@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Investors - منصة الاستثمار الذكي</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- تحميل Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <title>🔧 فحص Supabase - Elite Investors</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Tajawal', 'Arial', sans-serif;
+            font-family: 'Arial', sans-serif;
         }
         
         body {
@@ -24,111 +19,51 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
         }
         
-        /* الهيدر */
-        .header {
+        h1 {
+            color: #7c3aed;
             text-align: center;
-            padding: 50px 20px;
-            background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1));
-            border-radius: 30px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #7c3aed, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* حالة الاتصال */
-        .status-box {
+        .test-card {
             background: #1e293b;
             border-radius: 20px;
             padding: 25px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border: 2px solid #7c3aed;
         }
         
-        /* الباقات */
-        .packages-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin-top: 30px;
+        .success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            color: #10b981;
         }
         
-        .package-card {
-            background: #1e293b;
-            border-radius: 25px;
-            padding: 30px;
-            border: 2px solid rgba(124,58,237,0.3);
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #ef4444;
         }
         
-        .package-card:hover {
-            transform: translateY(-10px);
-            border-color: #7c3aed;
-            box-shadow: 0 20px 40px rgba(124,58,237,0.3);
+        .warning {
+            background: rgba(245, 158, 11, 0.2);
+            border: 2px solid #f59e0b;
+            color: #f59e0b;
         }
         
-        .package-badge {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .badge-standard { background: #3b82f6; }
-        .badge-premium { background: #8b5cf6; }
-        .badge-vip { background: #f59e0b; }
-        
-        .package-title {
-            font-size: 1.8rem;
-            color: white;
+        .step {
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
             margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .package-price {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #10b981;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .package-features {
-            list-style: none;
-            margin: 25px 0;
-            padding: 0;
-            color: #cbd5e1;
-        }
-        
-        .package-features li {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .package-features li i {
-            color: #10b981;
         }
         
         .btn {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            background: #7c3aed;
             color: white;
             border: none;
             padding: 15px 30px;
@@ -137,224 +72,158 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            transition: 0.3s;
+            margin-top: 20px;
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(124,58,237,0.5);
-        }
-        
-        .success { color: #10b981; }
-        .warning { color: #f59e0b; }
-        .error { color: #ef4444; }
-        
-        @media (max-width: 1024px) {
-            .packages-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .packages-grid {
-                grid-template-columns: 1fr;
-            }
-            .header h1 {
-                font-size: 2.2rem;
-            }
+        .code {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- الهيدر -->
-        <div class="header">
-            <h1>🚀 Elite Investors</h1>
-            <p style="color: #94a3b8; font-size: 1.2rem;">منصة الاستثمار الذكي</p>
-        </div>
+        <h1>🔧 فحص اتصال Supabase</h1>
         
-        <!-- حالة الاتصال -->
-        <div class="status-box">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                <i class="fas fa-database" style="color: #7c3aed; font-size: 28px;"></i>
-                <h2 style="color: #7c3aed; margin: 0;">🔌 حالة الاتصال</h2>
-            </div>
-            
-            <div id="connectionStatus" style="font-size: 18px; margin-bottom: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                ⏳ جاري الاتصال بـ Supabase...
-            </div>
-            
-            <div id="packagesCount" style="font-size: 16px; color: #94a3b8;"></div>
-        </div>
-        
-        <!-- الباقات -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 20px;">
-            <h2 style="color: white;">📦 باقات الاستثمار</h2>
-            <button onclick="location.reload()" style="background: none; border: 1px solid #7c3aed; color: #7c3aed; padding: 10px 20px; border-radius: 50px; cursor: pointer;">
-                <i class="fas fa-sync-alt"></i> تحديث
-            </button>
-        </div>
-        
-        <div id="packagesGrid" class="packages-grid">
-            <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 50px; color: #7c3aed;"></i>
-                <p style="margin-top: 20px; color: #94a3b8; font-size: 18px;">جاري تحميل الباقات...</p>
+        <div id="results">
+            <div class="test-card" id="step1">
+                <h3>📡 1. تحميل مكتبة Supabase</h3>
+                <div id="step1-status">⏳ جاري التحميل...</div>
             </div>
         </div>
+        
+        <button class="btn" onclick="location.reload()">
+            <i class="fas fa-redo"></i> إعادة الفحص
+        </button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // ========== إعداد Supabase ==========
         const SUPABASE_URL = 'https://wabyirjjhndrwxvcrdvn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnlpcmpqaG5kcnd4dmNyZHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTM0OTAsImV4cCI6MjA4NjQ2OTQ5MH0.AWDpHfWQLBto-Jn8_9fO0UmPS5Da9pgX611Bl6Q6u2w';
         
-        let supabase = null;
-        
-        // ========== تهيئة الاتصال ==========
-        async function initSupabase() {
-            const connectionStatus = document.getElementById('connectionStatus');
-            const packagesCount = document.getElementById('packagesCount');
+        async function runTests() {
+            // ========== الخطوة 1: فحص مكتبة Supabase ==========
+            const step1 = document.getElementById('step1');
+            const step1Status = document.getElementById('step1-status');
             
-            try {
-                // إنشاء اتصال
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    auth: { persistSession: false }
-                });
-                
-                connectionStatus.innerHTML = '✅ تم إنشاء اتصال Supabase';
-                connectionStatus.style.color = '#10b981';
-                
-                // جلب الباقات مباشرة
-                await loadPackages();
-                
-            } catch (error) {
-                console.error('❌ Supabase error:', error);
-                connectionStatus.innerHTML = '❌ فشل الاتصال بـ Supabase - جاري استخدام الباقات المحلية';
-                connectionStatus.style.color = '#ef4444';
-                packagesCount.innerHTML = '⚠️ تم التبديل إلى الباقات المحلية';
-                
-                // استخدام الباقات المحلية
-                loadLocalPackages();
+            if (typeof window.supabase === 'undefined') {
+                step1Status.innerHTML = '❌ مكتبة Supabase غير موجودة!';
+                step1.classList.add('error');
+                return;
+            } else {
+                step1Status.innerHTML = '✅ مكتبة Supabase موجودة';
+                step1.classList.add('success');
             }
-        }
-        
-        // ========== جلب الباقات من Supabase ==========
-        async function loadPackages() {
-            const packagesCount = document.getElementById('packagesCount');
+            
+            // ========== الخطوة 2: إنشاء اتصال ==========
+            const step2 = document.createElement('div');
+            step2.className = 'test-card';
+            step2.innerHTML = '<h3>🔌 2. إنشاء اتصال Supabase</h3><div id="step2-status">⏳ جاري الاتصال...</div>';
+            document.getElementById('results').appendChild(step2);
+            
+            let supabase;
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                document.getElementById('step2-status').innerHTML = '✅ تم إنشاء الاتصال بنجاح';
+                step2.classList.add('success');
+            } catch (e) {
+                document.getElementById('step2-status').innerHTML = `❌ فشل إنشاء الاتصال: ${e.message}`;
+                step2.classList.add('error');
+                return;
+            }
+            
+            // ========== الخطوة 3: اختبار الاتصال بقاعدة البيانات ==========
+            const step3 = document.createElement('div');
+            step3.className = 'test-card';
+            step3.innerHTML = '<h3>🗄️ 3. الاتصال بقاعدة البيانات</h3><div id="step3-status">⏳ جاري الاختبار...</div>';
+            document.getElementById('results').appendChild(step3);
             
             try {
-                // محاولة جلب الباقات
+                const { data, error } = await supabase.from('packages').select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                document.getElementById('step3-status').innerHTML = '✅ الاتصال بقاعدة البيانات ناجح';
+                step3.classList.add('success');
+            } catch (e) {
+                document.getElementById('step3-status').innerHTML = `❌ فشل الاتصال بقاعدة البيانات: ${e.message}`;
+                step3.classList.add('error');
+                
+                // عرض الحل
+                const solution = document.createElement('div');
+                solution.className = 'test-card warning';
+                solution.innerHTML = `
+                    <h3>💡 الحل المقترح</h3>
+                    <p style="margin-bottom: 15px;">المشكلة في صلاحيات RLS. شغل هذا الكود في SQL Editor:</p>
+                    <div class="code">
+ALTER TABLE packages DISABLE ROW LEVEL SECURITY;<br>
+GRANT SELECT ON packages TO anon;<br>
+GRANT SELECT ON packages TO authenticated;<br>
+<br>
+INSERT INTO packages (id, name, price, profit, daily_profit, tasks, duration, category, status) VALUES<br>
+    (1, 'الباقة الفضية', 500, 2.5, 12.5, 5, 30, 'standard', 'active'),<br>
+    (2, 'الباقة الذهبية', 1000, 2.5, 25, 5, 30, 'premium', 'active'),<br>
+    (3, 'الباقة الماسية', 5000, 2.5, 125, 5, 30, 'vip', 'active');<br>
+<br>
+SELECT * FROM packages;
+                    </div>
+                `;
+                document.getElementById('results').appendChild(solution);
+                return;
+            }
+            
+            // ========== الخطوة 4: جلب الباقات ==========
+            const step4 = document.createElement('div');
+            step4.className = 'test-card';
+            step4.innerHTML = '<h3>📦 4. جلب الباقات</h3><div id="step4-status">⏳ جاري التحميل...</div>';
+            document.getElementById('results').appendChild(step4);
+            
+            try {
                 const { data, error } = await supabase
                     .from('packages')
                     .select('*')
                     .eq('status', 'active')
                     .order('price', { ascending: true });
                 
-                if (error) {
-                    console.error('❌ Supabase query error:', error);
-                    throw error;
-                }
+                if (error) throw error;
                 
                 if (data && data.length > 0) {
-                    packagesCount.innerHTML = `✅ تم تحميل ${data.length} باقة من Supabase`;
-                    displayPackages(data);
+                    document.getElementById('step4-status').innerHTML = `✅ تم تحميل ${data.length} باقة`;
+                    step4.classList.add('success');
+                    
+                    // عرض الباقات
+                    const packagesList = document.createElement('div');
+                    packagesList.className = 'test-card success';
+                    packagesList.innerHTML = '<h3>📊 الباقات الموجودة</h3>';
+                    
+                    data.forEach(pkg => {
+                        packagesList.innerHTML += `
+                            <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                                <strong>${pkg.name}</strong> - ${pkg.price}$ (${pkg.category})
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('results').appendChild(packagesList);
                 } else {
-                    packagesCount.innerHTML = '⚠️ لا توجد باقات في قاعدة البيانات';
-                    loadLocalPackages();
+                    document.getElementById('step4-status').innerHTML = '⚠️ لا توجد باقات في قاعدة البيانات';
+                    step4.classList.add('warning');
                 }
-                
-            } catch (error) {
-                console.error('❌ Error loading packages:', error);
-                packagesCount.innerHTML = '⚠️ فشل تحميل الباقات - جاري استخدام الباقات المحلية';
-                loadLocalPackages();
+            } catch (e) {
+                document.getElementById('step4-status').innerHTML = `❌ فشل جلب الباقات: ${e.message}`;
+                step4.classList.add('error');
             }
         }
         
-        // ========== الباقات المحلية ==========
-        function loadLocalPackages() {
-            const localPackages = [
-                {
-                    id: 1,
-                    name: 'الباقة الفضية',
-                    price: 500,
-                    profit: 2.5,
-                    daily_profit: 12.5,
-                    tasks: 5,
-                    duration: 30,
-                    category: 'standard'
-                },
-                {
-                    id: 2,
-                    name: 'الباقة الذهبية',
-                    price: 1000,
-                    profit: 2.5,
-                    daily_profit: 25,
-                    tasks: 5,
-                    duration: 30,
-                    category: 'premium'
-                },
-                {
-                    id: 3,
-                    name: 'الباقة الماسية',
-                    price: 5000,
-                    profit: 2.5,
-                    daily_profit: 125,
-                    tasks: 5,
-                    duration: 30,
-                    category: 'vip'
-                }
-            ];
-            
-            displayPackages(localPackages);
-        }
-        
-        // ========== عرض الباقات ==========
-        function displayPackages(packages) {
-            const grid = document.getElementById('packagesGrid');
-            
-            let html = '';
-            packages.forEach(pkg => {
-                // حساب الربح اليومي
-                const dailyProfit = pkg.daily_profit || (pkg.price * (pkg.profit || 2.5) / 100).toFixed(2);
-                
-                // تحديد لون وشعار الفئة
-                let badgeClass = 'badge-standard';
-                let badgeText = 'عادية';
-                
-                if (pkg.category === 'vip') {
-                    badgeClass = 'badge-vip';
-                    badgeText = 'VIP';
-                } else if (pkg.category === 'premium') {
-                    badgeClass = 'badge-premium';
-                    badgeText = 'مميزة';
-                }
-                
-                html += `
-                    <div class="package-card">
-                        <div class="package-badge ${badgeClass}">
-                            ${badgeText}
-                        </div>
-                        <h3 class="package-title">${pkg.name}</h3>
-                        <div class="package-price">${pkg.price}$</div>
-                        <ul class="package-features">
-                            <li><i class="fas fa-check-circle"></i> ربح يومي: <strong style="color: #10b981;">${dailyProfit}$</strong></li>
-                            <li><i class="fas fa-check-circle"></i> ${pkg.tasks || 5} مهام يومية</li>
-                            <li><i class="fas fa-check-circle"></i> مدة الباقة: ${pkg.duration || 30} يوم</li>
-                            <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
-                            <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
-                        </ul>
-                        <button class="btn" onclick="alert('🚀 قريباً')">
-                            <i class="fas fa-bolt"></i> اشترك الآن
-                        </button>
-                    </div>
-                `;
-            });
-            
-            grid.innerHTML = html;
-        }
-        
-        // ========== بدء التطبيق ==========
-        initSupabase();
+        runTests();
     </script>
 </body>
 </html>
