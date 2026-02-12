@@ -20,14 +20,15 @@
         body {
             background: #0f172a;
             color: white;
+            padding: 20px;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
         }
         
+        /* الهيدر */
         .header {
             text-align: center;
             padding: 50px 20px;
@@ -44,26 +45,16 @@
             -webkit-text-fill-color: transparent;
         }
         
+        /* حالة الاتصال */
         .status-box {
             background: #1e293b;
             border-radius: 20px;
-            padding: 30px;
-            margin: 20px 0;
+            padding: 25px;
+            margin-bottom: 30px;
             border: 2px solid #7c3aed;
         }
         
-        .btn {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px;
-        }
-        
+        /* الباقات */
         .packages-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -73,9 +64,29 @@
         
         .package-card {
             background: #1e293b;
-            border-radius: 20px;
+            border-radius: 25px;
             padding: 30px;
             border: 2px solid #7c3aed50;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .package-card:hover {
+            transform: translateY(-10px);
+            border-color: #7c3aed;
+            box-shadow: 0 20px 40px #7c3aed30;
+        }
+        
+        .package-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
         }
         
         .package-title {
@@ -87,18 +98,78 @@
         
         .package-price {
             font-size: 2.5rem;
+            font-weight: bold;
             color: #10b981;
             text-align: center;
             margin-bottom: 20px;
         }
         
+        .package-features {
+            list-style: none;
+            margin: 25px 0;
+            padding: 0;
+            color: #cbd5e1;
+        }
+        
+        .package-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ffffff10;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .package-features li i {
+            color: #10b981;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px #7c3aed50;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .badge.standard { background: #3b82f6; }
+        .badge.premium { background: #8b5cf6; }
+        .badge.vip { background: #f59e0b; }
+        
         .success { color: #10b981; }
         .warning { color: #f59e0b; }
-        .danger { color: #ef4444; }
+        .error { color: #ef4444; }
+        
+        @media (max-width: 1024px) {
+            .packages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
         
         @media (max-width: 768px) {
             .packages-grid {
                 grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2.2rem;
             }
         }
     </style>
@@ -112,20 +183,29 @@
         </div>
         
         <!-- حالة الاتصال -->
-        <div class="status-box" id="statusBox">
-            <h2 style="color: #7c3aed; margin-bottom: 15px;">🔌 حالة الاتصال</h2>
-            <div id="connectionStatus" style="font-size: 18px; margin-bottom: 15px;">
+        <div class="status-box">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                <i class="fas fa-database" style="color: #7c3aed; font-size: 24px;"></i>
+                <h2 style="color: #7c3aed; margin: 0;">🔌 حالة الاتصال</h2>
+            </div>
+            <div id="connectionStatus" style="font-size: 18px; margin-bottom: 10px;">
                 ⏳ جاري الاتصال بـ Supabase...
             </div>
-            <div id="packagesStatus" style="font-size: 16px; color: #94a3b8;"></div>
+            <div id="packagesCount" style="font-size: 16px; color: #94a3b8;"></div>
         </div>
         
         <!-- الباقات -->
-        <h2 style="margin: 40px 0 20px; text-align: center;">📦 باقات الاستثمار</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px;">
+            <h2 style="color: white;">📦 باقات الاستثمار</h2>
+            <span id="refreshBtn" style="cursor: pointer; color: #7c3aed;" onclick="loadPackages()">
+                <i class="fas fa-sync-alt"></i> تحديث
+            </span>
+        </div>
+        
         <div id="packagesGrid" class="packages-grid">
-            <div style="text-align: center; grid-column: 1/-1; padding: 40px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #7c3aed;"></i>
-                <p style="margin-top: 20px; color: #94a3b8;">جاري تحميل الباقات...</p>
+            <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 50px; color: #7c3aed;"></i>
+                <p style="margin-top: 20px; color: #94a3b8; font-size: 18px;">جاري تحميل الباقات...</p>
             </div>
         </div>
     </div>
@@ -136,14 +216,28 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnlpcmpqaG5kcnd4dmNyZHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTM0OTAsImV4cCI6MjA4NjQ2OTQ5MH0.AWDpHfWQLBto-Jn8_9fO0UmPS5Da9pgX611Bl6Q6u2w';
         
         let supabase = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
         
         // ========== تهيئة الاتصال ==========
         async function initSupabase() {
             try {
                 // إنشاء اتصال
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: { persistSession: false },
+                    db: { schema: 'public' }
+                });
                 
-                // تحديث واجهة المستخدم
+                console.log('✅ Supabase client created');
+                
+                // اختبار الاتصال
+                const { error } = await supabase.from('packages').select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    console.error('❌ Supabase test failed:', error);
+                    throw error;
+                }
+                
                 document.getElementById('connectionStatus').innerHTML = '✅ متصل بـ Supabase';
                 document.getElementById('connectionStatus').style.color = '#10b981';
                 
@@ -152,18 +246,31 @@
                 
             } catch (error) {
                 console.error('❌ Supabase connection error:', error);
-                document.getElementById('connectionStatus').innerHTML = '❌ فشل الاتصال بـ Supabase';
-                document.getElementById('connectionStatus').style.color = '#ef4444';
-                document.getElementById('packagesStatus').innerHTML = '⚠️ جاري استخدام الباقات المحلية';
                 
-                // استخدام الباقات المحلية
-                loadLocalPackages();
+                retryCount++;
+                
+                if (retryCount <= MAX_RETRIES) {
+                    document.getElementById('connectionStatus').innerHTML = `⏳ إعادة المحاولة (${retryCount}/${MAX_RETRIES})...`;
+                    setTimeout(initSupabase, 2000);
+                } else {
+                    document.getElementById('connectionStatus').innerHTML = '⚠️ استخدام البيانات المحلية';
+                    document.getElementById('connectionStatus').style.color = '#f59e0b';
+                    document.getElementById('packagesCount').innerHTML = '⚠️ فشل الاتصال بـ Supabase - جاري عرض الباقات المحلية';
+                    loadLocalPackages();
+                }
             }
         }
         
         // ========== جلب الباقات من Supabase ==========
         async function loadPackages() {
             try {
+                document.getElementById('packagesGrid').innerHTML = `
+                    <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 50px; color: #7c3aed;"></i>
+                        <p style="margin-top: 20px; color: #94a3b8;">جاري تحميل الباقات...</p>
+                    </div>
+                `;
+                
                 const { data, error } = await supabase
                     .from('packages')
                     .select('*')
@@ -173,49 +280,57 @@
                 if (error) throw error;
                 
                 if (data && data.length > 0) {
-                    document.getElementById('packagesStatus').innerHTML = `✅ تم تحميل ${data.length} باقة من Supabase`;
+                    document.getElementById('packagesCount').innerHTML = `✅ تم تحميل ${data.length} باقة من Supabase`;
                     displayPackages(data);
                 } else {
-                    throw new Error('لا توجد باقات');
+                    throw new Error('لا توجد باقات في قاعدة البيانات');
                 }
+                
             } catch (error) {
                 console.error('Error loading packages:', error);
-                document.getElementById('packagesStatus').innerHTML = '⚠️ فشل تحميل الباقات، جاري استخدام الباقات المحلية';
+                document.getElementById('packagesCount').innerHTML = '⚠️ فشل تحميل الباقات - جاري عرض الباقات المحلية';
                 loadLocalPackages();
             }
         }
         
-        // ========== الباقات المحلية ==========
+        // ========== الباقات المحلية (نسخة احتياطية) ==========
         function loadLocalPackages() {
             const localPackages = [
                 {
                     id: 1,
                     name: 'الباقة الفضية',
                     price: 500,
+                    profit: 2.5,
                     daily_profit: 12.5,
                     tasks: 5,
                     duration: 30,
-                    category: 'standard'
+                    category: 'standard',
+                    description: 'الباقة المثالية للمبتدئين'
                 },
                 {
                     id: 2,
                     name: 'الباقة الذهبية',
                     price: 1000,
+                    profit: 2.5,
                     daily_profit: 25,
                     tasks: 5,
                     duration: 30,
-                    category: 'premium'
+                    category: 'premium',
+                    description: 'الباقة الأكثر طلباً'
                 },
                 {
                     id: 3,
                     name: 'الباقة الماسية',
                     price: 5000,
+                    profit: 2.5,
                     daily_profit: 125,
                     tasks: 5,
                     duration: 30,
-                    category: 'vip'
+                    category: 'vip',
+                    description: 'للحصول على أفضل العوائد'
                 }
             ];
+            
             displayPackages(localPackages);
         }
         
@@ -225,27 +340,40 @@
             
             let html = '';
             packages.forEach(pkg => {
-                const categoryColor = pkg.category === 'vip' ? '#f59e0b' : 
-                                    pkg.category === 'premium' ? '#8b5cf6' : '#3b82f6';
-                const categoryText = pkg.category === 'vip' ? 'VIP' : 
-                                   pkg.category === 'premium' ? 'مميزة' : 'عادية';
+                // حساب الربح اليومي
+                const dailyProfit = pkg.daily_profit || (pkg.price * (pkg.profit || 2.5) / 100).toFixed(2);
+                
+                // تحديد لون وشعار الفئة
+                let badgeClass = 'standard';
+                let badgeText = 'عادية';
+                let badgeColor = '#3b82f6';
+                
+                if (pkg.category === 'vip') {
+                    badgeClass = 'vip';
+                    badgeText = 'VIP';
+                    badgeColor = '#f59e0b';
+                } else if (pkg.category === 'premium') {
+                    badgeClass = 'premium';
+                    badgeText = 'مميزة';
+                    badgeColor = '#8b5cf6';
+                }
                 
                 html += `
-                    <div class="package-card" style="border-top: 5px solid ${categoryColor};">
-                        <div style="text-align: center;">
-                            <span style="background: ${categoryColor}; padding: 5px 15px; border-radius: 20px; font-size: 13px; color: white;">
-                                ${categoryText}
-                            </span>
+                    <div class="package-card">
+                        <div class="package-badge" style="background: ${badgeColor};">
+                            ${badgeText}
                         </div>
                         <h3 class="package-title">${pkg.name}</h3>
-                        <div class="package-price">${pkg.price}$</div>
-                        <ul style="list-style: none; color: #cbd5e1; margin: 20px 0;">
-                            <li style="margin-bottom: 10px;">✓ ربح يومي: ${pkg.daily_profit || (pkg.price * 0.025).toFixed(2)}$</li>
-                            <li style="margin-bottom: 10px;">✓ ${pkg.tasks || 5} مهام يومية</li>
-                            <li style="margin-bottom: 10px;">✓ مدة الباقة: ${pkg.duration || 30} يوم</li>
+                        <div class="package-price">${pkg.price}$ <small style="font-size: 16px; color: #94a3b8;">USDT</small></div>
+                        <ul class="package-features">
+                            <li><i class="fas fa-check-circle"></i> ربح يومي: <strong style="color: #10b981;">${dailyProfit}$</strong></li>
+                            <li><i class="fas fa-check-circle"></i> ${pkg.tasks || 5} مهام يومية</li>
+                            <li><i class="fas fa-check-circle"></i> مدة الباقة: ${pkg.duration || 30} يوم</li>
+                            <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
+                            <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
                         </ul>
-                        <button class="btn" style="width: 100%;" onclick="alert('🚀 قريباً')">
-                            اشترك الآن
+                        <button class="btn" onclick="alert('🚀 نظام الاشتراكات قيد التطوير')">
+                            <i class="fas fa-bolt"></i> اشترك الآن
                         </button>
                     </div>
                 `;
