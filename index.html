@@ -32,7 +32,7 @@
         .header {
             text-align: center;
             padding: 50px 20px;
-            background: linear-gradient(135deg, #7c3aed20, #06b6d420);
+            background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1));
             border-radius: 30px;
             margin-bottom: 40px;
         }
@@ -66,7 +66,7 @@
             background: #1e293b;
             border-radius: 25px;
             padding: 30px;
-            border: 2px solid #7c3aed50;
+            border: 2px solid rgba(124,58,237,0.3);
             transition: 0.3s;
             position: relative;
             overflow: hidden;
@@ -75,7 +75,7 @@
         .package-card:hover {
             transform: translateY(-10px);
             border-color: #7c3aed;
-            box-shadow: 0 20px 40px #7c3aed30;
+            box-shadow: 0 20px 40px rgba(124,58,237,0.3);
         }
         
         .package-badge {
@@ -88,6 +88,10 @@
             font-weight: bold;
             color: white;
         }
+        
+        .badge-standard { background: #3b82f6; }
+        .badge-premium { background: #8b5cf6; }
+        .badge-vip { background: #f59e0b; }
         
         .package-title {
             font-size: 1.8rem;
@@ -113,7 +117,7 @@
         
         .package-features li {
             padding: 10px 0;
-            border-bottom: 1px solid #ffffff10;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -138,21 +142,8 @@
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px #7c3aed50;
+            box-shadow: 0 10px 30px rgba(124,58,237,0.5);
         }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .badge.standard { background: #3b82f6; }
-        .badge.premium { background: #8b5cf6; }
-        .badge.vip { background: #f59e0b; }
         
         .success { color: #10b981; }
         .warning { color: #f59e0b; }
@@ -184,22 +175,24 @@
         
         <!-- حالة الاتصال -->
         <div class="status-box">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                <i class="fas fa-database" style="color: #7c3aed; font-size: 24px;"></i>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                <i class="fas fa-database" style="color: #7c3aed; font-size: 28px;"></i>
                 <h2 style="color: #7c3aed; margin: 0;">🔌 حالة الاتصال</h2>
             </div>
-            <div id="connectionStatus" style="font-size: 18px; margin-bottom: 10px;">
+            
+            <div id="connectionStatus" style="font-size: 18px; margin-bottom: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
                 ⏳ جاري الاتصال بـ Supabase...
             </div>
+            
             <div id="packagesCount" style="font-size: 16px; color: #94a3b8;"></div>
         </div>
         
         <!-- الباقات -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 20px;">
             <h2 style="color: white;">📦 باقات الاستثمار</h2>
-            <span id="refreshBtn" style="cursor: pointer; color: #7c3aed;" onclick="loadPackages()">
+            <button onclick="location.reload()" style="background: none; border: 1px solid #7c3aed; color: #7c3aed; padding: 10px 20px; border-radius: 50px; cursor: pointer;">
                 <i class="fas fa-sync-alt"></i> تحديث
-            </span>
+            </button>
         </div>
         
         <div id="packagesGrid" class="packages-grid">
@@ -216,84 +209,68 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnlpcmpqaG5kcnd4dmNyZHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTM0OTAsImV4cCI6MjA4NjQ2OTQ5MH0.AWDpHfWQLBto-Jn8_9fO0UmPS5Da9pgX611Bl6Q6u2w';
         
         let supabase = null;
-        let retryCount = 0;
-        const MAX_RETRIES = 3;
         
         // ========== تهيئة الاتصال ==========
         async function initSupabase() {
+            const connectionStatus = document.getElementById('connectionStatus');
+            const packagesCount = document.getElementById('packagesCount');
+            
             try {
                 // إنشاء اتصال
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    auth: { persistSession: false },
-                    db: { schema: 'public' }
+                    auth: { persistSession: false }
                 });
                 
-                console.log('✅ Supabase client created');
+                connectionStatus.innerHTML = '✅ تم إنشاء اتصال Supabase';
+                connectionStatus.style.color = '#10b981';
                 
-                // اختبار الاتصال
-                const { error } = await supabase.from('packages').select('count', { count: 'exact', head: true });
-                
-                if (error) {
-                    console.error('❌ Supabase test failed:', error);
-                    throw error;
-                }
-                
-                document.getElementById('connectionStatus').innerHTML = '✅ متصل بـ Supabase';
-                document.getElementById('connectionStatus').style.color = '#10b981';
-                
-                // جلب الباقات
+                // جلب الباقات مباشرة
                 await loadPackages();
                 
             } catch (error) {
-                console.error('❌ Supabase connection error:', error);
+                console.error('❌ Supabase error:', error);
+                connectionStatus.innerHTML = '❌ فشل الاتصال بـ Supabase - جاري استخدام الباقات المحلية';
+                connectionStatus.style.color = '#ef4444';
+                packagesCount.innerHTML = '⚠️ تم التبديل إلى الباقات المحلية';
                 
-                retryCount++;
-                
-                if (retryCount <= MAX_RETRIES) {
-                    document.getElementById('connectionStatus').innerHTML = `⏳ إعادة المحاولة (${retryCount}/${MAX_RETRIES})...`;
-                    setTimeout(initSupabase, 2000);
-                } else {
-                    document.getElementById('connectionStatus').innerHTML = '⚠️ استخدام البيانات المحلية';
-                    document.getElementById('connectionStatus').style.color = '#f59e0b';
-                    document.getElementById('packagesCount').innerHTML = '⚠️ فشل الاتصال بـ Supabase - جاري عرض الباقات المحلية';
-                    loadLocalPackages();
-                }
+                // استخدام الباقات المحلية
+                loadLocalPackages();
             }
         }
         
         // ========== جلب الباقات من Supabase ==========
         async function loadPackages() {
+            const packagesCount = document.getElementById('packagesCount');
+            
             try {
-                document.getElementById('packagesGrid').innerHTML = `
-                    <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 50px; color: #7c3aed;"></i>
-                        <p style="margin-top: 20px; color: #94a3b8;">جاري تحميل الباقات...</p>
-                    </div>
-                `;
-                
+                // محاولة جلب الباقات
                 const { data, error } = await supabase
                     .from('packages')
                     .select('*')
                     .eq('status', 'active')
                     .order('price', { ascending: true });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('❌ Supabase query error:', error);
+                    throw error;
+                }
                 
                 if (data && data.length > 0) {
-                    document.getElementById('packagesCount').innerHTML = `✅ تم تحميل ${data.length} باقة من Supabase`;
+                    packagesCount.innerHTML = `✅ تم تحميل ${data.length} باقة من Supabase`;
                     displayPackages(data);
                 } else {
-                    throw new Error('لا توجد باقات في قاعدة البيانات');
+                    packagesCount.innerHTML = '⚠️ لا توجد باقات في قاعدة البيانات';
+                    loadLocalPackages();
                 }
                 
             } catch (error) {
-                console.error('Error loading packages:', error);
-                document.getElementById('packagesCount').innerHTML = '⚠️ فشل تحميل الباقات - جاري عرض الباقات المحلية';
+                console.error('❌ Error loading packages:', error);
+                packagesCount.innerHTML = '⚠️ فشل تحميل الباقات - جاري استخدام الباقات المحلية';
                 loadLocalPackages();
             }
         }
         
-        // ========== الباقات المحلية (نسخة احتياطية) ==========
+        // ========== الباقات المحلية ==========
         function loadLocalPackages() {
             const localPackages = [
                 {
@@ -304,8 +281,7 @@
                     daily_profit: 12.5,
                     tasks: 5,
                     duration: 30,
-                    category: 'standard',
-                    description: 'الباقة المثالية للمبتدئين'
+                    category: 'standard'
                 },
                 {
                     id: 2,
@@ -315,8 +291,7 @@
                     daily_profit: 25,
                     tasks: 5,
                     duration: 30,
-                    category: 'premium',
-                    description: 'الباقة الأكثر طلباً'
+                    category: 'premium'
                 },
                 {
                     id: 3,
@@ -326,8 +301,7 @@
                     daily_profit: 125,
                     tasks: 5,
                     duration: 30,
-                    category: 'vip',
-                    description: 'للحصول على أفضل العوائد'
+                    category: 'vip'
                 }
             ];
             
@@ -344,27 +318,24 @@
                 const dailyProfit = pkg.daily_profit || (pkg.price * (pkg.profit || 2.5) / 100).toFixed(2);
                 
                 // تحديد لون وشعار الفئة
-                let badgeClass = 'standard';
+                let badgeClass = 'badge-standard';
                 let badgeText = 'عادية';
-                let badgeColor = '#3b82f6';
                 
                 if (pkg.category === 'vip') {
-                    badgeClass = 'vip';
+                    badgeClass = 'badge-vip';
                     badgeText = 'VIP';
-                    badgeColor = '#f59e0b';
                 } else if (pkg.category === 'premium') {
-                    badgeClass = 'premium';
+                    badgeClass = 'badge-premium';
                     badgeText = 'مميزة';
-                    badgeColor = '#8b5cf6';
                 }
                 
                 html += `
                     <div class="package-card">
-                        <div class="package-badge" style="background: ${badgeColor};">
+                        <div class="package-badge ${badgeClass}">
                             ${badgeText}
                         </div>
                         <h3 class="package-title">${pkg.name}</h3>
-                        <div class="package-price">${pkg.price}$ <small style="font-size: 16px; color: #94a3b8;">USDT</small></div>
+                        <div class="package-price">${pkg.price}$</div>
                         <ul class="package-features">
                             <li><i class="fas fa-check-circle"></i> ربح يومي: <strong style="color: #10b981;">${dailyProfit}$</strong></li>
                             <li><i class="fas fa-check-circle"></i> ${pkg.tasks || 5} مهام يومية</li>
@@ -372,7 +343,7 @@
                             <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
                             <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
                         </ul>
-                        <button class="btn" onclick="alert('🚀 نظام الاشتراكات قيد التطوير')">
+                        <button class="btn" onclick="alert('🚀 قريباً')">
                             <i class="fas fa-bolt"></i> اشترك الآن
                         </button>
                     </div>
