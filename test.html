@@ -1,203 +1,46 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Investors - منصة الاستثمار الذكي</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* أبسط وأسهل ستايل */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        
-        body {
-            background: #0f172a;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            text-align: center;
-        }
-        
-        h1 {
-            color: #7c3aed;
-            margin-bottom: 20px;
-            font-size: 36px;
-        }
-        
-        p {
-            color: #94a3b8;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-        
-        .loader {
-            border: 5px solid rgba(124,58,237,0.2);
-            border-top: 5px solid #7c3aed;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-            margin: 30px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .btn {
-            background: #7c3aed;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px;
-            transition: 0.3s;
-        }
-        
-        .btn:hover {
-            background: #6d28d9;
-            transform: translateY(-2px);
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .error-box {
-            background: rgba(239,68,68,0.1);
-            border: 2px solid #ef4444;
-            color: #ef4444;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        
-        .success-box {
-            background: rgba(16,185,129,0.1);
-            border: 2px solid #10b981;
-            color: #10b981;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="container" id="mainContainer">
-        <h1>🚀 Elite Investors</h1>
-        
-        <div id="loadingContent">
-            <div class="loader"></div>
-            <p>جاري تحميل المنصة وتأمين الاتصال...</p>
-        </div>
-        
-        <div id="errorContent" class="hidden">
-            <div class="error-box">
-                <i class="fas fa-exclamation-triangle" style="font-size: 40px; margin-bottom: 15px; display: block;"></i>
-                <h2 style="color: #ef4444; margin-bottom: 15px;">خطأ في الاتصال</h2>
-                <p id="errorMessage">لم نتمكن من الاتصال بقاعدة البيانات</p>
-                <button class="btn" onclick="location.reload()">
-                    <i class="fas fa-redo"></i> إعادة المحاولة
-                </button>
-            </div>
-        </div>
-        
-        <div id="successContent" class="hidden">
-            <div class="success-box">
-                <i class="fas fa-check-circle" style="font-size: 50px; margin-bottom: 15px; display: block;"></i>
-                <h2 style="color: #10b981; margin-bottom: 15px;">تم الاتصال بنجاح!</h2>
-                <p id="successMessage">جاري تحويلك إلى المنصة...</p>
-            </div>
-        </div>
+    <div style="padding: 20px; font-family: Arial;">
+        <h2>🔧 اختبار اتصال Supabase</h2>
+        <div id="status" style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;"></div>
     </div>
 
-    <!-- تحميل Supabase بشكل مباشر ومضمون -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    
     <script>
-        // ========== إعداد Supabase ==========
         const SUPABASE_URL = 'https://wabyirjjhndrwxvcrdvn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnlpcmpqaG5kcnd4dmNyZHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTM0OTAsImV4cCI6MjA4NjQ2OTQ5MH0.AWDpHfWQLBto-Jn8_9fO0UmPS5Da9pgX611Bl6Q6u2w';
         
-        // ========== تهيئة بسيطة جداً ==========
-        (async function() {
-            console.log('🚀 بدء تشغيل التطبيق...');
-            
-            // تأكد من تحميل Supabase
-            if (typeof window.supabase === 'undefined') {
-                document.getElementById('loadingContent').classList.add('hidden');
-                document.getElementById('errorContent').classList.remove('hidden');
-                document.getElementById('errorMessage').innerHTML = '❌ لم يتم تحميل مكتبة Supabase. يرجى التحقق من اتصال الإنترنت.';
-                return;
-            }
+        const status = document.getElementById('status');
+        
+        async function test() {
+            status.innerHTML = '🔄 جاري الاتصال...';
             
             try {
-                // إنشاء اتصال
                 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('✅ تم إنشاء اتصال Supabase');
+                status.innerHTML += '<br>✅ تم إنشاء الاتصال';
                 
-                // اختبار الاتصال بسيط
                 const { data, error } = await supabase.from('packages').select('count').limit(1);
                 
                 if (error) {
-                    throw error;
-                }
-                
-                console.log('✅ اتصال Supabase ناجح');
-                
-                // التحقق من الجلسة
-                const { data: { session } } = await supabase.auth.getSession();
-                
-                document.getElementById('loadingContent').classList.add('hidden');
-                document.getElementById('successContent').classList.remove('hidden');
-                
-                if (session) {
-                    document.getElementById('successMessage').innerHTML = '✅ مرحباً بك! جاري تحويلك إلى لوحة التحكم...';
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
+                    status.innerHTML += `<br>❌ خطأ: ${error.message}`;
+                    status.innerHTML += '<br><br>🔍 تأكد من:';
+                    status.innerHTML += '<br>1. أن الجدول packages موجود';
+                    status.innerHTML += '<br>2. أن سياسات RLS مفعلة بشكل صحيح';
                 } else {
-                    document.getElementById('successMessage').innerHTML = '✅ تم الاتصال بنجاح! جاري تحويلك إلى الصفحة الرئيسية...';
-                    setTimeout(() => {
-                        window.location.href = 'home.html'; // أو أي صفحة تبيها
-                    }, 2000);
+                    status.innerHTML += '<br>✅ اتصال Supabase ناجح!';
+                    status.style.background = '#d4edda';
                 }
                 
-            } catch (error) {
-                console.error('❌ خطأ:', error);
-                
-                document.getElementById('loadingContent').classList.add('hidden');
-                document.getElementById('errorContent').classList.remove('hidden');
-                
-                let errorMsg = '';
-                if (error.message.includes('Failed to fetch')) {
-                    errorMsg = '❌ لا يمكن الاتصال بقاعدة البيانات. تأكد من:';
-                    errorMsg += '<br>1. أن رابط Supabase صحيح';
-                    errorMsg += '<br>2. أن مفتاح API صحيح';
-                    errorMsg += '<br>3. أن الجداول موجودة في قاعدة البيانات';
-                } else {
-                    errorMsg = `❌ خطأ: ${error.message}`;
-                }
-                
-                document.getElementById('errorMessage').innerHTML = errorMsg;
+            } catch (e) {
+                status.innerHTML += `<br>❌ خطأ: ${e.message}`;
+                status.style.background = '#f8d7da';
             }
-        })();
+        }
+        
+        test();
     </script>
 </body>
 </html>
