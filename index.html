@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔧 فحص Supabase - Elite Investors</title>
+    <title>Elite Investors - منصة الاستثمار الذكي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -19,46 +21,48 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #7c3aed20, #06b6d420);
+            border-radius: 20px;
+            margin-bottom: 30px;
         }
         
         h1 {
             color: #7c3aed;
-            text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
         
-        .test-card {
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .package-card {
             background: #1e293b;
-            border-radius: 20px;
+            border-radius: 15px;
             padding: 25px;
-            margin-bottom: 20px;
-            border: 2px solid #7c3aed;
+            border: 2px solid #7c3aed50;
         }
         
-        .success {
-            background: rgba(16, 185, 129, 0.2);
-            border: 2px solid #10b981;
+        .package-title {
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .package-price {
+            font-size: 2rem;
             color: #10b981;
-        }
-        
-        .error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 2px solid #ef4444;
-            color: #ef4444;
-        }
-        
-        .warning {
-            background: rgba(245, 158, 11, 0.2);
-            border: 2px solid #f59e0b;
-            color: #f59e0b;
-        }
-        
-        .step {
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
+            text-align: center;
             margin-bottom: 15px;
         }
         
@@ -66,164 +70,99 @@
             background: #7c3aed;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border-radius: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
             width: 100%;
-            margin-top: 20px;
+            cursor: pointer;
+            margin-top: 15px;
         }
         
-        .code {
-            background: #0f172a;
-            padding: 15px;
-            border-radius: 10px;
-            font-family: monospace;
-            direction: ltr;
-            text-align: left;
-            overflow-x: auto;
+        @media (max-width: 768px) {
+            .packages-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔧 فحص اتصال Supabase</h1>
-        
-        <div id="results">
-            <div class="test-card" id="step1">
-                <h3>📡 1. تحميل مكتبة Supabase</h3>
-                <div id="step1-status">⏳ جاري التحميل...</div>
-            </div>
+        <div class="header">
+            <h1>🚀 Elite Investors</h1>
+            <p style="color: #94a3b8;">منصة الاستثمار الذكي</p>
         </div>
         
-        <button class="btn" onclick="location.reload()">
-            <i class="fas fa-redo"></i> إعادة الفحص
-        </button>
+        <div id="status" style="background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            ⏳ جاري الاتصال...
+        </div>
+        
+        <div id="packages" class="packages-grid"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://wabyirjjhndrwxvcrdvn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnlpcmpqaG5kcnd4dmNyZHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTM0OTAsImV4cCI6MjA4NjQ2OTQ5MH0.AWDpHfWQLBto-Jn8_9fO0UmPS5Da9pgX611Bl6Q6u2w';
         
-        async function runTests() {
-            // ========== الخطوة 1: فحص مكتبة Supabase ==========
-            const step1 = document.getElementById('step1');
-            const step1Status = document.getElementById('step1-status');
-            
-            if (typeof window.supabase === 'undefined') {
-                step1Status.innerHTML = '❌ مكتبة Supabase غير موجودة!';
-                step1.classList.add('error');
-                return;
-            } else {
-                step1Status.innerHTML = '✅ مكتبة Supabase موجودة';
-                step1.classList.add('success');
-            }
-            
-            // ========== الخطوة 2: إنشاء اتصال ==========
-            const step2 = document.createElement('div');
-            step2.className = 'test-card';
-            step2.innerHTML = '<h3>🔌 2. إنشاء اتصال Supabase</h3><div id="step2-status">⏳ جاري الاتصال...</div>';
-            document.getElementById('results').appendChild(step2);
-            
-            let supabase;
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const statusEl = document.getElementById('status');
+        const packagesEl = document.getElementById('packages');
+        
+        async function loadPackages() {
             try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                document.getElementById('step2-status').innerHTML = '✅ تم إنشاء الاتصال بنجاح';
-                step2.classList.add('success');
-            } catch (e) {
-                document.getElementById('step2-status').innerHTML = `❌ فشل إنشاء الاتصال: ${e.message}`;
-                step2.classList.add('error');
-                return;
-            }
-            
-            // ========== الخطوة 3: اختبار الاتصال بقاعدة البيانات ==========
-            const step3 = document.createElement('div');
-            step3.className = 'test-card';
-            step3.innerHTML = '<h3>🗄️ 3. الاتصال بقاعدة البيانات</h3><div id="step3-status">⏳ جاري الاختبار...</div>';
-            document.getElementById('results').appendChild(step3);
-            
-            try {
-                const { data, error } = await supabase.from('packages').select('count', { count: 'exact', head: true });
+                statusEl.innerHTML = '✅ متصل بـ Supabase - جاري تحميل الباقات...';
+                statusEl.style.color = '#10b981';
                 
-                if (error) {
-                    throw error;
-                }
-                
-                document.getElementById('step3-status').innerHTML = '✅ الاتصال بقاعدة البيانات ناجح';
-                step3.classList.add('success');
-            } catch (e) {
-                document.getElementById('step3-status').innerHTML = `❌ فشل الاتصال بقاعدة البيانات: ${e.message}`;
-                step3.classList.add('error');
-                
-                // عرض الحل
-                const solution = document.createElement('div');
-                solution.className = 'test-card warning';
-                solution.innerHTML = `
-                    <h3>💡 الحل المقترح</h3>
-                    <p style="margin-bottom: 15px;">المشكلة في صلاحيات RLS. شغل هذا الكود في SQL Editor:</p>
-                    <div class="code">
-ALTER TABLE packages DISABLE ROW LEVEL SECURITY;<br>
-GRANT SELECT ON packages TO anon;<br>
-GRANT SELECT ON packages TO authenticated;<br>
-<br>
-INSERT INTO packages (id, name, price, profit, daily_profit, tasks, duration, category, status) VALUES<br>
-    (1, 'الباقة الفضية', 500, 2.5, 12.5, 5, 30, 'standard', 'active'),<br>
-    (2, 'الباقة الذهبية', 1000, 2.5, 25, 5, 30, 'premium', 'active'),<br>
-    (3, 'الباقة الماسية', 5000, 2.5, 125, 5, 30, 'vip', 'active');<br>
-<br>
-SELECT * FROM packages;
-                    </div>
-                `;
-                document.getElementById('results').appendChild(solution);
-                return;
-            }
-            
-            // ========== الخطوة 4: جلب الباقات ==========
-            const step4 = document.createElement('div');
-            step4.className = 'test-card';
-            step4.innerHTML = '<h3>📦 4. جلب الباقات</h3><div id="step4-status">⏳ جاري التحميل...</div>';
-            document.getElementById('results').appendChild(step4);
-            
-            try {
                 const { data, error } = await supabase
                     .from('packages')
                     .select('*')
-                    .eq('status', 'active')
-                    .order('price', { ascending: true });
+                    .eq('status', 'active');
                 
                 if (error) throw error;
                 
                 if (data && data.length > 0) {
-                    document.getElementById('step4-status').innerHTML = `✅ تم تحميل ${data.length} باقة`;
-                    step4.classList.add('success');
+                    statusEl.innerHTML = `✅ تم تحميل ${data.length} باقة`;
                     
-                    // عرض الباقات
-                    const packagesList = document.createElement('div');
-                    packagesList.className = 'test-card success';
-                    packagesList.innerHTML = '<h3>📊 الباقات الموجودة</h3>';
-                    
+                    let html = '';
                     data.forEach(pkg => {
-                        packagesList.innerHTML += `
-                            <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                                <strong>${pkg.name}</strong> - ${pkg.price}$ (${pkg.category})
+                        html += `
+                            <div class="package-card">
+                                <h3 class="package-title">${pkg.name}</h3>
+                                <div class="package-price">${pkg.price}$</div>
+                                <button class="btn" onclick="alert('🚀 قريباً')">اشترك الآن</button>
                             </div>
                         `;
                     });
-                    
-                    document.getElementById('results').appendChild(packagesList);
+                    packagesEl.innerHTML = html;
                 } else {
-                    document.getElementById('step4-status').innerHTML = '⚠️ لا توجد باقات في قاعدة البيانات';
-                    step4.classList.add('warning');
+                    throw new Error('لا توجد باقات');
                 }
-            } catch (e) {
-                document.getElementById('step4-status').innerHTML = `❌ فشل جلب الباقات: ${e.message}`;
-                step4.classList.add('error');
+                
+            } catch (error) {
+                console.error(error);
+                statusEl.innerHTML = '⚠️ فشل الاتصال - جاري عرض الباقات المحلية';
+                statusEl.style.color = '#f59e0b';
+                
+                // الباقات المحلية
+                const localPackages = [
+                    { name: 'الباقة الفضية', price: 500 },
+                    { name: 'الباقة الذهبية', price: 1000 },
+                    { name: 'الباقة الماسية', price: 5000 }
+                ];
+                
+                let html = '';
+                localPackages.forEach(pkg => {
+                    html += `
+                        <div class="package-card">
+                            <h3 class="package-title">${pkg.name}</h3>
+                            <div class="package-price">${pkg.price}$</div>
+                            <button class="btn" onclick="alert('🚀 قريباً')">اشترك الآن</button>
+                        </div>
+                    `;
+                });
+                packagesEl.innerHTML = html;
             }
         }
         
-        runTests();
+        loadPackages();
     </script>
 </body>
 </html>
