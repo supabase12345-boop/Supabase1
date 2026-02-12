@@ -6,6 +6,9 @@
     <title>Elite Investors - منصة الاستثمار الذكي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- تحميل Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         /* ========== الأساسيات ========== */
         :root {
@@ -17,7 +20,6 @@
             --dark: #0f172a;
             --light: #f8fafc;
             --purple: #8b5cf6;
-            --info: #0891b2;
         }
         
         * {
@@ -32,10 +34,9 @@
             color: white;
             line-height: 1.6;
             overflow-x: hidden;
-            min-height: 100vh;
         }
         
-        /* ========== شاشة التحميل - تختفي بعد 1 ثانية ========== */
+        /* ========== شاشة التحميل ========== */
         .loader-container {
             position: fixed;
             top: 0;
@@ -71,7 +72,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* ========== المحتوى الرئيسي ========== */
         .main-content {
             display: block;
         }
@@ -89,7 +89,6 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--primary);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         
         .logo {
@@ -123,8 +122,7 @@
             align-items: center;
             gap: 10px;
             font-size: 16px;
-            box-shadow: 0 4px 15px rgba(124,58,237,0.3);
-            transition: all 0.3s;
+            transition: 0.3s;
         }
         
         .login-btn:hover {
@@ -154,47 +152,6 @@
             font-size: 20px;
             color: white;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(124,58,237,0.3);
-        }
-        
-        .user-dropdown {
-            position: absolute;
-            top: 70px;
-            left: 25px;
-            background: var(--dark);
-            border-radius: 15px;
-            padding: 20px;
-            min-width: 250px;
-            border: 2px solid var(--primary);
-            display: none;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            z-index: 1001;
-        }
-        
-        .user-dropdown.active {
-            display: block;
-            animation: slideDown 0.3s;
-        }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .user-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-        
-        .user-dropdown a:hover {
-            background: rgba(124,58,237,0.2);
-            color: var(--primary);
         }
         
         /* ========== المحتوى ========== */
@@ -212,18 +169,6 @@
             background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1));
             border-radius: 30px;
             margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero::before {
-            content: '🚀';
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            font-size: 120px;
-            opacity: 0.1;
-            transform: rotate(15deg);
         }
         
         .hero h1 {
@@ -241,140 +186,7 @@
             margin: 0 auto 30px;
         }
         
-        /* ========== إحصائيات ========== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-            margin: 40px 0;
-        }
-        
-        .stat-item {
-            text-align: center;
-            padding: 30px 20px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
-            border: 1px solid rgba(124,58,237,0.2);
-            transition: all 0.3s;
-        }
-        
-        .stat-item:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            background: rgba(124,58,237,0.1);
-        }
-        
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--success);
-            margin-bottom: 10px;
-        }
-        
-        .stat-label {
-            color: #94a3b8;
-            font-size: 15px;
-        }
-        
-        /* ========== مميزات ========== */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-            margin: 40px 0;
-        }
-        
-        .feature-item {
-            padding: 30px 20px;
-            background: rgba(30,41,59,0.6);
-            border-radius: 20px;
-            border: 1px solid rgba(124,58,237,0.2);
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-        
-        .feature-item i {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-        
-        .feature-item h4 {
-            margin-bottom: 15px;
-            color: white;
-        }
-        
-        .feature-item p {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-        
-        /* ========== نظام الإحالة ========== */
-        .referral-banner {
-            background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(124,58,237,0.2));
-            border-radius: 25px;
-            padding: 40px;
-            margin: 40px 0;
-            border: 2px solid var(--purple);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .referral-banner::before {
-            content: '🎁';
-            position: absolute;
-            bottom: -20px;
-            left: -20px;
-            font-size: 120px;
-            opacity: 0.1;
-            transform: rotate(-15deg);
-        }
-        
-        .referral-rewards {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-        
-        .reward-card {
-            background: rgba(255,255,255,0.05);
-            padding: 25px 40px;
-            border-radius: 15px;
-            text-align: center;
-            min-width: 200px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .reward-card.referrer {
-            border-color: var(--purple);
-        }
-        
-        .reward-card.referee {
-            border-color: var(--success);
-        }
-        
-        .reward-amount {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .reward-card.referrer .reward-amount {
-            color: var(--purple);
-        }
-        
-        .reward-card.referee .reward-amount {
-            color: var(--success);
-        }
-        
-        .reward-label {
-            color: #cbd5e1;
-            font-size: 16px;
-        }
-        
-        /* ========== الباقات الثابتة ========== */
+        /* ========== الباقات ========== */
         .section-title {
             text-align: center;
             margin-bottom: 40px;
@@ -397,13 +209,11 @@
         
         .package-card {
             background: rgba(30,41,59,0.8);
-            backdrop-filter: blur(10px);
             border-radius: 25px;
             padding: 30px;
             border: 2px solid rgba(124,58,237,0.3);
-            transition: all 0.3s;
+            transition: 0.3s;
             position: relative;
-            overflow: hidden;
         }
         
         .package-card:hover {
@@ -425,7 +235,7 @@
         
         .package-badge.standard { background: #3b82f6; }
         .package-badge.premium { background: var(--purple); }
-        .package-badge.vip { background: var(--warning); }
+        .package-badge.vip { background: #f59e0b; }
         
         .package-header {
             text-align: center;
@@ -474,7 +284,7 @@
             border: none;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: 0.3s;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -486,13 +296,11 @@
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), #6d28d9);
             color: white;
-            box-shadow: 0 4px 15px rgba(124,58,237,0.3);
         }
         
         .btn-glow {
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             color: white;
-            box-shadow: 0 5px 20px rgba(124,58,237,0.4);
         }
         
         .btn-glow:hover {
@@ -500,73 +308,51 @@
             box-shadow: 0 10px 30px rgba(124,58,237,0.6);
         }
         
-        /* ========== كيف تبدأ ========== */
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
+        /* ========== نظام الإحالة ========== */
+        .referral-banner {
+            background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(124,58,237,0.2));
+            border-radius: 25px;
+            padding: 40px;
             margin: 40px 0;
+            border: 2px solid var(--purple);
         }
         
-        .step-item {
-            text-align: center;
-        }
-        
-        .step-number {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
+        .referral-rewards {
             display: flex;
-            align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 32px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        /* ========== التذييل ========== */
-        .footer {
-            background: rgba(15,23,42,0.98);
-            padding: 60px 20px 30px;
-            margin-top: 80px;
-            border-top: 2px solid var(--primary);
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
             gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
         }
         
-        .footer-section h4 {
-            color: var(--secondary);
-            margin-bottom: 20px;
+        .reward-card {
+            background: rgba(255,255,255,0.05);
+            padding: 25px 40px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 200px;
         }
         
-        .footer-section p,
-        .footer-section ul {
-            color: #94a3b8;
-            font-size: 14px;
+        .reward-card.referrer {
+            border: 2px solid var(--purple);
         }
         
-        .footer-section ul {
-            list-style: none;
+        .reward-card.referee {
+            border: 2px solid var(--success);
         }
         
-        .footer-section ul li {
+        .reward-amount {
+            font-size: 3rem;
+            font-weight: bold;
             margin-bottom: 10px;
         }
         
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            margin-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: #64748b;
+        .reward-card.referrer .reward-amount {
+            color: var(--purple);
+        }
+        
+        .reward-card.referee .reward-amount {
+            color: var(--success);
         }
         
         /* ========== الإشعارات ========== */
@@ -601,35 +387,31 @@
         
         /* ========== التجاوب ========== */
         @media (max-width: 1024px) {
-            .stats-grid,
-            .features-grid,
-            .packages-grid,
-            .footer-content {
+            .packages-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
         
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.2rem; }
-            .stats-grid,
-            .features-grid,
-            .packages-grid,
-            .steps-grid,
-            .footer-content {
+            .packages-grid {
                 grid-template-columns: 1fr;
             }
-            .referral-rewards { flex-direction: column; align-items: center; }
+            .referral-rewards {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- ========== شاشة التحميل - تختفي بعد 1 ثانية ========== -->
+    <!-- شاشة التحميل -->
     <div id="loaderContainer" class="loader-container">
         <div class="loader-spinner"></div>
         <div class="loader-text">جاري تحميل المنصة...</div>
     </div>
 
-    <!-- ========== المحتوى الرئيسي ========== -->
+    <!-- المحتوى الرئيسي -->
     <div id="mainContent" class="main-content">
         <!-- الشريط العلوي -->
         <nav class="navbar">
@@ -637,7 +419,7 @@
                 <i class="fas fa-chart-line"></i>
                 <span>Elite Investors</span>
             </div>
-            <button class="login-btn" onclick="showNotification('🚀 منصة Elite Investors - قريباً', 'info')">
+            <button class="login-btn" id="loginBtn">
                 <i class="fas fa-sign-in-alt"></i> دخول / تسجيل
             </button>
         </nav>
@@ -648,67 +430,16 @@
             <section class="hero">
                 <h1>استثمر بذكاء واربح يومياً</h1>
                 <p>انضم إلى المنصة الاستثمارية الأسرع نمواً وابدأ رحلتك نحو النجاح المالي</p>
-                <button class="btn btn-glow" onclick="showNotification('🚀 قريباً', 'info')" style="width: auto; padding: 16px 48px;">
+                <button class="btn btn-glow" onclick="openAuthModal()" style="width: auto; padding: 16px 48px;">
                     <i class="fas fa-rocket"></i> ابدأ الآن
                 </button>
             </section>
             
-            <!-- إحصائيات -->
-            <section>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-number">50,000+</div>
-                        <div class="stat-label">مستثمر ناجح</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">$25M+</div>
-                        <div class="stat-label">أرباح تم توزيعها</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">99%</div>
-                        <div class="stat-label">معدل رضا العملاء</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">24/7</div>
-                        <div class="stat-label">دعم فني متاح</div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- مميزات -->
-            <section>
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <h4>أمان تام</h4>
-                        <p>نظام حماية متقدم وأمان للبيانات والاستثمارات</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-chart-line"></i>
-                        <h4>أرباح مضمونة</h4>
-                        <p>تحويل يومي مباشر للأرباح إلى محفظتك الشخصية</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-headset"></i>
-                        <h4>دعم فني</h4>
-                        <p>فريق دعم متاح على مدار الساعة لمساعدتك</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-bolt"></i>
-                        <h4>سرعة التنفيذ</h4>
-                        <p>معاملات سريعة وتفعيل فوري للباقات</p>
-                    </div>
-                </div>
-            </section>
-            
             <!-- نظام الإحالة -->
             <section class="referral-banner">
-                <div style="text-align: center;">
-                    <h2 style="color: white; margin-bottom: 30px; font-size: 2rem;">
-                        <i class="fas fa-gift"></i> نظام الإحالة
-                    </h2>
-                </div>
-                
+                <h2 style="color: white; text-align: center; margin-bottom: 30px; font-size: 2rem;">
+                    <i class="fas fa-gift"></i> نظام الإحالة
+                </h2>
                 <div class="referral-rewards">
                     <div class="reward-card referrer">
                         <div class="reward-amount">50$</div>
@@ -719,158 +450,164 @@
                         <div class="reward-label">لصديقك - المشترك</div>
                     </div>
                 </div>
-                
-                <div style="text-align: center;">
-                    <button class="btn btn-primary" onclick="showNotification('🚀 قريباً', 'info')" style="width: auto; padding: 12px 40px;">
-                        <i class="fas fa-user-plus"></i> احصل على كود الإحالة
-                    </button>
-                </div>
             </section>
             
-            <!-- الباقات الثابتة -->
+            <!-- الباقات - تتحمل من Supabase -->
             <section id="packages">
                 <div class="section-title">
                     <h2>باقات الاستثمار</h2>
                     <p style="color: #94a3b8;">اختر الباقة المناسبة لك وابدأ الربح اليومي</p>
                 </div>
-                
-                <div class="packages-grid">
-                    <!-- الباقة الفضية -->
-                    <div class="package-card">
-                        <div class="package-badge standard">عادية</div>
-                        <div class="package-header">
-                            <h3 class="package-title">الباقة الفضية</h3>
-                            <div class="package-price">500$ <small>USDT</small></div>
-                        </div>
-                        <ul class="package-features">
-                            <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>12.5$</strong></li>
-                            <li><i class="fas fa-check-circle"></i> 5 مهام يومية</li>
-                            <li><i class="fas fa-check-circle"></i> مدة الباقة: 30 يوم</li>
-                            <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
-                            <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
-                        </ul>
-                        <button class="btn btn-glow" onclick="showNotification('🚀 قريباً', 'info')">
-                            <i class="fas fa-bolt"></i> قريباً
-                        </button>
-                    </div>
-                    
-                    <!-- الباقة الذهبية -->
-                    <div class="package-card">
-                        <div class="package-badge premium">مميزة</div>
-                        <div class="package-header">
-                            <h3 class="package-title">الباقة الذهبية</h3>
-                            <div class="package-price">1000$ <small>USDT</small></div>
-                        </div>
-                        <ul class="package-features">
-                            <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>25$</strong></li>
-                            <li><i class="fas fa-check-circle"></i> 5 مهام يومية</li>
-                            <li><i class="fas fa-check-circle"></i> مدة الباقة: 30 يوم</li>
-                            <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
-                            <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
-                        </ul>
-                        <button class="btn btn-glow" onclick="showNotification('🚀 قريباً', 'info')">
-                            <i class="fas fa-bolt"></i> قريباً
-                        </button>
-                    </div>
-                    
-                    <!-- الباقة الماسية -->
-                    <div class="package-card">
-                        <div class="package-badge vip">VIP</div>
-                        <div class="package-header">
-                            <h3 class="package-title">الباقة الماسية</h3>
-                            <div class="package-price">5000$ <small>USDT</small></div>
-                        </div>
-                        <ul class="package-features">
-                            <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>125$</strong></li>
-                            <li><i class="fas fa-check-circle"></i> 5 مهام يومية</li>
-                            <li><i class="fas fa-check-circle"></i> مدة الباقة: 30 يوم</li>
-                            <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
-                            <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
-                        </ul>
-                        <button class="btn btn-glow" onclick="showNotification('🚀 قريباً', 'info')">
-                            <i class="fas fa-bolt"></i> قريباً
-                        </button>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- كيف تبدأ -->
-            <section style="margin-top: 80px;">
-                <div class="section-title">
-                    <h2>كيف تبدأ؟</h2>
-                    <p>ثلاث خطوات بسيطة لبداية استثمارك</p>
-                </div>
-                
-                <div class="steps-grid">
-                    <div class="step-item">
-                        <div class="step-number">1</div>
-                        <h4 style="margin-bottom: 10px;">إنشاء حساب</h4>
-                        <p style="color: #94a3b8;">سجل حساب مجاني في دقيقة واحدة</p>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">2</div>
-                        <h4 style="margin-bottom: 10px;">اختيار الباقة</h4>
-                        <p style="color: #94a3b8;">اشترك في إحدى باقاتنا الاستثمارية</p>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-number">3</div>
-                        <h4 style="margin-bottom: 10px;">ابدأ الربح</h4>
-                        <p style="color: #94a3b8;">احصل على أرباحك اليومية فوراً</p>
+                <div class="packages-grid" id="packagesGrid">
+                    <div style="text-align: center; grid-column: 1/-1; padding: 50px;">
+                        <div class="loader-spinner" style="width: 50px; height: 50px;"></div>
+                        <p style="color: #94a3b8; margin-top: 20px;">جاري تحميل الباقات...</p>
                     </div>
                 </div>
             </section>
         </div>
-        
-        <!-- التذييل -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4><i class="fas fa-info-circle"></i> عن المنصة</h4>
-                    <p>Elite Investors منصة استثمارية رقمية توفر فرصة حقيقية للربح اليومي من خلال باقات استثمارية متنوعة وآمنة.</p>
-                </div>
-                <div class="footer-section">
-                    <h4><i class="fas fa-link"></i> روابط سريعة</h4>
-                    <ul>
-                        <li><a href="#" style="color: #94a3b8; text-decoration: none;" onclick="showNotification('🚀 قريباً', 'info')">تسجيل الدخول</a></li>
-                        <li><a href="#" style="color: #94a3b8; text-decoration: none;" onclick="showNotification('🚀 قريباً', 'info')">إنشاء حساب</a></li>
-                        <li><a href="#packages" style="color: #94a3b8; text-decoration: none;">الباقات</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4><i class="fas fa-credit-card"></i> طرق الدفع</h4>
-                    <ul>
-                        <li><i class="fas fa-coins"></i> USDT (TRC20)</li>
-                        <li><i class="fab fa-bitcoin"></i> Bitcoin</li>
-                        <li><i class="fab fa-ethereum"></i> Ethereum</li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4><i class="fas fa-headset"></i> الدعم الفني</h4>
-                    <ul>
-                        <li><i class="fas fa-clock"></i> متاح 24/7</li>
-                        <li><i class="fas fa-envelope"></i> support@elite-investors.com</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="copyright">
-                <p>© 2025 Elite Investors. جميع الحقوق محفوظة.</p>
-            </div>
-        </footer>
     </div>
     
     <!-- الإشعار -->
     <div class="notification" id="notification"></div>
 
     <script>
+        // ========== إعداد Supabase ==========
+        const SUPABASE_URL = 'https://wabyirjjhndrwxvcrdvn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnlpcmpqaG5kcnd4dmNyZHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTM0OTAsImV4cCI6MjA4NjQ2OTQ5MH0.AWDpHfWQLBto-Jn8_9fO0UmPS5Da9pgX611Bl6Q6u2w';
+        
+        let supabase = null;
+        
         // ========== إخفاء شاشة التحميل بعد 1 ثانية ==========
-        setTimeout(function() {
+        setTimeout(() => {
             document.getElementById('loaderContainer').style.opacity = '0';
-            setTimeout(function() {
+            setTimeout(() => {
                 document.getElementById('loaderContainer').style.display = 'none';
             }, 500);
         }, 1000);
         
-        // ========== نظام الإشعارات ==========
+        // ========== تهيئة Supabase وجلب البيانات ==========
+        async function initSupabase() {
+            try {
+                // إنشاء اتصال
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase connected');
+                
+                // جلب الباقات
+                await loadPackages();
+                
+            } catch (error) {
+                console.error('❌ Supabase error:', error);
+                // إذا فشل الاتصال، استخدم الباقات الافتراضية
+                loadDefaultPackages();
+            }
+        }
+        
+        // ========== تحميل الباقات من Supabase ==========
+        async function loadPackages() {
+            try {
+                const { data, error } = await supabase
+                    .from('packages')
+                    .select('*')
+                    .eq('status', 'active')
+                    .order('price', { ascending: true });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    displayPackages(data);
+                } else {
+                    loadDefaultPackages();
+                }
+            } catch (error) {
+                console.error('Error loading packages:', error);
+                loadDefaultPackages();
+            }
+        }
+        
+        // ========== الباقات الافتراضية (إذا فشل Supabase) ==========
+        function loadDefaultPackages() {
+            const defaultPackages = [
+                {
+                    id: 1,
+                    name: 'الباقة الفضية',
+                    price: 500,
+                    profit: 2.5,
+                    daily_profit: 12.5,
+                    tasks: 5,
+                    duration: 30,
+                    category: 'standard'
+                },
+                {
+                    id: 2,
+                    name: 'الباقة الذهبية',
+                    price: 1000,
+                    profit: 2.5,
+                    daily_profit: 25,
+                    tasks: 5,
+                    duration: 30,
+                    category: 'premium'
+                },
+                {
+                    id: 3,
+                    name: 'الباقة الماسية',
+                    price: 5000,
+                    profit: 2.5,
+                    daily_profit: 125,
+                    tasks: 5,
+                    duration: 30,
+                    category: 'vip'
+                }
+            ];
+            displayPackages(defaultPackages);
+        }
+        
+        // ========== عرض الباقات ==========
+        function displayPackages(packages) {
+            const packagesGrid = document.getElementById('packagesGrid');
+            
+            let html = '';
+            packages.forEach(pkg => {
+                const dailyProfit = (pkg.daily_profit || (pkg.price * (pkg.profit || 2.5) / 100)).toFixed(2);
+                const badgeClass = pkg.category === 'vip' ? 'vip' : pkg.category === 'premium' ? 'premium' : 'standard';
+                const badgeText = pkg.category === 'vip' ? 'VIP' : pkg.category === 'premium' ? 'مميزة' : 'عادية';
+                
+                html += `
+                    <div class="package-card">
+                        <div class="package-badge ${badgeClass}">${badgeText}</div>
+                        <div class="package-header">
+                            <h3 class="package-title">${pkg.name}</h3>
+                            <div class="package-price">${pkg.price}$ <small>USDT</small></div>
+                        </div>
+                        <ul class="package-features">
+                            <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>${dailyProfit}$</strong></li>
+                            <li><i class="fas fa-check-circle"></i> ${pkg.tasks || 5} مهام يومية</li>
+                            <li><i class="fas fa-check-circle"></i> مدة الباقة: ${pkg.duration || 30} يوم</li>
+                            <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
+                            <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
+                        </ul>
+                        <button class="btn btn-glow" onclick="selectPackage(${pkg.id})">
+                            <i class="fas fa-bolt"></i> اشترك الآن
+                        </button>
+                    </div>
+                `;
+            });
+            
+            packagesGrid.innerHTML = html;
+        }
+        
+        // ========== اختيار باقة ==========
+        function selectPackage(packageId) {
+            showNotification('✅ يرجى تسجيل الدخول أولاً', 'warning');
+            openAuthModal();
+        }
+        
+        // ========== نظام تسجيل الدخول ==========
+        function openAuthModal() {
+            showNotification('🚀 نظام تسجيل الدخول قيد التطوير', 'info');
+        }
+        
+        // ========== الإشعارات ==========
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -882,19 +619,11 @@
             }, 3000);
         }
         
-        // ========== Supabase - اتصال في الخلفية (اختياري) ==========
-        setTimeout(function() {
-            try {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-                script.onload = function() {
-                    console.log('✅ Supabase ready');
-                };
-                document.head.appendChild(script);
-            } catch(e) {
-                console.log('⚠️ Supabase not loaded');
-            }
-        }, 2000);
+        // ========== تشغيل التطبيق ==========
+        initSupabase();
+        
+        // ========== زر تسجيل الدخول ==========
+        document.getElementById('loginBtn').addEventListener('click', openAuthModal);
     </script>
 </body>
 </html>
