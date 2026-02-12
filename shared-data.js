@@ -1,22 +1,34 @@
 // ===================================
-// نظام البيانات المشتركة بين الصفحات - النسخة النهائية المصححة
+// نظام البيانات المشتركة مع Supabase - النسخة النهائية المصححة والجاهزة
 // ===================================
-// في بداية الملف
-window.SUPABASE_ENABLED = true
 
-// وظيفة للتبديل بين التخزين المحلي وSupabase
-async function getData() {
-  if (window.SUPABASE_ENABLED && window.supabaseAPI) {
-    try {
-      return await window.supabaseAPI.getDashboardStats()
-    } catch (e) {
-      console.warn('Supabase غير متاح، استخدام التخزين المحلي:', e)
-      return getLocalData()
+// ========== تحميل عميل Supabase ==========
+let supabase = null;
+
+// تهيئة Supabase
+async function initSupabaseConnection() {
+    if (window.supabaseClient && window.supabaseClient.client) {
+        supabase = window.supabaseClient.client;
+        return supabase;
     }
-  }
-  return getLocalData()
+    
+    return new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+            if (window.supabaseClient && window.supabaseClient.client) {
+                supabase = window.supabaseClient.client;
+                clearInterval(checkInterval);
+                resolve(supabase);
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(null);
+        }, 3000);
+    });
 }
-// ========== نظام الباقات ==========
+
+// ========== الباقات الافتراضية ==========
 let SHARED_PACKAGES = [
     {
         id: 1,
@@ -62,7 +74,7 @@ let SHARED_PACKAGES = [
     }
 ];
 
-// ========== نظام المهام - مرتبط بالباقات ==========
+// ========== المهام الافتراضية ==========
 let SHARED_TASKS = [
     {
         id: 1,
@@ -136,7 +148,7 @@ let SHARED_TASKS = [
     }
 ];
 
-// ========== نظام كود الإحالة - محدث ==========
+// ========== إعدادات نظام الإحالة ==========
 const REFERRAL_SETTINGS = {
     referrerReward: 50,
     refereeReward: 20,
@@ -145,141 +157,340 @@ const REFERRAL_SETTINGS = {
     enableReferralSystem: true
 };
 
-// ========== دوال كود الإحالة ==========
-function generateReferralCode(username) {
-    if (!username) username = 'USER';
-    const cleanUsername = username.toString().toUpperCase().replace(/\s/g, '').substring(0, 5);
-    const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const timestamp = Date.now().toString().slice(-4);
-    return `${cleanUsername}${random}${timestamp}`.substring(0, 12);
+// ========== دوال المزامنة مع Supabase ==========
+
+// تحميل الباقات من Supabase
+async function loadPackagesFromSupabase() {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return SHARED_PACKAGES;
+    
+    try {
+        const { data, error } = await supabase
+            .from('packages')
+            .select('*')
+            .order('id', { ascending: true });
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            SHARED_PACKAGES = data.map(pkg => ({
+                id: pkg.id,
+                name: pkg.name,
+                price: parseFloat(pkg.price),
+                profit: parseFloat(pkg.profit),
+                dailyProfit: parseFloat(pkg.daily_profit || (pkg.price * pkg.profit / 100).toFixed(2)),
+                tasks: pkg.tasks || 5,
+                duration: pkg.duration || 30,
+                status: pkg.status,
+                description: pkg.description || '',
+                category: pkg.category || 'standard',
+                users: pkg.users_count || 0,
+                createdAt: pkg.created_at
+            }));
+            
+            localStorage.setItem('website_packages', JSON.stringify(SHARED_PACKAGES));
+            console.log(`✅ تم تحميل ${SHARED_PACKAGES.length} باقة من Supabase`);
+        }
+    } catch (error) {
+        console.error('❌ فشل تحميل الباقات من Supabase:', error);
+    }
+    
+    return SHARED_PACKAGES;
 }
 
-function getReferralStats(userId) {
-    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-    const currentUser = users.find(u => u.id === userId);
+// حفظ الباقات إلى Supabase
+async function savePackagesToSupabase() {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return false;
     
-    if (!currentUser) return null;
-    
-    if (!currentUser.referralCode) {
-        currentUser.referralCode = generateReferralCode(currentUser.username || `USER${userId}`);
-        saveUsersToStorage(users);
+    try {
+        const packagesToSave = SHARED_PACKAGES.map(pkg => ({
+            id: pkg.id,
+            name: pkg.name,
+            price: pkg.price,
+            profit: pkg.profit || 2.5,
+            daily_profit: pkg.dailyProfit || (pkg.price * (pkg.profit || 2.5) / 100),
+            tasks: pkg.tasks || 5,
+            duration: pkg.duration || 30,
+            status: pkg.status || 'active',
+            description: pkg.description || '',
+            category: pkg.category || 'standard',
+            users_count: pkg.users || 0,
+            updated_at: new Date().toISOString()
+        }));
+        
+        const { error } = await supabase
+            .from('packages')
+            .upsert(packagesToSave, { onConflict: 'id' });
+        
+        if (error) throw error;
+        
+        console.log('✅ تم حفظ الباقات في Supabase');
+        return true;
+    } catch (error) {
+        console.error('❌ فشل حفظ الباقات في Supabase:', error);
+        return false;
     }
-    
-    const referredUsers = users.filter(u => u.referredBy === currentUser.referralCode);
-    const activeReferrals = referredUsers.filter(u => u.package && u.package.status === 'نشط');
-    const pendingReferrals = referredUsers.filter(u => u.pendingPackage && !u.package);
-    const paidReferrals = referredUsers.filter(u => u.referralRewardPaid === true);
-    
-    let pendingCommission = 0;
-    referredUsers.forEach(u => {
-        if (u.package && u.package.amount && u.referralRewardPaid !== true) {
-            pendingCommission += REFERRAL_SETTINGS.referrerReward;
-        }
-    });
-    
-    return {
-        referralCode: currentUser.referralCode || '',
-        referredCount: referredUsers.length,
-        activeReferrals: activeReferrals.length,
-        pendingReferrals: pendingReferrals.length,
-        paidReferrals: paidReferrals.length,
-        totalEarned: currentUser.referralEarnings || 0,
-        pendingCommission: pendingCommission,
-        conversionRate: referredUsers.length > 0 ? ((activeReferrals.length / referredUsers.length) * 100).toFixed(1) : 0,
-        referredUsers: referredUsers.map(u => ({
-            id: u.id,
-            name: u.name,
-            email: u.email,
-            username: u.username,
-            joinedDate: u.joinedDate,
-            hasPackage: !!u.package,
-            packageName: u.package ? u.package.name : 'لا يوجد',
-            packageAmount: u.package ? u.package.amount : 0,
-            rewardPaid: u.referralRewardPaid || false
-        }))
-    };
 }
 
-function processReferralRewardsOnApproval(userId, packageAmount) {
-    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-    const newUser = users.find(u => u.id === userId);
+// تحميل المهام من Supabase
+async function loadTasksFromSupabase() {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return SHARED_TASKS;
     
-    if (!newUser || !newUser.referredBy) {
-        console.log('⚠️ لا يوجد كود إحالة');
-        return false;
-    }
-    
-    const referrer = users.find(u => u.referralCode === newUser.referredBy);
-    if (!referrer) {
-        console.log('⚠️ لم يتم العثور على صاحب الكود');
-        return false;
-    }
-    
-    if (newUser.referralRewardPaid === true) {
-        console.log('⚠️ تم صرف المكافأة مسبقاً');
-        return false;
-    }
-    
-    referrer.referralCount = (referrer.referralCount || 0) + 1;
-    
-    newUser.balance = (newUser.balance || 0) + REFERRAL_SETTINGS.refereeReward;
-    newUser.referralRewardPaid = true;
-    newUser.referralRewardAmount = REFERRAL_SETTINGS.refereeReward;
-    newUser.referralRewardDate = new Date().toISOString();
-    
-    referrer.balance = (referrer.balance || 0) + REFERRAL_SETTINGS.referrerReward;
-    referrer.referralEarnings = (referrer.referralEarnings || 0) + REFERRAL_SETTINGS.referrerReward;
-    
-    addUserTransaction(newUser.id, {
-        id: Date.now(),
-        type: 'مكافأة إحالة',
-        amount: REFERRAL_SETTINGS.refereeReward,
-        description: `🎁 مكافأة تسجيل عن طريق كود الإحالة من ${referrer.name}`,
-        date: new Date().toLocaleString('ar-SA'),
-        status: 'مكتمل',
-        referralCode: newUser.referredBy,
-        referrerName: referrer.name
-    });
-    
-    addUserTransaction(referrer.id, {
-        id: Date.now() + 1,
-        type: 'مكافأة إحالة',
-        amount: REFERRAL_SETTINGS.referrerReward,
-        description: `💰 مكافأة إحالة: ${newUser.name}`,
-        date: new Date().toLocaleString('ar-SA'),
-        status: 'مكتمل',
-        referredUserId: newUser.id,
-        referredUserName: newUser.name
-    });
-    
-    localStorage.setItem('elite_users', JSON.stringify(users));
-    
-    const currentUser = JSON.parse(localStorage.getItem('current_user'));
-    if (currentUser) {
-        if (currentUser.id === newUser.id) {
-            currentUser.balance = newUser.balance;
-            currentUser.referralRewardPaid = true;
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
+    try {
+        const { data, error } = await supabase
+            .from('tasks')
+            .select('*')
+            .order('id', { ascending: true });
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            SHARED_TASKS = data.map(task => ({
+                id: task.id,
+                title: task.title,
+                description: task.description || '',
+                reward: parseFloat(task.reward),
+                type: task.type || 'daily',
+                status: task.status || 'active',
+                completions: task.completions || 0,
+                availableFor: task.available_for || 'all',
+                packageCategories: task.package_categories || ['standard', 'premium', 'vip'],
+                difficulty: task.difficulty || 'easy',
+                timeRequired: task.time_required || 2,
+                createdAt: task.created_at
+            }));
+            
+            localStorage.setItem('website_tasks', JSON.stringify(SHARED_TASKS));
+            console.log(`✅ تم تحميل ${SHARED_TASKS.length} مهمة من Supabase`);
         }
-        if (currentUser.id === referrer.id) {
-            currentUser.balance = referrer.balance;
-            currentUser.referralEarnings = referrer.referralEarnings;
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-        }
+    } catch (error) {
+        console.error('❌ فشل تحميل المهام من Supabase:', error);
     }
     
-    console.log(`✅ تم صرف المكافآت: ${REFERRAL_SETTINGS.referrerReward}$ للمحيل، ${REFERRAL_SETTINGS.refereeReward}$ للمحال`);
-    
-    broadcastUpdate('referrals');
-    broadcastUpdate('users');
-    
-    return {
-        referrer: { id: referrer.id, name: referrer.name, reward: REFERRAL_SETTINGS.referrerReward },
-        referee: { id: newUser.id, name: newUser.name, reward: REFERRAL_SETTINGS.refereeReward }
-    };
+    return SHARED_TASKS;
 }
 
-// ========== دوال المهام ==========
+// حفظ المهام إلى Supabase
+async function saveTasksToSupabase() {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return false;
+    
+    try {
+        const tasksToSave = SHARED_TASKS.map(task => ({
+            id: task.id,
+            title: task.title,
+            description: task.description || '',
+            reward: task.reward,
+            type: task.type || 'daily',
+            status: task.status || 'active',
+            completions: task.completions || 0,
+            available_for: task.availableFor || 'all',
+            package_categories: task.packageCategories || ['standard', 'premium', 'vip'],
+            difficulty: task.difficulty || 'easy',
+            time_required: task.timeRequired || 2,
+            updated_at: new Date().toISOString()
+        }));
+        
+        const { error } = await supabase
+            .from('tasks')
+            .upsert(tasksToSave, { onConflict: 'id' });
+        
+        if (error) throw error;
+        
+        console.log('✅ تم حفظ المهام في Supabase');
+        return true;
+    } catch (error) {
+        console.error('❌ فشل حفظ المهام في Supabase:', error);
+        return false;
+    }
+}
+
+// تحميل المستخدمين من Supabase
+async function loadUsersFromSupabase() {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return JSON.parse(localStorage.getItem('elite_users')) || [];
+    
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .order('id', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            const users = data.map(user => ({
+                id: user.id,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                phone: user.phone || '',
+                password: user.password,
+                referredBy: user.referred_by,
+                referralCode: user.referral_code,
+                balance: parseFloat(user.balance || 0),
+                package: null,
+                pendingPackage: null,
+                walletAddress: user.wallet_address || '',
+                walletNetwork: user.wallet_network || 'TRC20',
+                tasksCompleted: user.tasks_completed || 0,
+                totalEarned: parseFloat(user.total_earned || 0),
+                totalWithdrawn: parseFloat(user.total_withdrawn || 0),
+                referralCount: user.referral_count || 0,
+                referralEarnings: parseFloat(user.referral_earnings || 0),
+                referralRewardPaid: user.referral_reward_paid || false,
+                joinedDate: user.joined_date,
+                lastLogin: user.last_login,
+                isAdmin: user.is_admin || false,
+                status: user.status || 'active',
+                statusReason: user.status_reason || '',
+                metadata: user.metadata || {}
+            }));
+            
+            localStorage.setItem('elite_users', JSON.stringify(users));
+            console.log(`✅ تم تحميل ${users.length} مستخدم من Supabase`);
+            return users;
+        }
+    } catch (error) {
+        console.error('❌ فشل تحميل المستخدمين من Supabase:', error);
+    }
+    
+    return JSON.parse(localStorage.getItem('elite_users')) || [];
+}
+
+// حفظ المستخدمين إلى Supabase
+async function saveUsersToSupabase(users) {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return false;
+    
+    try {
+        const usersToSave = users.map(user => ({
+            id: user.id,
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            phone: user.phone || '',
+            password: user.password,
+            referred_by: user.referredBy || null,
+            referral_code: user.referralCode,
+            balance: user.balance || 0,
+            wallet_address: user.walletAddress || '',
+            wallet_network: user.walletNetwork || 'TRC20',
+            tasks_completed: user.tasksCompleted || 0,
+            total_earned: user.totalEarned || 0,
+            total_withdrawn: user.totalWithdrawn || 0,
+            referral_count: user.referralCount || 0,
+            referral_earnings: user.referralEarnings || 0,
+            referral_reward_paid: user.referralRewardPaid || false,
+            joined_date: user.joinedDate,
+            last_login: user.lastLogin,
+            is_admin: user.isAdmin || false,
+            status: user.status || 'active',
+            status_reason: user.statusReason || '',
+            metadata: user.metadata || {},
+            updated_at: new Date().toISOString()
+        }));
+        
+        const { error } = await supabase
+            .from('users')
+            .upsert(usersToSave, { onConflict: 'id' });
+        
+        if (error) throw error;
+        
+        console.log('✅ تم حفظ المستخدمين في Supabase');
+        return true;
+    } catch (error) {
+        console.error('❌ فشل حفظ المستخدمين في Supabase:', error);
+        return false;
+    }
+}
+
+// تحميل الإعدادات من Supabase
+async function loadSettingsFromSupabase() {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return null;
+    
+    try {
+        const { data, error } = await supabase
+            .from('settings')
+            .select('*')
+            .eq('id', 1)
+            .maybeSingle();
+        
+        if (error) throw error;
+        
+        if (data) {
+            REFERRAL_SETTINGS.referrerReward = parseFloat(data.referrer_reward || 50);
+            REFERRAL_SETTINGS.refereeReward = parseFloat(data.referee_reward || 20);
+            
+            localStorage.setItem('system_settings', JSON.stringify({
+                referrerReward: REFERRAL_SETTINGS.referrerReward,
+                refereeReward: REFERRAL_SETTINGS.refereeReward,
+                minWithdrawal: parseFloat(data.min_withdrawal || 50),
+                withdrawalFees: data.withdrawal_fees || { TRC20: 5, ERC20: 15, BEP20: 3 }
+            }));
+            
+            console.log('✅ تم تحميل إعدادات النظام من Supabase');
+        }
+    } catch (error) {
+        console.error('❌ فشل تحميل الإعدادات من Supabase:', error);
+    }
+}
+
+// حفظ الإعدادات إلى Supabase
+async function saveSettingsToSupabase(settings) {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return false;
+    
+    try {
+        const { error } = await supabase
+            .from('settings')
+            .upsert({
+                id: 1,
+                referrer_reward: settings.referrerReward || REFERRAL_SETTINGS.referrerReward,
+                referee_reward: settings.refereeReward || REFERRAL_SETTINGS.refereeReward,
+                min_withdrawal: settings.minWithdrawal || 50,
+                withdrawal_fees: settings.withdrawalFees || { TRC20: 5, ERC20: 15, BEP20: 3 },
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+        
+        if (error) throw error;
+        
+        console.log('✅ تم حفظ إعدادات النظام في Supabase');
+        return true;
+    } catch (error) {
+        console.error('❌ فشل حفظ الإعدادات في Supabase:', error);
+        return false;
+    }
+}
+
+// ========== دوال الباقات المحلية ==========
+function loadPackagesFromStorage() {
+    try {
+        const saved = localStorage.getItem('website_packages');
+        if (saved) {
+            SHARED_PACKAGES = JSON.parse(saved);
+        }
+    } catch (e) {
+        console.error('خطأ في تحميل الباقات:', e);
+    }
+    return SHARED_PACKAGES;
+}
+
+function savePackagesToStorage() {
+    try {
+        localStorage.setItem('website_packages', JSON.stringify(SHARED_PACKAGES));
+        savePackagesToSupabase(); // مزامنة مع Supabase
+        return true;
+    } catch (e) {
+        console.error('خطأ في حفظ الباقات:', e);
+        return false;
+    }
+}
+
+// ========== دوال المهام المحلية ==========
 function loadTasksFromStorage() {
     try {
         const saved = localStorage.getItem('website_tasks');
@@ -295,6 +506,7 @@ function loadTasksFromStorage() {
 function saveTasksToStorage() {
     try {
         localStorage.setItem('website_tasks', JSON.stringify(SHARED_TASKS));
+        saveTasksToSupabase(); // مزامنة مع Supabase
         return true;
     } catch (e) {
         console.error('خطأ في حفظ المهام:', e);
@@ -302,6 +514,49 @@ function saveTasksToStorage() {
     }
 }
 
+// ========== دوال الباقات العامة ==========
+function getAllPackages() {
+    return SHARED_PACKAGES.filter(pkg => pkg.status === "active");
+}
+
+function getPackageById(id) {
+    return SHARED_PACKAGES.find(pkg => pkg.id === id);
+}
+
+function addNewPackage(packageData) {
+    const newPackage = {
+        id: Date.now(),
+        name: packageData.name,
+        price: parseFloat(packageData.price),
+        profit: parseFloat(packageData.profit || 2.5),
+        dailyProfit: parseFloat((packageData.price * (packageData.profit || 2.5) / 100).toFixed(2)),
+        tasks: parseInt(packageData.tasks || 5),
+        duration: parseInt(packageData.duration || 30),
+        status: "active",
+        category: packageData.category || "standard",
+        description: packageData.description || "",
+        users: 0,
+        createdAt: new Date().toISOString()
+    };
+    
+    SHARED_PACKAGES.push(newPackage);
+    savePackagesToStorage();
+    broadcastUpdate('packages');
+    return newPackage;
+}
+
+function deletePackage(packageId) {
+    const initialLength = SHARED_PACKAGES.length;
+    SHARED_PACKAGES = SHARED_PACKAGES.filter(pkg => pkg.id !== packageId);
+    if (SHARED_PACKAGES.length < initialLength) {
+        savePackagesToStorage();
+        broadcastUpdate('packages');
+        return true;
+    }
+    return false;
+}
+
+// ========== دوال المهام العامة ==========
 function getAllTasks() {
     return SHARED_TASKS.filter(task => task.status === "active");
 }
@@ -396,73 +651,145 @@ function getTasksStats() {
     };
 }
 
-// ========== دوال الباقات ==========
-function loadPackagesFromStorage() {
-    try {
-        const saved = localStorage.getItem('website_packages');
-        if (saved) {
-            SHARED_PACKAGES = JSON.parse(saved);
-        }
-    } catch (e) {
-        console.error('خطأ في تحميل الباقات:', e);
-    }
-    return SHARED_PACKAGES;
+// ========== دوال كود الإحالة ==========
+function generateReferralCode(username) {
+    if (!username) username = 'USER';
+    const cleanUsername = username.toString().toUpperCase().replace(/\s/g, '').substring(0, 5);
+    const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const timestamp = Date.now().toString().slice(-4);
+    return `${cleanUsername}${random}${timestamp}`.substring(0, 12);
 }
 
-function savePackagesToStorage() {
-    try {
-        localStorage.setItem('website_packages', JSON.stringify(SHARED_PACKAGES));
-        return true;
-    } catch (e) {
-        console.error('خطأ في حفظ الباقات:', e);
+function getReferralStats(userId) {
+    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+    const currentUser = users.find(u => u.id === userId);
+    
+    if (!currentUser) return null;
+    
+    if (!currentUser.referralCode) {
+        currentUser.referralCode = generateReferralCode(currentUser.username || `USER${userId}`);
+        saveUsersToStorage(users);
+    }
+    
+    const referredUsers = users.filter(u => u.referredBy === currentUser.referralCode);
+    const activeReferrals = referredUsers.filter(u => u.package && u.package.status === 'نشط');
+    const pendingReferrals = referredUsers.filter(u => u.pendingPackage && !u.package);
+    const paidReferrals = referredUsers.filter(u => u.referralRewardPaid === true);
+    
+    let pendingCommission = 0;
+    referredUsers.forEach(u => {
+        if (u.package && u.package.amount && u.referralRewardPaid !== true) {
+            pendingCommission += REFERRAL_SETTINGS.referrerReward;
+        }
+    });
+    
+    return {
+        referralCode: currentUser.referralCode || '',
+        referredCount: referredUsers.length,
+        activeReferrals: activeReferrals.length,
+        pendingReferrals: pendingReferrals.length,
+        paidReferrals: paidReferrals.length,
+        totalEarned: currentUser.referralEarnings || 0,
+        pendingCommission: pendingCommission,
+        conversionRate: referredUsers.length > 0 ? ((activeReferrals.length / referredUsers.length) * 100).toFixed(1) : 0,
+        referredUsers: referredUsers.map(u => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            username: u.username,
+            joinedDate: u.joinedDate,
+            hasPackage: !!u.package,
+            packageName: u.package ? u.package.name : 'لا يوجد',
+            packageAmount: u.package ? u.package.amount : 0,
+            rewardPaid: u.referralRewardPaid || false
+        }))
+    };
+}
+
+async function processReferralRewardsOnApproval(userId, packageAmount) {
+    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+    const newUser = users.find(u => u.id === userId);
+    
+    if (!newUser || !newUser.referredBy) {
+        console.log('⚠️ لا يوجد كود إحالة');
         return false;
     }
-}
-
-function getAllPackages() {
-    return SHARED_PACKAGES.filter(pkg => pkg.status === "active");
-}
-
-function getPackageById(id) {
-    return SHARED_PACKAGES.find(pkg => pkg.id === id);
-}
-
-function addNewPackage(packageData) {
-    const newPackage = {
-        id: Date.now(),
-        name: packageData.name,
-        price: parseFloat(packageData.price),
-        profit: parseFloat(packageData.profit || 2.5),
-        dailyProfit: parseFloat((packageData.price * (packageData.profit || 2.5) / 100).toFixed(2)),
-        tasks: parseInt(packageData.tasks || 5),
-        duration: parseInt(packageData.duration || 30),
-        status: "active",
-        category: packageData.category || "standard",
-        description: packageData.description || "",
-        users: 0,
-        createdAt: new Date().toISOString()
-    };
     
-    SHARED_PACKAGES.push(newPackage);
-    savePackagesToStorage();
-    broadcastUpdate('packages');
-    return newPackage;
-}
-
-function deletePackage(packageId) {
-    const initialLength = SHARED_PACKAGES.length;
-    SHARED_PACKAGES = SHARED_PACKAGES.filter(pkg => pkg.id !== packageId);
-    if (SHARED_PACKAGES.length < initialLength) {
-        savePackagesToStorage();
-        broadcastUpdate('packages');
-        return true;
+    const referrer = users.find(u => u.referralCode === newUser.referredBy);
+    if (!referrer) {
+        console.log('⚠️ لم يتم العثور على صاحب الكود');
+        return false;
     }
-    return false;
+    
+    if (newUser.referralRewardPaid === true) {
+        console.log('⚠️ تم صرف المكافأة مسبقاً');
+        return false;
+    }
+    
+    referrer.referralCount = (referrer.referralCount || 0) + 1;
+    
+    newUser.balance = (newUser.balance || 0) + REFERRAL_SETTINGS.refereeReward;
+    newUser.referralRewardPaid = true;
+    newUser.referralRewardAmount = REFERRAL_SETTINGS.refereeReward;
+    newUser.referralRewardDate = new Date().toISOString();
+    
+    referrer.balance = (referrer.balance || 0) + REFERRAL_SETTINGS.referrerReward;
+    referrer.referralEarnings = (referrer.referralEarnings || 0) + REFERRAL_SETTINGS.referrerReward;
+    
+    addUserTransaction(newUser.id, {
+        id: Date.now(),
+        type: 'مكافأة إحالة',
+        amount: REFERRAL_SETTINGS.refereeReward,
+        description: `🎁 مكافأة تسجيل عن طريق كود الإحالة من ${referrer.name}`,
+        date: new Date().toLocaleString('ar-SA'),
+        status: 'مكتمل',
+        referralCode: newUser.referredBy,
+        referrerName: referrer.name
+    });
+    
+    addUserTransaction(referrer.id, {
+        id: Date.now() + 1,
+        type: 'مكافأة إحالة',
+        amount: REFERRAL_SETTINGS.referrerReward,
+        description: `💰 مكافأة إحالة: ${newUser.name}`,
+        date: new Date().toLocaleString('ar-SA'),
+        status: 'مكتمل',
+        referredUserId: newUser.id,
+        referredUserName: newUser.name
+    });
+    
+    localStorage.setItem('elite_users', JSON.stringify(users));
+    saveUsersToSupabase(users); // مزامنة مع Supabase
+    
+    const currentUser = JSON.parse(localStorage.getItem('current_user'));
+    if (currentUser) {
+        if (currentUser.id === newUser.id) {
+            currentUser.balance = newUser.balance;
+            currentUser.referralRewardPaid = true;
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
+        }
+        if (currentUser.id === referrer.id) {
+            currentUser.balance = referrer.balance;
+            currentUser.referralEarnings = referrer.referralEarnings;
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
+        }
+    }
+    
+    console.log(`✅ تم صرف المكافآت: ${REFERRAL_SETTINGS.referrerReward}$ للمحيل، ${REFERRAL_SETTINGS.refereeReward}$ للمحال`);
+    
+    broadcastUpdate('referrals');
+    broadcastUpdate('users');
+    
+    return {
+        referrer: { id: referrer.id, name: referrer.name, reward: REFERRAL_SETTINGS.referrerReward },
+        referee: { id: newUser.id, name: newUser.name, reward: REFERRAL_SETTINGS.refereeReward }
+    };
 }
 
 // ========== دوال المستخدمين ==========
 function saveUsersToStorage(users) {
     localStorage.setItem('elite_users', JSON.stringify(users));
+    saveUsersToSupabase(users); // مزامنة مع Supabase
 }
 
 function addUserTransaction(userId, transaction) {
@@ -472,6 +799,34 @@ function addUserTransaction(userId, transaction) {
         id: transaction.id || Date.now() + Math.random()
     });
     localStorage.setItem(`user_transactions_${userId}`, JSON.stringify(transactions.slice(0, 200)));
+    
+    // مزامنة مع Supabase
+    syncTransactionToSupabase(userId, transaction);
+}
+
+async function syncTransactionToSupabase(userId, transaction) {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return;
+    
+    try {
+        const { error } = await supabase
+            .from('transactions')
+            .upsert({
+                id: transaction.id || Date.now(),
+                user_id: userId,
+                type: transaction.type,
+                amount: transaction.amount,
+                description: transaction.description || '',
+                status: transaction.status || 'مكتمل',
+                date: transaction.date,
+                metadata: transaction.metadata || {},
+                created_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+        
+        if (error) throw error;
+    } catch (error) {
+        console.error('❌ فشل مزامنة المعاملة:', error);
+    }
 }
 
 function getUserTransactions(userId, limit = 50) {
@@ -572,6 +927,7 @@ function updateUserStatus(userId, status, reason = '') {
     users[userIndex].statusUpdatedAt = new Date().toISOString();
     
     localStorage.setItem('elite_users', JSON.stringify(users));
+    saveUsersToSupabase(users); // مزامنة مع Supabase
     
     const currentUser = JSON.parse(localStorage.getItem('current_user'));
     if (currentUser && currentUser.id === userId) {
@@ -600,6 +956,7 @@ function addUserBalance(userId, amount, reason = 'إضافة رصيد') {
     
     users[userIndex].balance = (users[userIndex].balance || 0) + amount;
     localStorage.setItem('elite_users', JSON.stringify(users));
+    saveUsersToSupabase(users); // مزامنة مع Supabase
     
     const currentUser = JSON.parse(localStorage.getItem('current_user'));
     if (currentUser && currentUser.id === userId) {
@@ -626,6 +983,31 @@ function addSystemLog(log) {
         ...log
     });
     localStorage.setItem('system_logs', JSON.stringify(logs.slice(0, 500)));
+    
+    // مزامنة مع Supabase
+    syncSystemLogToSupabase(log);
+}
+
+async function syncSystemLogToSupabase(log) {
+    if (!supabase) await initSupabaseConnection();
+    if (!supabase) return;
+    
+    try {
+        const { error } = await supabase
+            .from('system_logs')
+            .upsert({
+                id: Date.now(),
+                action: log.action,
+                user_id: log.userId || null,
+                user_name: log.userName || '',
+                details: log,
+                date: new Date().toISOString()
+            }, { onConflict: 'id' });
+        
+        if (error) throw error;
+    } catch (error) {
+        console.error('❌ فشل مزامنة سجل النظام:', error);
+    }
 }
 
 // ========== دوال السحب ==========
@@ -648,7 +1030,7 @@ function getAllWithdrawals() {
     return allWithdrawals.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-// ========== دوال الإحصائيات المتقدمة ==========
+// ========== دوال الإحصائيات ==========
 function getDashboardStats() {
     const users = JSON.parse(localStorage.getItem('elite_users')) || [];
     const pendingPackages = JSON.parse(localStorage.getItem('pending_packages')) || [];
@@ -753,13 +1135,62 @@ function broadcastUpdate(type) {
     window.dispatchEvent(event);
 }
 
-// ========== التهيئة ==========
-function initializeSharedData() {
-    console.log('🚀 تهيئة نظام البيانات المشتركة...');
+// ========== التهيئة الكاملة ==========
+async function initializeSharedData() {
+    console.log('🚀 تهيئة نظام البيانات المشتركة مع Supabase...');
+    
+    // تهيئة الاتصال بـ Supabase
+    await initSupabaseConnection();
+    
+    // تحميل البيانات من Supabase
+    await loadPackagesFromSupabase();
+    await loadTasksFromSupabase();
+    await loadUsersFromSupabase();
+    await loadSettingsFromSupabase();
+    
+    // تحميل البيانات من localStorage كاحتياطي
     loadPackagesFromStorage();
     loadTasksFromStorage();
-    console.log(`✅ تم تحميل ${SHARED_PACKAGES.length} باقة و ${SHARED_TASKS.length} مهمة`);
+    
+    console.log(`✅ تم تهيئة النظام:`);
+    console.log(`   - الباقات: ${SHARED_PACKAGES.length}`);
+    console.log(`   - المهام: ${SHARED_TASKS.length}`);
     console.log(`💰 نظام الإحالة: ${REFERRAL_SETTINGS.referrerReward}$ للمحيل، ${REFERRAL_SETTINGS.refereeReward}$ للمحال`);
+    
+    if (supabase) {
+        console.log('✅ متصل بـ Supabase');
+    } else {
+        console.log('⚠️ يعمل في وضع عدم الاتصال - استخدام localStorage');
+    }
+}
+
+// ========== دوال المزامنة اليدوية ==========
+async function syncAllToSupabase() {
+    console.log('🔄 بدء مزامنة جميع البيانات إلى Supabase...');
+    
+    await savePackagesToSupabase();
+    await saveTasksToSupabase();
+    
+    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+    await saveUsersToSupabase(users);
+    
+    const settings = JSON.parse(localStorage.getItem('system_settings'));
+    if (settings) {
+        await saveSettingsToSupabase(settings);
+    }
+    
+    console.log('✅ تمت مزامنة جميع البيانات');
+}
+
+async function syncAllFromSupabase() {
+    console.log('🔄 بدء مزامنة جميع البيانات من Supabase...');
+    
+    await loadPackagesFromSupabase();
+    await loadTasksFromSupabase();
+    await loadUsersFromSupabase();
+    await loadSettingsFromSupabase();
+    
+    console.log('✅ تمت مزامنة جميع البيانات من Supabase');
 }
 
 // ========== التصدير ==========
@@ -798,6 +1229,8 @@ const SharedData = {
     updateUserStatus: updateUserStatus,
     addUserBalance: addUserBalance,
     addSystemLog: addSystemLog,
+    saveUsersToSupabase: saveUsersToSupabase,
+    loadUsersFromSupabase: loadUsersFromSupabase,
     
     // المعاملات
     addUserTransaction: addUserTransaction,
@@ -814,12 +1247,27 @@ const SharedData = {
     // البث
     broadcastUpdate: broadcastUpdate,
     
+    // Supabase
+    supabase: supabase,
+    initSupabase: initSupabaseConnection,
+    syncAllToSupabase: syncAllToSupabase,
+    syncAllFromSupabase: syncAllFromSupabase,
+    
     // تهيئة
     init: initializeSharedData
 };
 
 window.sharedData = SharedData;
 
+// التهيئة التلقائية
 if (typeof window !== 'undefined') {
+    // تهيئة فورية
     SharedData.init();
+    
+    // مزامنة دورية كل 5 دقائق
+    setInterval(() => {
+        if (window.supabaseClient && window.supabaseClient.client) {
+            SharedData.syncAllToSupabase();
+        }
+    }, 300000);
 }
