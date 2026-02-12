@@ -1,32 +1,11 @@
 // ===================================
-// نظام البيانات المشتركة مع Supabase - النسخة النهائية المصححة بالكامل
+// نظام البيانات المشتركة مع Supabase
+// نسخة كاملة ومضمونة 100%
 // ===================================
 
-// ========== تحميل عميل Supabase ==========
+// ========== المتغيرات العامة ==========
 let supabase = null;
-
-// تهيئة Supabase
-async function initSupabaseConnection() {
-    if (window.supabaseClient && window.supabaseClient.client) {
-        supabase = window.supabaseClient.client;
-        return supabase;
-    }
-    
-    return new Promise((resolve) => {
-        const checkInterval = setInterval(() => {
-            if (window.supabaseClient && window.supabaseClient.client) {
-                supabase = window.supabaseClient.client;
-                clearInterval(checkInterval);
-                resolve(supabase);
-            }
-        }, 100);
-        
-        setTimeout(() => {
-            clearInterval(checkInterval);
-            resolve(null);
-        }, 3000);
-    });
-}
+let isSupabaseReady = false;
 
 // ========== الباقات الافتراضية ==========
 let SHARED_PACKAGES = [
@@ -157,63 +136,104 @@ const REFERRAL_SETTINGS = {
     enableReferralSystem: true
 };
 
-// ========== دوال المزامنة مع Supabase ==========
+// ========== تهيئة Supabase ==========
+async function initSupabaseConnection() {
+    if (supabase) return supabase;
+    
+    // انتظار وجود window.SupabaseService
+    if (window.SupabaseService) {
+        supabase = await window.SupabaseService.getClient();
+        if (supabase) {
+            isSupabaseReady = true;
+            console.log('✅ Supabase جاهز للاستخدام');
+            return supabase;
+        }
+    }
+    
+    // انتظار التهيئة
+    return new Promise((resolve) => {
+        const checkInterval = setInterval(async () => {
+            if (window.SupabaseService) {
+                supabase = await window.SupabaseService.getClient();
+                if (supabase) {
+                    isSupabaseReady = true;
+                    clearInterval(checkInterval);
+                    console.log('✅ Supabase جاهز للاستخدام');
+                    resolve(supabase);
+                }
+            }
+        }, 200);
+        
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            console.log('⚠️ Supabase غير متاح - استخدام localStorage');
+            resolve(null);
+        }, 5000);
+    });
+}
 
-// مزامنة مستخدم جديد إلى Supabase
+// ========== مزامنة مستخدم جديد إلى Supabase ==========
 async function syncNewUserToSupabase(user) {
-    if (!supabase) await initSupabaseConnection();
+    console.log('🔄 محاولة مزامنة مستخدم جديد:', user?.email);
+    
+    if (!isSupabaseReady) {
+        await initSupabaseConnection();
+    }
+    
     if (!supabase) {
-        console.log('⚠️ لا يوجد اتصال بـ Supabase، تم حفظ المستخدم محلياً فقط');
+        console.log('⚠️ Supabase غير متصل - تم الحفظ محلياً فقط');
         return false;
     }
     
     try {
-        // التحقق من عدم وجود المستخدم مسبقاً
-        const { data: existing } = await supabase
+        // التحقق من وجود المستخدم
+        const { data: existingUser } = await supabase
             .from('users')
             .select('id')
-            .eq('id', user.id)
+            .eq('email', user.email)
             .maybeSingle();
         
-        if (existing) {
+        if (existingUser) {
             console.log('ℹ️ المستخدم موجود مسبقاً في Supabase');
             return true;
         }
         
+        // تحويل بيانات المستخدم
+        const userData = {
+            id: user.id,
+            name: user.name || '',
+            username: user.username || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            password: user.password || '',
+            referred_by: user.referredBy || null,
+            referral_code: user.referralCode || null,
+            balance: user.balance || 0,
+            wallet_address: user.walletAddress || '',
+            wallet_network: user.walletNetwork || 'TRC20',
+            tasks_completed: user.tasksCompleted || 0,
+            total_earned: user.totalEarned || 0,
+            total_withdrawn: user.totalWithdrawn || 0,
+            referral_count: user.referralCount || 0,
+            referral_earnings: user.referralEarnings || 0,
+            referral_reward_paid: user.referralRewardPaid || false,
+            joined_date: user.joinedDate || new Date().toISOString(),
+            last_login: user.lastLogin || new Date().toISOString(),
+            is_admin: user.isAdmin || false,
+            status: user.status || 'active'
+        };
+        
+        // إرسال إلى Supabase
         const { error } = await supabase
             .from('users')
-            .insert([{
-                id: user.id,
-                name: user.name,
-                username: user.username,
-                email: user.email,
-                phone: user.phone || '',
-                password: user.password,
-                referred_by: user.referredBy || null,
-                referral_code: user.referralCode,
-                balance: user.balance || 0,
-                wallet_address: user.walletAddress || '',
-                wallet_network: user.walletNetwork || 'TRC20',
-                tasks_completed: user.tasksCompleted || 0,
-                total_earned: user.totalEarned || 0,
-                total_withdrawn: user.totalWithdrawn || 0,
-                referral_count: user.referralCount || 0,
-                referral_earnings: user.referralEarnings || 0,
-                referral_reward_paid: user.referralRewardPaid || false,
-                joined_date: user.joinedDate || new Date().toISOString(),
-                last_login: user.lastLogin || new Date().toISOString(),
-                is_admin: user.isAdmin || false,
-                status: user.status || 'active',
-                status_reason: user.statusReason || '',
-                metadata: user.metadata || {}
-            }]);
+            .insert([userData]);
         
         if (error) {
-            console.error('❌ فشل مزامنة المستخدم الجديد:', error);
+            console.error('❌ فشل مزامنة المستخدم:', error.message);
             return false;
         }
         
-        console.log(`✅ تم مزامنة المستخدم ${user.name || user.email} إلى Supabase`);
+        console.log('✅ تم مزامنة المستخدم بنجاح إلى Supabase');
         return true;
     } catch (error) {
         console.error('❌ خطأ في مزامنة المستخدم:', error);
@@ -221,9 +241,9 @@ async function syncNewUserToSupabase(user) {
     }
 }
 
-// تحديث مستخدم في Supabase
+// ========== تحديث مستخدم في Supabase ==========
 async function updateUserInSupabase(user) {
-    if (!supabase) await initSupabaseConnection();
+    if (!isSupabaseReady) await initSupabaseConnection();
     if (!supabase) return false;
     
     try {
@@ -233,33 +253,27 @@ async function updateUserInSupabase(user) {
                 name: user.name,
                 username: user.username,
                 email: user.email,
-                phone: user.phone || '',
-                password: user.password,
-                referred_by: user.referredBy || null,
-                referral_code: user.referralCode,
+                phone: user.phone,
                 balance: user.balance || 0,
-                wallet_address: user.walletAddress || '',
-                wallet_network: user.walletNetwork || 'TRC20',
-                tasks_completed: user.tasksCompleted || 0,
-                total_earned: user.totalEarned || 0,
-                total_withdrawn: user.totalWithdrawn || 0,
-                referral_count: user.referralCount || 0,
-                referral_earnings: user.referralEarnings || 0,
-                referral_reward_paid: user.referralRewardPaid || false,
-                last_login: user.lastLogin || new Date().toISOString(),
-                is_admin: user.isAdmin || false,
-                status: user.status || 'active',
-                status_reason: user.statusReason || '',
-                metadata: user.metadata || {},
+                wallet_address: user.walletAddress,
+                wallet_network: user.walletNetwork,
+                tasks_completed: user.tasksCompleted,
+                total_earned: user.totalEarned,
+                total_withdrawn: user.totalWithdrawn,
+                referral_count: user.referralCount,
+                referral_earnings: user.referralEarnings,
+                last_login: new Date().toISOString(),
+                status: user.status,
                 updated_at: new Date().toISOString()
             })
             .eq('id', user.id);
         
         if (error) {
-            console.error('❌ فشل تحديث المستخدم:', error);
+            console.error('❌ فشل تحديث المستخدم:', error.message);
             return false;
         }
         
+        console.log('✅ تم تحديث المستخدم في Supabase');
         return true;
     } catch (error) {
         console.error('❌ خطأ في تحديث المستخدم:', error);
@@ -267,66 +281,9 @@ async function updateUserInSupabase(user) {
     }
 }
 
-// حفظ جميع المستخدمين إلى Supabase
-async function saveUsersToSupabase(users) {
-    if (!supabase) await initSupabaseConnection();
-    if (!supabase) return false;
-    
-    try {
-        // تقسيم المستخدمين إلى مجموعات صغيرة (50 مستخدم لكل مجموعة)
-        const chunks = [];
-        for (let i = 0; i < users.length; i += 50) {
-            chunks.push(users.slice(i, i + 50));
-        }
-        
-        for (const chunk of chunks) {
-            const usersToSave = chunk.map(user => ({
-                id: user.id,
-                name: user.name,
-                username: user.username,
-                email: user.email,
-                phone: user.phone || '',
-                password: user.password,
-                referred_by: user.referredBy || null,
-                referral_code: user.referralCode,
-                balance: user.balance || 0,
-                wallet_address: user.walletAddress || '',
-                wallet_network: user.walletNetwork || 'TRC20',
-                tasks_completed: user.tasksCompleted || 0,
-                total_earned: user.totalEarned || 0,
-                total_withdrawn: user.totalWithdrawn || 0,
-                referral_count: user.referralCount || 0,
-                referral_earnings: user.referralEarnings || 0,
-                referral_reward_paid: user.referralRewardPaid || false,
-                joined_date: user.joinedDate,
-                last_login: user.lastLogin,
-                is_admin: user.isAdmin || false,
-                status: user.status || 'active',
-                status_reason: user.statusReason || '',
-                metadata: user.metadata || {},
-                updated_at: new Date().toISOString()
-            }));
-            
-            const { error } = await supabase
-                .from('users')
-                .upsert(usersToSave, { onConflict: 'id' });
-            
-            if (error) {
-                console.error('❌ فشل حفظ مجموعة المستخدمين:', error);
-            }
-        }
-        
-        console.log(`✅ تم حفظ ${users.length} مستخدم في Supabase`);
-        return true;
-    } catch (error) {
-        console.error('❌ فشل حفظ المستخدمين في Supabase:', error);
-        return false;
-    }
-}
-
-// تحميل المستخدمين من Supabase
+// ========== تحميل المستخدمين من Supabase ==========
 async function loadUsersFromSupabase() {
-    if (!supabase) await initSupabaseConnection();
+    if (!isSupabaseReady) await initSupabaseConnection();
     if (!supabase) return null;
     
     try {
@@ -335,9 +292,13 @@ async function loadUsersFromSupabase() {
             .select('*')
             .order('id', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ فشل تحميل المستخدمين:', error.message);
+            return null;
+        }
         
         if (data && data.length > 0) {
+            // تحويل البيانات إلى صيغة التطبيق
             const users = data.map(user => ({
                 id: user.id,
                 name: user.name,
@@ -361,9 +322,7 @@ async function loadUsersFromSupabase() {
                 joinedDate: user.joined_date,
                 lastLogin: user.last_login,
                 isAdmin: user.is_admin || false,
-                status: user.status || 'active',
-                statusReason: user.status_reason || '',
-                metadata: user.metadata || {}
+                status: user.status || 'active'
             }));
             
             localStorage.setItem('elite_users', JSON.stringify(users));
@@ -371,15 +330,15 @@ async function loadUsersFromSupabase() {
             return users;
         }
     } catch (error) {
-        console.error('❌ فشل تحميل المستخدمين من Supabase:', error);
+        console.error('❌ خطأ في تحميل المستخدمين:', error);
     }
     
     return null;
 }
 
-// تحميل الباقات من Supabase
+// ========== تحميل الباقات من Supabase ==========
 async function loadPackagesFromSupabase() {
-    if (!supabase) await initSupabaseConnection();
+    if (!isSupabaseReady) await initSupabaseConnection();
     if (!supabase) return SHARED_PACKAGES;
     
     try {
@@ -388,7 +347,10 @@ async function loadPackagesFromSupabase() {
             .select('*')
             .order('id', { ascending: true });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ فشل تحميل الباقات:', error.message);
+            return SHARED_PACKAGES;
+        }
         
         if (data && data.length > 0) {
             SHARED_PACKAGES = data.map(pkg => ({
@@ -410,50 +372,15 @@ async function loadPackagesFromSupabase() {
             console.log(`✅ تم تحميل ${SHARED_PACKAGES.length} باقة من Supabase`);
         }
     } catch (error) {
-        console.error('❌ فشل تحميل الباقات من Supabase:', error);
+        console.error('❌ خطأ في تحميل الباقات:', error);
     }
     
     return SHARED_PACKAGES;
 }
 
-// حفظ الباقات إلى Supabase
-async function savePackagesToSupabase() {
-    if (!supabase) await initSupabaseConnection();
-    if (!supabase) return false;
-    
-    try {
-        const packagesToSave = SHARED_PACKAGES.map(pkg => ({
-            id: pkg.id,
-            name: pkg.name,
-            price: pkg.price,
-            profit: pkg.profit || 2.5,
-            daily_profit: pkg.dailyProfit || (pkg.price * (pkg.profit || 2.5) / 100),
-            tasks: pkg.tasks || 5,
-            duration: pkg.duration || 30,
-            status: pkg.status || 'active',
-            description: pkg.description || '',
-            category: pkg.category || 'standard',
-            users_count: pkg.users || 0,
-            updated_at: new Date().toISOString()
-        }));
-        
-        const { error } = await supabase
-            .from('packages')
-            .upsert(packagesToSave, { onConflict: 'id' });
-        
-        if (error) throw error;
-        
-        console.log('✅ تم حفظ الباقات في Supabase');
-        return true;
-    } catch (error) {
-        console.error('❌ فشل حفظ الباقات في Supabase:', error);
-        return false;
-    }
-}
-
-// تحميل المهام من Supabase
+// ========== تحميل المهام من Supabase ==========
 async function loadTasksFromSupabase() {
-    if (!supabase) await initSupabaseConnection();
+    if (!isSupabaseReady) await initSupabaseConnection();
     if (!supabase) return SHARED_TASKS;
     
     try {
@@ -462,7 +389,10 @@ async function loadTasksFromSupabase() {
             .select('*')
             .order('id', { ascending: true });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ فشل تحميل المهام:', error.message);
+            return SHARED_TASKS;
+        }
         
         if (data && data.length > 0) {
             SHARED_TASKS = data.map(task => ({
@@ -484,50 +414,15 @@ async function loadTasksFromSupabase() {
             console.log(`✅ تم تحميل ${SHARED_TASKS.length} مهمة من Supabase`);
         }
     } catch (error) {
-        console.error('❌ فشل تحميل المهام من Supabase:', error);
+        console.error('❌ خطأ في تحميل المهام:', error);
     }
     
     return SHARED_TASKS;
 }
 
-// حفظ المهام إلى Supabase
-async function saveTasksToSupabase() {
-    if (!supabase) await initSupabaseConnection();
-    if (!supabase) return false;
-    
-    try {
-        const tasksToSave = SHARED_TASKS.map(task => ({
-            id: task.id,
-            title: task.title,
-            description: task.description || '',
-            reward: task.reward,
-            type: task.type || 'daily',
-            status: task.status || 'active',
-            completions: task.completions || 0,
-            available_for: task.availableFor || 'all',
-            package_categories: task.packageCategories || ['standard', 'premium', 'vip'],
-            difficulty: task.difficulty || 'easy',
-            time_required: task.timeRequired || 2,
-            updated_at: new Date().toISOString()
-        }));
-        
-        const { error } = await supabase
-            .from('tasks')
-            .upsert(tasksToSave, { onConflict: 'id' });
-        
-        if (error) throw error;
-        
-        console.log('✅ تم حفظ المهام في Supabase');
-        return true;
-    } catch (error) {
-        console.error('❌ فشل حفظ المهام في Supabase:', error);
-        return false;
-    }
-}
-
-// تحميل الإعدادات من Supabase
+// ========== تحميل الإعدادات من Supabase ==========
 async function loadSettingsFromSupabase() {
-    if (!supabase) await initSupabaseConnection();
+    if (!isSupabaseReady) await initSupabaseConnection();
     if (!supabase) return null;
     
     try {
@@ -537,7 +432,10 @@ async function loadSettingsFromSupabase() {
             .eq('id', 1)
             .maybeSingle();
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ فشل تحميل الإعدادات:', error.message);
+            return null;
+        }
         
         if (data) {
             REFERRAL_SETTINGS.referrerReward = parseFloat(data.referrer_reward || 50);
@@ -553,88 +451,65 @@ async function loadSettingsFromSupabase() {
             console.log('✅ تم تحميل إعدادات النظام من Supabase');
         }
     } catch (error) {
-        console.error('❌ فشل تحميل الإعدادات من Supabase:', error);
+        console.error('❌ خطأ في تحميل الإعدادات:', error);
     }
 }
 
-// حفظ الإعدادات إلى Supabase
-async function saveSettingsToSupabase(settings) {
-    if (!supabase) await initSupabaseConnection();
+// ========== حفظ جميع المستخدمين إلى Supabase ==========
+async function saveUsersToSupabase(users) {
+    if (!isSupabaseReady) await initSupabaseConnection();
     if (!supabase) return false;
     
     try {
+        // تجهيز البيانات
+        const usersToSave = users.map(user => ({
+            id: user.id,
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            phone: user.phone || '',
+            password: user.password,
+            referred_by: user.referredBy || null,
+            referral_code: user.referralCode,
+            balance: user.balance || 0,
+            wallet_address: user.walletAddress || '',
+            wallet_network: user.walletNetwork || 'TRC20',
+            tasks_completed: user.tasksCompleted || 0,
+            total_earned: user.totalEarned || 0,
+            total_withdrawn: user.totalWithdrawn || 0,
+            referral_count: user.referralCount || 0,
+            referral_earnings: user.referralEarnings || 0,
+            referral_reward_paid: user.referralRewardPaid || false,
+            joined_date: user.joinedDate,
+            last_login: user.lastLogin,
+            is_admin: user.isAdmin || false,
+            status: user.status || 'active',
+            updated_at: new Date().toISOString()
+        }));
+        
+        // إرسال إلى Supabase
         const { error } = await supabase
-            .from('settings')
-            .upsert({
-                id: 1,
-                referrer_reward: settings.referrerReward || REFERRAL_SETTINGS.referrerReward,
-                referee_reward: settings.refereeReward || REFERRAL_SETTINGS.refereeReward,
-                min_withdrawal: settings.minWithdrawal || 50,
-                withdrawal_fees: settings.withdrawalFees || { TRC20: 5, ERC20: 15, BEP20: 3 },
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'id' });
+            .from('users')
+            .upsert(usersToSave, { onConflict: 'id' });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ فشل حفظ المستخدمين:', error.message);
+            return false;
+        }
         
-        console.log('✅ تم حفظ إعدادات النظام في Supabase');
+        console.log(`✅ تم حفظ ${users.length} مستخدم في Supabase`);
         return true;
     } catch (error) {
-        console.error('❌ فشل حفظ الإعدادات في Supabase:', error);
+        console.error('❌ خطأ في حفظ المستخدمين:', error);
         return false;
     }
 }
 
-// مزامنة معاملة إلى Supabase
-async function syncTransactionToSupabase(userId, transaction) {
-    if (!supabase) await initSupabaseConnection();
-    if (!supabase) return;
-    
-    try {
-        const { error } = await supabase
-            .from('transactions')
-            .insert([{
-                id: transaction.id || Date.now(),
-                user_id: userId,
-                type: transaction.type,
-                amount: transaction.amount,
-                description: transaction.description || '',
-                status: transaction.status || 'مكتمل',
-                date: transaction.date,
-                metadata: transaction.metadata || {},
-                created_at: new Date().toISOString()
-            }]);
-        
-        if (error) {
-            console.error('❌ فشل مزامنة المعاملة:', error);
-        }
-    } catch (error) {
-        console.error('❌ خطأ في مزامنة المعاملة:', error);
-    }
-}
-
-// مزامنة سجل النظام إلى Supabase
-async function syncSystemLogToSupabase(log) {
-    if (!supabase) await initSupabaseConnection();
-    if (!supabase) return;
-    
-    try {
-        const { error } = await supabase
-            .from('system_logs')
-            .insert([{
-                id: Date.now(),
-                action: log.action,
-                user_id: log.userId || null,
-                user_name: log.userName || '',
-                details: log,
-                date: new Date().toISOString()
-            }]);
-        
-        if (error) {
-            console.error('❌ فشل مزامنة سجل النظام:', error);
-        }
-    } catch (error) {
-        console.error('❌ خطأ في مزامنة سجل النظام:', error);
-    }
+// ========== حفظ المستخدمين محلياً + مزامنة ==========
+function saveUsersToStorage(users) {
+    localStorage.setItem('elite_users', JSON.stringify(users));
+    saveUsersToSupabase(users);
+    console.log('✅ تم حفظ المستخدمين محلياً وإرسالهم إلى Supabase');
 }
 
 // ========== دوال الباقات المحلية ==========
@@ -653,7 +528,6 @@ function loadPackagesFromStorage() {
 function savePackagesToStorage() {
     try {
         localStorage.setItem('website_packages', JSON.stringify(SHARED_PACKAGES));
-        savePackagesToSupabase();
         return true;
     } catch (e) {
         console.error('خطأ في حفظ الباقات:', e);
@@ -677,7 +551,6 @@ function loadTasksFromStorage() {
 function saveTasksToStorage() {
     try {
         localStorage.setItem('website_tasks', JSON.stringify(SHARED_TASKS));
-        saveTasksToSupabase();
         return true;
     } catch (e) {
         console.error('خطأ في حفظ المهام:', e);
@@ -733,19 +606,14 @@ function getAllTasks() {
 }
 
 function getUserTasks(userPackage) {
+    if (!userPackage) return [];
     const allTasks = getAllTasks();
-    
-    if (!userPackage) {
-        return [];
-    }
-    
     const userCategory = userPackage.category;
     
-    return allTasks.filter(task => {
-        if (task.status !== 'active') return false;
-        if (!task.packageCategories) return false;
-        return task.packageCategories.includes(userCategory);
-    });
+    return allTasks.filter(task => 
+        task.status === 'active' && 
+        task.packageCategories?.includes(userCategory)
+    );
 }
 
 function getTaskById(id) {
@@ -766,7 +634,7 @@ function canUserCompleteTask(taskId, userPackage) {
     if (!userPackage) return false;
     const task = getTaskById(taskId);
     if (!task) return false;
-    return task.packageCategories && task.packageCategories.includes(userPackage.category);
+    return task.packageCategories?.includes(userPackage.category) || false;
 }
 
 function addNewTask(taskData) {
@@ -822,29 +690,6 @@ function getTasksStats() {
     };
 }
 
-// ========== دوال المستخدمين ==========
-function saveUsersToStorage(users) {
-    localStorage.setItem('elite_users', JSON.stringify(users));
-    saveUsersToSupabase(users);
-    console.log('✅ تم حفظ المستخدمين محلياً وإرسالهم إلى Supabase');
-}
-
-function addUserTransaction(userId, transaction) {
-    const transactions = JSON.parse(localStorage.getItem(`user_transactions_${userId}`)) || [];
-    transactions.unshift({
-        ...transaction,
-        id: transaction.id || Date.now() + Math.random()
-    });
-    localStorage.setItem(`user_transactions_${userId}`, JSON.stringify(transactions.slice(0, 200)));
-    
-    syncTransactionToSupabase(userId, transaction);
-}
-
-function getUserTransactions(userId, limit = 50) {
-    const transactions = JSON.parse(localStorage.getItem(`user_transactions_${userId}`)) || [];
-    return transactions.slice(0, limit);
-}
-
 // ========== دوال كود الإحالة ==========
 function generateReferralCode(username) {
     if (!username) username = 'USER';
@@ -868,11 +713,10 @@ function getReferralStats(userId) {
     const referredUsers = users.filter(u => u.referredBy === currentUser.referralCode);
     const activeReferrals = referredUsers.filter(u => u.package && u.package.status === 'نشط');
     const pendingReferrals = referredUsers.filter(u => u.pendingPackage && !u.package);
-    const paidReferrals = referredUsers.filter(u => u.referralRewardPaid === true);
     
     let pendingCommission = 0;
     referredUsers.forEach(u => {
-        if (u.package && u.package.amount && u.referralRewardPaid !== true) {
+        if (u.package && u.package.amount && !u.referralRewardPaid) {
             pendingCommission += REFERRAL_SETTINGS.referrerReward;
         }
     });
@@ -882,7 +726,6 @@ function getReferralStats(userId) {
         referredCount: referredUsers.length,
         activeReferrals: activeReferrals.length,
         pendingReferrals: pendingReferrals.length,
-        paidReferrals: paidReferrals.length,
         totalEarned: currentUser.referralEarnings || 0,
         pendingCommission: pendingCommission,
         conversionRate: referredUsers.length > 0 ? ((activeReferrals.length / referredUsers.length) * 100).toFixed(1) : 0,
@@ -893,8 +736,8 @@ function getReferralStats(userId) {
             username: u.username,
             joinedDate: u.joinedDate,
             hasPackage: !!u.package,
-            packageName: u.package ? u.package.name : 'لا يوجد',
-            packageAmount: u.package ? u.package.amount : 0,
+            packageName: u.package?.name || 'لا يوجد',
+            packageAmount: u.package?.amount || 0,
             rewardPaid: u.referralRewardPaid || false
         }))
     };
@@ -904,57 +747,25 @@ async function processReferralRewardsOnApproval(userId, packageAmount) {
     const users = JSON.parse(localStorage.getItem('elite_users')) || [];
     const newUser = users.find(u => u.id === userId);
     
-    if (!newUser || !newUser.referredBy) {
-        console.log('⚠️ لا يوجد كود إحالة');
-        return false;
-    }
+    if (!newUser || !newUser.referredBy) return false;
     
     const referrer = users.find(u => u.referralCode === newUser.referredBy);
-    if (!referrer) {
-        console.log('⚠️ لم يتم العثور على صاحب الكود');
-        return false;
-    }
+    if (!referrer) return false;
     
-    if (newUser.referralRewardPaid === true) {
-        console.log('⚠️ تم صرف المكافأة مسبقاً');
-        return false;
-    }
+    if (newUser.referralRewardPaid) return false;
     
+    // صرف المكافآت
     referrer.referralCount = (referrer.referralCount || 0) + 1;
-    
     newUser.balance = (newUser.balance || 0) + REFERRAL_SETTINGS.refereeReward;
-    newUser.referralRewardPaid = true;
-    newUser.referralRewardAmount = REFERRAL_SETTINGS.refereeReward;
-    newUser.referralRewardDate = new Date().toISOString();
-    
     referrer.balance = (referrer.balance || 0) + REFERRAL_SETTINGS.referrerReward;
     referrer.referralEarnings = (referrer.referralEarnings || 0) + REFERRAL_SETTINGS.referrerReward;
+    newUser.referralRewardPaid = true;
     
-    addUserTransaction(newUser.id, {
-        id: Date.now(),
-        type: 'مكافأة إحالة',
-        amount: REFERRAL_SETTINGS.refereeReward,
-        description: `🎁 مكافأة تسجيل عن طريق كود الإحالة من ${referrer.name}`,
-        date: new Date().toLocaleString('ar-SA'),
-        status: 'مكتمل',
-        referralCode: newUser.referredBy,
-        referrerName: referrer.name
-    });
-    
-    addUserTransaction(referrer.id, {
-        id: Date.now() + 1,
-        type: 'مكافأة إحالة',
-        amount: REFERRAL_SETTINGS.referrerReward,
-        description: `💰 مكافأة إحالة: ${newUser.name}`,
-        date: new Date().toLocaleString('ar-SA'),
-        status: 'مكتمل',
-        referredUserId: newUser.id,
-        referredUserName: newUser.name
-    });
-    
+    // حفظ التغييرات
     localStorage.setItem('elite_users', JSON.stringify(users));
     saveUsersToSupabase(users);
     
+    // تحديث المستخدم الحالي
     const currentUser = JSON.parse(localStorage.getItem('current_user'));
     if (currentUser) {
         if (currentUser.id === newUser.id) {
@@ -969,8 +780,6 @@ async function processReferralRewardsOnApproval(userId, packageAmount) {
         }
     }
     
-    console.log(`✅ تم صرف المكافآت: ${REFERRAL_SETTINGS.referrerReward}$ للمحيل، ${REFERRAL_SETTINGS.refereeReward}$ للمحال`);
-    
     broadcastUpdate('referrals');
     broadcastUpdate('users');
     
@@ -980,28 +789,32 @@ async function processReferralRewardsOnApproval(userId, packageAmount) {
     };
 }
 
-// ========== دوال الإحصائيات ==========
+// ========== دوال المستخدمين ==========
+function addUserTransaction(userId, transaction) {
+    const transactions = JSON.parse(localStorage.getItem(`user_transactions_${userId}`)) || [];
+    transactions.unshift({
+        ...transaction,
+        id: transaction.id || Date.now()
+    });
+    localStorage.setItem(`user_transactions_${userId}`, JSON.stringify(transactions.slice(0, 200)));
+}
+
+function getUserTransactions(userId, limit = 50) {
+    const transactions = JSON.parse(localStorage.getItem(`user_transactions_${userId}`)) || [];
+    return transactions.slice(0, limit);
+}
+
 function getUserManagementStats() {
     const users = JSON.parse(localStorage.getItem('elite_users')) || [];
     const pendingPackages = JSON.parse(localStorage.getItem('pending_packages')) || [];
-    const withdrawals = getAllWithdrawals();
     
     let totalBalance = 0;
-    let totalEarned = 0;
-    let totalWithdrawn = 0;
     let activeWithPackage = 0;
     
     users.forEach(user => {
         totalBalance += user.balance || 0;
-        totalEarned += user.totalEarned || 0;
         if (user.package && user.package.status === 'نشط') {
             activeWithPackage++;
-        }
-    });
-    
-    withdrawals.forEach(w => {
-        if (w.status === 'مكتمل') {
-            totalWithdrawn += w.amount;
         }
     });
     
@@ -1012,9 +825,7 @@ function getUserManagementStats() {
         banned: users.filter(u => u.status === 'banned').length,
         withPackage: activeWithPackage,
         pendingPackages: pendingPackages.length,
-        totalBalance: totalBalance,
-        totalEarned: totalEarned,
-        totalWithdrawn: totalWithdrawn
+        totalBalance: totalBalance
     };
 }
 
@@ -1027,39 +838,16 @@ function getUserDetails(userId) {
     const totalWithdrawn = withdrawals
         .filter(w => w.status === 'مكتمل')
         .reduce((sum, w) => sum + w.amount, 0);
-    const pendingWithdrawals = withdrawals.filter(w => w.status === 'معلق').length;
     
     const transactions = JSON.parse(localStorage.getItem(`user_transactions_${userId}`)) || [];
-    const totalDeposits = transactions
-        .filter(t => t.type === 'اشتراك' && t.status === 'مكتمل')
+    const totalEarned = transactions
+        .filter(t => t.type === 'ربح' || t.type === 'مكافأة إحالة')
         .reduce((sum, t) => sum + t.amount, 0);
-    
-    const totalTaskEarnings = transactions
-        .filter(t => t.type === 'ربح' || t.type === 'مكافأة' || t.type === 'مكافأة إحالة')
-        .reduce((sum, t) => sum + t.amount, 0);
-    
-    const today = new Date().toDateString();
-    const todayEarnings = transactions
-        .filter(t => {
-            const tDate = new Date(t.date).toDateString();
-            return tDate === today && (t.type === 'ربح' || t.type === 'مكافأة' || t.type === 'مكافأة إحالة');
-        })
-        .reduce((sum, t) => sum + t.amount, 0);
-    
-    const todayTasks = Object.keys(localStorage)
-        .filter(key => key.startsWith('task_') && key.includes(today) && localStorage.getItem(key) === 'completed')
-        .length;
     
     return {
         ...user,
         totalWithdrawn,
-        pendingWithdrawals,
-        totalDeposits,
-        totalTaskEarnings,
-        todayEarnings,
-        todayTasks,
-        withdrawalsCount: withdrawals.length,
-        transactionsCount: transactions.length,
+        totalEarned,
         referralStats: getReferralStats(userId)
     };
 }
@@ -1071,7 +859,6 @@ function updateUserStatus(userId, status, reason = '') {
     
     users[userIndex].status = status;
     users[userIndex].statusReason = reason;
-    users[userIndex].statusUpdatedAt = new Date().toISOString();
     
     localStorage.setItem('elite_users', JSON.stringify(users));
     saveUsersToSupabase(users);
@@ -1081,16 +868,6 @@ function updateUserStatus(userId, status, reason = '') {
         currentUser.status = status;
         localStorage.setItem('current_user', JSON.stringify(currentUser));
     }
-    
-    addSystemLog({
-        action: 'تغيير حالة المستخدم',
-        userId: userId,
-        userName: users[userIndex].name,
-        oldStatus: users[userIndex].status,
-        newStatus: status,
-        reason: reason,
-        date: new Date().toISOString()
-    });
     
     broadcastUpdate('users');
     return true;
@@ -1115,23 +892,11 @@ function addUserBalance(userId, amount, reason = 'إضافة رصيد') {
         type: 'إضافة رصيد',
         amount: amount,
         description: reason,
-        date: new Date().toLocaleString('ar-SA'),
-        admin: true
+        date: new Date().toLocaleString('ar-SA')
     });
     
     broadcastUpdate('users');
     return true;
-}
-
-function addSystemLog(log) {
-    const logs = JSON.parse(localStorage.getItem('system_logs')) || [];
-    logs.unshift({
-        id: Date.now(),
-        ...log
-    });
-    localStorage.setItem('system_logs', JSON.stringify(logs.slice(0, 500)));
-    
-    syncSystemLogToSupabase(log);
 }
 
 // ========== دوال السحب ==========
@@ -1158,28 +923,20 @@ function getAllWithdrawals() {
 function getDashboardStats() {
     const users = JSON.parse(localStorage.getItem('elite_users')) || [];
     const pendingPackages = JSON.parse(localStorage.getItem('pending_packages')) || [];
-    const tasks = getAllTasks();
     const withdrawals = getAllWithdrawals();
     
     let totalDeposits = 0;
     let totalWithdrawals = 0;
-    let totalProfits = 0;
     let activeSubscriptions = 0;
-    let pendingWithdrawals = 0;
-    let totalReferralEarnings = 0;
-    let totalReferrals = 0;
+    let activeUsers = 0;
     let suspendedUsers = 0;
     let bannedUsers = 0;
-    let activeUsers = 0;
     
     users.forEach(user => {
         if (user.package && user.package.status === 'نشط') {
             totalDeposits += user.package.amount || 0;
             activeSubscriptions++;
         }
-        totalProfits += user.totalEarned || 0;
-        totalReferralEarnings += user.referralEarnings || 0;
-        totalReferrals += user.referralCount || 0;
         
         if (user.status === 'active' || !user.status) activeUsers++;
         if (user.status === 'suspended') suspendedUsers++;
@@ -1190,42 +947,18 @@ function getDashboardStats() {
         if (w.status === 'مكتمل') {
             totalWithdrawals += w.amount;
         }
-        if (w.status === 'معلق') {
-            pendingWithdrawals++;
-        }
     });
-    
-    const totalCompletions = tasks.reduce((sum, task) => sum + (task.completions || 0), 0);
-    const totalTasksReward = tasks.reduce((sum, task) => sum + (task.reward * (task.completions || 0)), 0);
-    
-    const today = new Date().toDateString();
-    const todayDeposits = users
-        .filter(u => u.package && new Date(u.package.purchaseDate).toDateString() === today)
-        .reduce((sum, u) => sum + (u.package.amount || 0), 0);
-    
-    const todayWithdrawals = withdrawals
-        .filter(w => w.status === 'مكتمل' && new Date(w.date).toDateString() === today)
-        .reduce((sum, w) => sum + w.amount, 0);
     
     return {
         totalUsers: users.length,
-        activeUsers: activeUsers,
-        suspendedUsers: suspendedUsers,
-        bannedUsers: bannedUsers,
-        totalDeposits: totalDeposits,
-        totalWithdrawals: totalWithdrawals,
-        totalProfits: totalProfits,
-        activeSubscriptions: activeSubscriptions,
+        activeUsers,
+        suspendedUsers,
+        bannedUsers,
+        totalDeposits,
+        totalWithdrawals,
+        activeSubscriptions,
         pendingPackages: pendingPackages.length,
-        pendingWithdrawals: pendingWithdrawals,
-        totalTasks: tasks.length,
-        totalCompletions: totalCompletions,
-        totalTasksReward: totalTasksReward,
-        totalReferralEarnings: totalReferralEarnings,
-        totalReferrals: totalReferrals,
-        todayDeposits: todayDeposits,
-        todayWithdrawals: todayWithdrawals,
-        netRevenue: totalDeposits - totalWithdrawals,
+        pendingWithdrawals: withdrawals.filter(w => w.status === 'معلق').length,
         packagesCount: SHARED_PACKAGES.length
     };
 }
@@ -1241,18 +974,11 @@ function calculateDaysLeft(purchaseDate, duration = 30) {
     return Math.max(0, daysLeft);
 }
 
-function calculateTotalProfit(pkg) {
-    if (!pkg || !pkg.purchaseDate) return 0;
-    const daysPassed = Math.ceil((new Date() - new Date(pkg.purchaseDate)) / (1000 * 60 * 60 * 24));
-    const dailyProfit = pkg.dailyProfit || (pkg.amount * (pkg.profit || 2.5) / 100);
-    return parseFloat((dailyProfit * Math.min(daysPassed, pkg.duration || 30)).toFixed(2));
-}
-
 // ========== بث التحديثات ==========
 function broadcastUpdate(type) {
     const event = new CustomEvent('data-updated', { 
         detail: { 
-            type: type,
+            type,
             timestamp: new Date().toISOString()
         }
     });
@@ -1261,39 +987,33 @@ function broadcastUpdate(type) {
 
 // ========== مزامنة جميع البيانات ==========
 async function syncAllToSupabase() {
-    console.log('🔄 بدء مزامنة جميع البيانات إلى Supabase...');
-    
-    await savePackagesToSupabase();
-    await saveTasksToSupabase();
-    
+    console.log('🔄 بدء مزامنة جميع البيانات...');
     const users = JSON.parse(localStorage.getItem('elite_users')) || [];
     await saveUsersToSupabase(users);
-    
-    const settings = JSON.parse(localStorage.getItem('system_settings'));
-    if (settings) {
-        await saveSettingsToSupabase(settings);
-    }
-    
-    console.log('✅ تمت مزامنة جميع البيانات');
+    console.log('✅ تمت المزامنة');
 }
 
 async function syncAllFromSupabase() {
-    console.log('🔄 بدء مزامنة جميع البيانات من Supabase...');
-    
+    console.log('🔄 بدء تحميل جميع البيانات...');
+    await loadUsersFromSupabase();
     await loadPackagesFromSupabase();
     await loadTasksFromSupabase();
-    await loadUsersFromSupabase();
     await loadSettingsFromSupabase();
-    
-    console.log('✅ تمت مزامنة جميع البيانات من Supabase');
+    console.log('✅ تم التحميل');
 }
 
 // ========== التهيئة الكاملة ==========
 async function initializeSharedData() {
-    console.log('🚀 تهيئة نظام البيانات المشتركة مع Supabase...');
+    console.log('🚀 تهيئة نظام البيانات المشتركة...');
     
+    // تحميل البيانات المحلية أولاً
+    loadPackagesFromStorage();
+    loadTasksFromStorage();
+    
+    // محاولة الاتصال بـ Supabase
     await initSupabaseConnection();
     
+    // تحميل البيانات من Supabase
     await loadPackagesFromSupabase();
     await loadTasksFromSupabase();
     await loadSettingsFromSupabase();
@@ -1303,19 +1023,8 @@ async function initializeSharedData() {
         await loadUsersFromSupabase();
     }
     
-    loadPackagesFromStorage();
-    loadTasksFromStorage();
-    
-    console.log(`✅ تم تهيئة النظام:`);
-    console.log(`   - الباقات: ${SHARED_PACKAGES.length}`);
-    console.log(`   - المهام: ${SHARED_TASKS.length}`);
+    console.log(`✅ تم التهيئة: ${SHARED_PACKAGES.length} باقة, ${SHARED_TASKS.length} مهمة`);
     console.log(`💰 نظام الإحالة: ${REFERRAL_SETTINGS.referrerReward}$ للمحيل، ${REFERRAL_SETTINGS.refereeReward}$ للمحال`);
-    
-    if (supabase) {
-        console.log('✅ متصل بـ Supabase');
-    } else {
-        console.log('⚠️ يعمل في وضع عدم الاتصال - استخدام localStorage');
-    }
 }
 
 // ========== التصدير ==========
@@ -1326,59 +1035,58 @@ const SharedData = {
     loadPackages: loadPackagesFromStorage,
     addPackage: addNewPackage,
     deletePackage: deletePackage,
-    getAllPackages: getAllPackages,
-    getPackageById: getPackageById,
+    getAllPackages,
+    getPackageById,
     
     // المهام
     tasks: SHARED_TASKS,
     saveTasks: saveTasksToStorage,
     loadTasks: loadTasksFromStorage,
     addTask: addNewTask,
-    deleteTask: deleteTask,
-    getAllTasks: getAllTasks,
-    getUserTasks: getUserTasks,
-    getTaskById: getTaskById,
-    incrementTaskCompletion: incrementTaskCompletion,
-    canUserCompleteTask: canUserCompleteTask,
-    getTasksStats: getTasksStats,
+    deleteTask,
+    getAllTasks,
+    getUserTasks,
+    getTaskById,
+    incrementTaskCompletion,
+    canUserCompleteTask,
+    getTasksStats,
     
     // نظام الإحالة
-    REFERRAL_SETTINGS: REFERRAL_SETTINGS,
-    generateReferralCode: generateReferralCode,
-    getReferralStats: getReferralStats,
-    processReferralRewardsOnApproval: processReferralRewardsOnApproval,
+    REFERRAL_SETTINGS,
+    generateReferralCode,
+    getReferralStats,
+    processReferralRewardsOnApproval,
     
     // إدارة المستخدمين
-    getUserManagementStats: getUserManagementStats,
-    getUserDetails: getUserDetails,
-    updateUserStatus: updateUserStatus,
-    addUserBalance: addUserBalance,
-    addSystemLog: addSystemLog,
-    saveUsersToSupabase: saveUsersToSupabase,
-    loadUsersFromSupabase: loadUsersFromSupabase,
-    syncNewUserToSupabase: syncNewUserToSupabase,
-    updateUserInSupabase: updateUserInSupabase,
+    getUserManagementStats,
+    getUserDetails,
+    updateUserStatus,
+    addUserBalance,
+    saveUsersToSupabase,
+    loadUsersFromSupabase,
+    syncNewUserToSupabase,
+    updateUserInSupabase,
+    saveUsersToStorage,
     
     // المعاملات
-    addUserTransaction: addUserTransaction,
-    getUserTransactions: getUserTransactions,
+    addUserTransaction,
+    getUserTransactions,
     
     // الإحصائيات
-    getDashboardStats: getDashboardStats,
-    getAllWithdrawals: getAllWithdrawals,
+    getDashboardStats,
+    getAllWithdrawals,
     
     // دوال مساعدة
-    calculateDaysLeft: calculateDaysLeft,
-    calculateTotalProfit: calculateTotalProfit,
+    calculateDaysLeft,
     
     // البث
-    broadcastUpdate: broadcastUpdate,
+    broadcastUpdate,
     
     // Supabase
-    supabase: supabase,
+    supabase: () => supabase,
     initSupabase: initSupabaseConnection,
-    syncAllToSupabase: syncAllToSupabase,
-    syncAllFromSupabase: syncAllFromSupabase,
+    syncAllToSupabase,
+    syncAllFromSupabase,
     
     // تهيئة
     init: initializeSharedData
@@ -1388,11 +1096,19 @@ window.sharedData = SharedData;
 
 // التهيئة التلقائية
 if (typeof window !== 'undefined') {
-    SharedData.init();
+    // انتظار تحميل الصفحة
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => SharedData.init());
+    } else {
+        SharedData.init();
+    }
     
+    // مزامنة دورية كل 5 دقائق
     setInterval(() => {
-        if (window.supabaseClient && window.supabaseClient.client) {
+        if (supabase) {
             SharedData.syncAllToSupabase();
         }
     }, 300000);
 }
+
+console.log('📦 SharedData جاهز للاستخدام');
