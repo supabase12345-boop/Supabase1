@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- استخدام رابط مختلف لمكتبة Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>🔧 تشخيص المشكلة</h1>
+    <div id="status" style="margin: 20px; padding: 20px; border: 1px solid black;"></div>
+    
+    <script>
+        const status = document.getElementById('status')
+        
+        // 1. تأكد أن المكتبة وصلت
+        if (typeof window.supabase === 'undefined') {
+            status.innerHTML = '❌ مكتبة Supabase ما حملت!<br>جرب تحديث الصفحة أو غير الرابط'
+            status.style.background = '#ffebee'
+        } else {
+            status.innerHTML = '✅ مكتبة Supabase حملت بنجاح<br>'
+            
+            // 2. جرب الاتصال
+            try {
+                const SUPABASE_URL = 'https://wabyirjjhndrwxvcrdvn.supabase.co'
+                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhYnlpcmpqaG5kcnd4dmNyZHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTM0OTAsImV4cCI6MjA4NjQ2OTQ5MH0.AWDpHfWQLBto-Jn8_9fO0UmPS5Da9pgX611Bl6Q6u2w'
+                
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+                status.innerHTML += '✅ تم إنشاء اتصال Supabase<br>'
+                
+                // 3. جرب تجيب الجلسة
+                supabase.auth.getSession().then(({ data }) => {
+                    status.innerHTML += '✅ تم التحقق من الجلسة<br>'
+                    if (data.session) {
+                        status.innerHTML += '👤 مستخدم مسجل: ' + data.session.user.email
+                    } else {
+                        status.innerHTML += '👤 لا يوجد مستخدم مسجل'
+                    }
+                }).catch(error => {
+                    status.innerHTML += '❌ فشل التحقق من الجلسة: ' + error.message
+                })
+                
+            } catch (error) {
+                status.innerHTML += '❌ خطأ: ' + error.message
+            }
+        }
+    </script>
+</body>
+</html>
