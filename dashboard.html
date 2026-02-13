@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <!-- منع التخزين المؤقت -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <!-- تحميل مكتبة Supabase أولاً -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -16,6 +21,7 @@
     <style>
         :root {
             --primary: #7c3aed;
+            --primary-dark: #6d28d9;
             --secondary: #06b6d4;
             --success: #10b981;
             --warning: #f59e0b;
@@ -56,6 +62,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--primary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         
         .user-info {
@@ -88,6 +95,27 @@
             font-size: 13px;
         }
         
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+            box-shadow: 0 5px 15px rgba(239,68,68,0.3);
+        }
+        
         /* ========== شريط التنقل السفلي ========== */
         .bottom-nav {
             position: fixed;
@@ -107,7 +135,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-decoration: none;
             color: var(--text-muted);
             transition: all 0.3s;
             padding: 8px 16px;
@@ -129,10 +156,16 @@
             margin-bottom: 5px;
         }
         
+        .nav-label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
         /* ========== المحتوى الرئيسي ========== */
         .main-content {
             padding: 20px;
             padding-top: 90px;
+            padding-bottom: 90px;
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -175,6 +208,35 @@
         .stat-value.success { color: var(--success); }
         .stat-value.warning { color: var(--warning); }
         .stat-value.info { color: var(--secondary); }
+        
+        /* ========== أزرار التنقل بين الأقسام ========== */
+        .section-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: var(--dark-light);
+            padding: 10px;
+            border-radius: 15px;
+        }
+        
+        .section-tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            min-width: 80px;
+        }
+        
+        .section-tab.active {
+            background: var(--primary);
+            color: white;
+        }
         
         /* ========== الأقسام ========== */
         .section {
@@ -301,6 +363,16 @@
             margin: 15px 0;
         }
         
+        .referred-user-item {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
         /* ========== المعاملات ========== */
         .transactions-list {
             display: grid;
@@ -394,6 +466,24 @@
             font-weight: bold;
         }
         
+        /* ========== حالة الطلب المعلق ========== */
+        .pending-section {
+            background: rgba(245,158,11,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--warning);
+        }
+        
+        .status-pending {
+            color: var(--warning);
+            background: rgba(245,158,11,0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
         /* ========== النماذج ========== */
         .form-group {
             margin-bottom: 20px;
@@ -448,7 +538,7 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #6d28d9);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
         }
         
@@ -702,6 +792,10 @@
                 font-size: 18px;
                 letter-spacing: 2px;
             }
+            
+            .user-details {
+                display: none;
+            }
         }
         
         @media (max-width: 480px) {
@@ -717,8 +811,9 @@
                 font-size: 24px;
             }
             
-            .user-details {
-                display: none;
+            .section-tab {
+                font-size: 13px;
+                padding: 8px;
             }
         }
     </style>
@@ -733,7 +828,7 @@
                 <small id="userEmail">...</small>
             </div>
         </div>
-        <button class="btn btn-primary" onclick="logout()" style="width: auto; padding: 10px 20px;">
+        <button class="logout-btn" onclick="logout()">
             <i class="fas fa-sign-out-alt"></i> خروج
         </button>
     </div>
@@ -779,18 +874,18 @@
         <div id="pendingRequestSection" style="display: none;"></div>
 
         <!-- أزرار التنقل بين الأقسام -->
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-            <button class="btn btn-primary" style="flex:1" onclick="showSection('home')">الرئيسية</button>
-            <button class="btn" style="flex:1" onclick="showSection('tasks')">المهام</button>
-            <button class="btn" style="flex:1" onclick="showSection('referral')">الإحالة</button>
-            <button class="btn" style="flex:1" onclick="showSection('history')">السجل</button>
-            <button class="btn" style="flex:1" onclick="showSection('profile')">حسابي</button>
+        <div class="section-tabs">
+            <button class="section-tab active" onclick="showSection('home')">الرئيسية</button>
+            <button class="section-tab" onclick="showSection('tasks')">المهام</button>
+            <button class="section-tab" onclick="showSection('referral')">الإحالة</button>
+            <button class="section-tab" onclick="showSection('history')">السجل</button>
+            <button class="section-tab" onclick="showSection('profile')">حسابي</button>
         </div>
 
         <!-- القسم: الرئيسية -->
         <div id="home-section" class="section active-section">
             <div class="section-title">
-                <i class="fas fa-crown" style="color: var(--primary);"></i>
+                <i class="fas fa-crown"></i>
                 <h3>باقتك الحالية</h3>
             </div>
             <div class="current-package" id="currentPackage">
@@ -808,13 +903,15 @@
                 <i class="fas fa-bolt" style="color: var(--warning);"></i>
                 <h3>مهام اليوم السريعة</h3>
             </div>
-            <div id="quickTasks" class="tasks-list"></div>
+            <div id="quickTasks" class="tasks-list">
+                <p class="text-center text-muted">لا توجد مهام متاحة</p>
+            </div>
         </div>
 
         <!-- القسم: المهام -->
         <div id="tasks-section" class="section" style="display: none;">
             <div class="section-title">
-                <i class="fas fa-tasks" style="color: var(--success);"></i>
+                <i class="fas fa-tasks"></i>
                 <h3>المهام المتاحة</h3>
                 <div style="margin-right: auto;">
                     <button class="btn btn-sm btn-primary" onclick="loadUserTasks()">
@@ -891,7 +988,7 @@
         <!-- القسم: الملف الشخصي -->
         <div id="profile-section" class="section" style="display: none;">
             <div class="section-title">
-                <i class="fas fa-user-cog" style="color: var(--primary);"></i>
+                <i class="fas fa-user-cog"></i>
                 <h3>معلومات الحساب</h3>
             </div>
             
@@ -955,23 +1052,23 @@
     <div class="bottom-nav">
         <button class="nav-item active" onclick="showSection('home')">
             <i class="fas fa-home nav-icon"></i>
-            <span>الرئيسية</span>
+            <span class="nav-label">الرئيسية</span>
         </button>
         <button class="nav-item" onclick="showSection('tasks')">
             <i class="fas fa-tasks nav-icon"></i>
-            <span>المهام</span>
+            <span class="nav-label">المهام</span>
         </button>
         <button class="nav-item" onclick="showSection('referral')">
             <i class="fas fa-user-friends nav-icon"></i>
-            <span>الإحالة</span>
+            <span class="nav-label">الإحالة</span>
         </button>
         <button class="nav-item" onclick="showSection('history')">
             <i class="fas fa-history nav-icon"></i>
-            <span>السجل</span>
+            <span class="nav-label">السجل</span>
         </button>
         <button class="nav-item" onclick="showSection('profile')">
             <i class="fas fa-user nav-icon"></i>
-            <span>حسابي</span>
+            <span class="nav-label">حسابي</span>
         </button>
     </div>
 
@@ -1033,8 +1130,8 @@
     <!-- ========== الإشعار ========== -->
     <div class="notification" id="notification"></div>
 
-    <script>
-        // ========== المتغيرات العامة ==========
+<script>
+        // ========== متغيرات عامة ==========
         let currentUser = null;
         let transactions = [];
         let withdrawals = [];
@@ -1047,7 +1144,7 @@
             'BEP20': 3
         };
 
-        // ========== التهيئة ==========
+        // ========== تهيئة لوحة التحكم ==========
         async function initDashboard() {
             console.log('🚀 بدء تشغيل لوحة التحكم...');
             
@@ -1063,10 +1160,21 @@
                 
                 // التحقق من صحة المستخدم في Supabase
                 const user = await window.sharedData.getUserById(currentUser.id);
+                
                 if (!user) {
+                    throw new Error('المستخدم غير موجود');
+                }
+                
+                // التحقق من حالة المستخدم
+                if (user.status === 'banned') {
+                    showNotification('❌ حسابك محظور', 'error');
                     localStorage.removeItem('current_user');
-                    window.location.href = 'index.html';
+                    setTimeout(() => window.location.href = 'index.html', 2000);
                     return;
+                }
+                
+                if (user.status === 'suspended') {
+                    showNotification('⚠️ حسابك معلق مؤقتاً', 'warning');
                 }
                 
                 currentUser = user;
@@ -1084,7 +1192,8 @@
                 
             } catch (error) {
                 console.error('خطأ في التهيئة:', error);
-                showNotification('❌ حدث خطأ في تحميل البيانات', 'error');
+                localStorage.removeItem('current_user');
+                window.location.href = 'index.html';
             }
         }
 
@@ -1218,31 +1327,25 @@
             const pending = currentUser.pending_package;
             
             pendingSection.style.display = 'block';
-            pendingSection.className = 'section';
+            pendingSection.className = 'pending-section';
             pendingSection.innerHTML = `
-                <div class="section-title">
-                    <i class="fas fa-clock" style="color: var(--warning);"></i>
-                    <h3>حالة طلب الاشتراك</h3>
+                <div class="d-flex justify-between align-center">
+                    <h4 style="color: var(--warning); margin: 0;">${pending.name}</h4>
+                    <span class="status-pending">
+                        <i class="fas fa-clock"></i> بانتظار المراجعة
+                    </span>
                 </div>
-                <div style="background: rgba(245,158,11,0.1); padding: 20px; border-radius: 12px;">
-                    <div class="d-flex justify-between align-center">
-                        <h4 style="color: var(--warning); margin: 0;">${pending.name}</h4>
-                        <span class="status-badge status-pending">
-                            <i class="fas fa-clock"></i> بانتظار المراجعة
-                        </span>
-                    </div>
-                    <div class="d-flex justify-between mt-3">
-                        <span class="text-muted">المبلغ:</span>
-                        <strong>${pending.amount}$</strong>
-                    </div>
-                    <div class="d-flex justify-between mt-2">
-                        <span class="text-muted">تاريخ الطلب:</span>
-                        <span>${new Date(pending.requestedDate).toLocaleString('ar-SA')}</span>
-                    </div>
-                    <div class="mt-3 text-muted">
-                        <i class="fas fa-info-circle"></i>
-                        سيتم تفعيل باقتك خلال ${pending.estimatedActivation || '3-6 ساعات'}
-                    </div>
+                <div class="d-flex justify-between mt-3">
+                    <span class="text-muted">المبلغ:</span>
+                    <strong>${pending.amount}$</strong>
+                </div>
+                <div class="d-flex justify-between mt-2">
+                    <span class="text-muted">تاريخ الطلب:</span>
+                    <span>${new Date(pending.requestedDate).toLocaleString('ar-SA')}</span>
+                </div>
+                <div class="mt-3 text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    سيتم تفعيل باقتك خلال ${pending.estimatedActivation || '3-6 ساعات'}
                 </div>
             `;
         }
@@ -1256,7 +1359,6 @@
                     userTasks = [];
                     displayUserTasks();
                     displayQuickTasks();
-                    updateTasksStats();
                     return;
                 }
                 
@@ -1274,7 +1376,6 @@
                 
                 displayUserTasks();
                 displayQuickTasks();
-                updateTasksStats();
                 
             } catch (error) {
                 console.error('خطأ في تحميل المهام:', error);
@@ -1292,7 +1393,7 @@
                         <i class="fas fa-crown" style="font-size: 40px; color: var(--warning); margin-bottom: 15px;"></i>
                         <h4 style="color: var(--warning); margin-bottom: 10px;">لا توجد باقة نشطة</h4>
                         <p class="text-muted mb-3">اشترك في إحدى باقاتنا لبدء المهام اليومية</p>
-                        <button class="btn btn-primary" onclick="goToPackages()">
+                        <button class="btn btn-primary" onclick="window.location.href='index.html#packages'">
                             <i class="fas fa-plus-circle"></i> اشترك الآن
                         </button>
                     </div>
@@ -1372,7 +1473,7 @@
                         <i class="fas fa-crown" style="font-size: 60px; color: var(--warning); margin-bottom: 20px;"></i>
                         <h3 style="color: var(--warning); margin-bottom: 15px;">لا توجد باقة نشطة</h3>
                         <p class="text-muted mb-4">المهام متاحة فقط للمشتركين في الباقات</p>
-                        <button class="btn btn-primary" onclick="goToPackages()">
+                        <button class="btn btn-primary" onclick="window.location.href='index.html#packages'">
                             <i class="fas fa-plus-circle"></i> اشترك الآن
                         </button>
                     </div>
@@ -1452,25 +1553,6 @@
             });
             
             container.innerHTML = html;
-        }
-
-        // ========== تحديث إحصائيات المهام ==========
-        function updateTasksStats() {
-            if (!currentUser?.package) {
-                document.getElementById('tasksCompleted').textContent = '0';
-                return;
-            }
-            
-            const today = new Date().toDateString();
-            let completedCount = 0;
-            
-            userTasks.forEach(task => {
-                if (localStorage.getItem(`task_${task.id}_${today}`)) {
-                    completedCount++;
-                }
-            });
-            
-            document.getElementById('tasksCompleted').textContent = completedCount;
         }
 
         // ========== إكمال مهمة ==========
@@ -1599,18 +1681,16 @@
                         '<span style="color: var(--warning);"><i class="fas fa-clock"></i> بانتظار الباقة</span>';
                     
                     html += `
-                        <div style="background: rgba(255,255,255,0.03); padding: 15px; margin-bottom: 10px; border-radius: 10px;">
-                            <div class="d-flex justify-between align-center">
-                                <div>
-                                    <strong>${user.name}</strong><br>
-                                    <small class="text-muted">${joinDate}</small>
-                                </div>
-                                <div>
-                                    <span class="badge" style="background: ${user.hasPackage ? 'var(--success)' : 'var(--warning)'};">
-                                        ${user.hasPackage ? 'مشترك' : 'بانتظار'}
-                                    </span>
-                                    <div style="margin-top: 5px; font-size: 12px;">${rewardStatus}</div>
-                                </div>
+                        <div class="referred-user-item">
+                            <div>
+                                <strong>${user.name}</strong><br>
+                                <small class="text-muted">${joinDate}</small>
+                            </div>
+                            <div>
+                                <span class="badge" style="background: ${user.hasPackage ? 'var(--success)' : 'var(--warning)'};">
+                                    ${user.hasPackage ? 'مشترك' : 'بانتظار'}
+                                </span>
+                                <div style="margin-top: 5px; font-size: 12px;">${rewardStatus}</div>
                             </div>
                         </div>
                     `;
@@ -1962,9 +2042,18 @@
             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
             document.getElementById(sectionName + '-section').style.display = 'block';
             
+            document.querySelectorAll('.section-tab').forEach(tab => tab.classList.remove('active'));
+            const tabs = document.querySelectorAll('.section-tab');
+            const tabIndex = { home: 0, tasks: 1, referral: 2, history: 3, profile: 4 };
+            if (tabs[tabIndex[sectionName]]) {
+                tabs[tabIndex[sectionName]].classList.add('active');
+            }
+            
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            const navMap = { home: 0, tasks: 1, referral: 2, history: 3, profile: 4 };
-            document.querySelectorAll('.nav-item')[navMap[sectionName]].classList.add('active');
+            const navItems = document.querySelectorAll('.nav-item');
+            if (navItems[tabIndex[sectionName]]) {
+                navItems[tabIndex[sectionName]].classList.add('active');
+            }
             
             // تحميل البيانات حسب القسم
             if (sectionName === 'history') {
