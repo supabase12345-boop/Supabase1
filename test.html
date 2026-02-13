@@ -1,241 +1,377 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 اختبار Supabase - بسيط</title>
+    <title>🔍 تشخيص المشاكل - Elite Investors</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
         body {
             background: #0f172a;
             color: white;
-            font-family: Arial;
             padding: 20px;
-            text-align: center;
             direction: rtl;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
         }
         h1 {
             color: #7c3aed;
+            text-align: center;
+            margin-bottom: 30px;
             font-size: 24px;
         }
-        button {
+        .card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #7c3aed;
+        }
+        .card-title {
+            color: #7c3aed;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .test-item {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .test-name {
+            font-weight: bold;
+            color: #cbd5e1;
+        }
+        .status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #10b98120;
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+        .status-error {
+            background: #ef444420;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        .status-warning {
+            background: #f59e0b20;
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+        .details {
+            background: #00000030;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #94a3b8;
+            word-break: break-word;
+            margin-top: 10px;
+        }
+        .btn {
             background: #7c3aed;
             color: white;
             border: none;
-            padding: 15px;
+            padding: 12px 20px;
             border-radius: 10px;
-            font-size: 18px;
-            margin: 10px 0;
+            font-weight: bold;
             width: 100%;
+            margin: 5px 0;
             cursor: pointer;
-            font-weight: bold;
-        }
-        .result-box {
-            background: #1e293b;
-            border: 2px solid #7c3aed;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: right;
-            min-height: 100px;
             font-size: 16px;
-            direction: ltr;
         }
-        .success {
+        .btn-success {
+            background: #10b981;
+        }
+        .btn-warning {
+            background: #f59e0b;
+        }
+        .package-box {
+            background: #2d3a4f;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-right: 5px solid #7c3aed;
+        }
+        .package-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+        .package-price {
             color: #10b981;
-            font-weight: bold;
+            font-size: 16px;
         }
-        .error {
-            color: #ef4444;
-            font-weight: bold;
+        .log {
+            background: #00000050;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #94a3b8;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        .info {
-            color: #3b82f6;
-        }
-        hr {
-            border: 1px solid #334155;
-            margin: 20px 0;
+        .row {
+            display: flex;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>🔍 اختبار Supabase</h1>
-    <p>اضغط على الأزرار للفحص المباشر</p>
+    <div class="container">
+        <h1>🔍 تشخيص مشاكل الباقات</h1>
+        
+        <div class="card">
+            <div class="card-title">
+                <span>📡 1. فحص الاتصال بـ Supabase</span>
+            </div>
+            <button class="btn" onclick="testConnection()">بدء الفحص</button>
+            <div id="connection-result" class="details" style="margin-top: 15px;"></div>
+        </div>
 
-    <button onclick="testConnection()">📡 1. فحص الاتصال بقاعدة البيانات</button>
-    <button onclick="testUsers()">👥 2. عرض جميع المستخدمين</button>
-    <button onclick="testPackages()">📦 3. عرض جميع الباقات</button>
-    <button onclick="testLogin()">🔑 4. تجربة تسجيل الدخول (admin/admin123)</button>
-    <button onclick="clearStorage()">🧹 5. تنظيف التخزين المحلي</button>
+        <div class="card">
+            <div class="card-title">
+                <span>📦 2. فحص الباقات</span>
+            </div>
+            <button class="btn" onclick="testPackages()">عرض الباقات</button>
+            <div id="packages-result" class="details" style="margin-top: 15px;"></div>
+        </div>
 
-    <hr>
+        <div class="card">
+            <div class="card-title">
+                <span>🔧 3. إصلاح سريع</span>
+            </div>
+            <button class="btn btn-success" onclick="fixPackages()">إضافة الباقات الأساسية</button>
+            <button class="btn btn-warning" onclick="clearCache()">مسح الكاش</button>
+            <div id="fix-result" class="details" style="margin-top: 15px;"></div>
+        </div>
 
-    <div class="result-box" id="result">
-        ⏳ النتائج تظهر هنا...
+        <div class="card">
+            <div class="card-title">
+                <span>📋 4. سجل الأخطاء</span>
+            </div>
+            <div id="log" class="log"></div>
+        </div>
     </div>
 
     <script>
-        // بيانات Supabase مباشرة بدون مكتبة
-        const SUPABASE_URL = 'https://kfwbcewtnfoofllhxron.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2JjZXd0bmZvb2ZsbGh4cm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEwMzksImV4cCI6MjA4NjQ5NzAzOX0.Mgf7Dg4Ji3eKHQPz3SUGTfwSfsl7anYneA4ZPIYgbIU';
+        // إعدادات Supabase
+        const SUPABASE_URL = 'https://kjivdgfacwvdcfaxdedb.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaXZkZ2ZhY3d2ZGNmYXhkZWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODY1MDksImV4cCI6MjA4NjU2MjUwOX0.3SW2jU-Cu3i4Ms5yIFjaDZZ8DQCVI78Rc0ZIyFeFaXo';
 
-        // دالة عرض النتائج
-        function showResult(text, type = 'info') {
-            const resultDiv = document.getElementById('result');
-            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
-            resultDiv.innerHTML = `<div class="${className}">${text}</div>`;
-            console.log(text);
+        let supabase = null;
+
+        // دالة التسجيل
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#94a3b8';
+            logDiv.innerHTML = `<div style="color: ${color}">[${time}] ${message}</div>` + logDiv.innerHTML;
         }
 
-        // دالة الاتصال بـ Supabase (بدون مكتبة)
-        async function fetchFromSupabase(table) {
+        // تهيئة Supabase
+        async function initSupabase() {
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    const error = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${error}`);
+                if (!supabase) {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    addLog('✅ تم إنشاء عميل Supabase', 'success');
                 }
-                
-                return await response.json();
-            } catch (error) {
-                throw error;
+                return supabase;
+            } catch (e) {
+                addLog('❌ خطأ في إنشاء العميل: ' + e.message, 'error');
+                return null;
             }
         }
 
         // 1. فحص الاتصال
         async function testConnection() {
-            showResult('🔄 جاري فحص الاتصال...', 'info');
-            
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-                
-                if (response.ok) {
-                    showResult('✅ الاتصال ناجح! قاعدة البيانات شغالة', 'success');
-                } else {
-                    showResult(`❌ فشل الاتصال: ${response.status}`, 'error');
-                }
-            } catch (error) {
-                showResult(`❌ خطأ في الاتصال: ${error.message}`, 'error');
-            }
-        }
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.innerHTML = '🔄 جاري الفحص...';
+            addLog('بدء فحص الاتصال...');
 
-        // 2. عرض المستخدمين
-        async function testUsers() {
-            showResult('🔄 جلب المستخدمين...', 'info');
-            
             try {
-                const users = await fetchFromSupabase('users');
-                
-                if (!users || users.length === 0) {
-                    showResult('⚠️ لا يوجد مستخدمين في قاعدة البيانات', 'info');
-                } else {
-                    let result = '✅ المستخدمين:\n\n';
-                    users.forEach(user => {
-                        result += `👤 ${user.username} / ${user.password}`;
-                        if (user.is_admin) result += ' (👑 مشرف)';
-                        result += `\n   📧 ${user.email}`;
-                        result += `\n   💰 ${user.balance || 0}$\n\n`;
-                    });
-                    showResult(result, 'success');
-                }
-            } catch (error) {
-                if (error.message.includes('404')) {
-                    showResult('❌ جدول users غير موجود! يجب إنشاء الجداول أولاً', 'error');
-                } else if (error.message.includes('401') || error.message.includes('403')) {
-                    showResult('❌ مشكلة في الصلاحيات (RLS) - اضغط على زر التنظيف', 'error');
-                } else {
-                    showResult(`❌ خطأ: ${error.message}`, 'error');
-                }
-            }
-        }
+                const client = await initSupabase();
+                if (!client) throw new Error('فشل إنشاء العميل');
 
-        // 3. عرض الباقات
-        async function testPackages() {
-            showResult('🔄 جلب الباقات...', 'info');
-            
-            try {
-                const packages = await fetchFromSupabase('packages');
-                
-                if (!packages || packages.length === 0) {
-                    showResult('⚠️ لا يوجد باقات في قاعدة البيانات', 'info');
-                } else {
-                    let result = '✅ الباقات:\n\n';
-                    packages.forEach(pkg => {
-                        result += `📦 ${pkg.name}\n`;
-                        result += `   💰 ${pkg.price}$\n`;
-                        result += `   📈 ربح: ${pkg.profit || 2.5}%\n\n`;
-                    });
-                    showResult(result, 'success');
-                }
-            } catch (error) {
-                if (error.message.includes('404')) {
-                    showResult('❌ جدول packages غير موجود!', 'error');
-                } else {
-                    showResult(`❌ خطأ: ${error.message}`, 'error');
-                }
-            }
-        }
+                // اختبار الاتصال بجدول packages
+                const { data, error } = await client
+                    .from('packages')
+                    .select('count', { count: 'exact', head: true });
 
-        // 4. تجربة تسجيل الدخول
-        async function testLogin() {
-            showResult('🔄 محاولة تسجيل الدخول...', 'info');
-            
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/users?username=eq.admin&password=eq.admin123&select=*`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-                
-                const users = await response.json();
-                
-                if (users && users.length > 0) {
-                    const user = users[0];
-                    showResult(`✅ تسجيل الدخول ناجح!\n👤 ${user.name}\n💰 الرصيد: ${user.balance || 0}$`, 'success');
-                    
-                    // حفظ في localStorage
-                    localStorage.setItem('current_user', JSON.stringify(user));
-                } else {
-                    // جرب ahmed
-                    const response2 = await fetch(`${SUPABASE_URL}/rest/v1/users?username=eq.ahmed&password=eq.123456&select=*`, {
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`
-                        }
-                    });
-                    const users2 = await response2.json();
-                    
-                    if (users2 && users2.length > 0) {
-                        showResult(`✅ تسجيل الدخول ناجح!\n👤 ${users2[0].name}`, 'success');
-                        localStorage.setItem('current_user', JSON.stringify(users2[0]));
+                if (error) {
+                    if (error.code === '42P01') {
+                        throw new Error('جدول packages غير موجود - يجب إنشاء الجداول أولاً');
+                    } else if (error.code === '42501') {
+                        throw new Error('خطأ في الصلاحيات (RLS)');
                     } else {
-                        showResult('❌ لا يوجد مستخدم admin أو ahmed في قاعدة البيانات', 'error');
+                        throw new Error(error.message);
                     }
                 }
-            } catch (error) {
-                showResult(`❌ خطأ: ${error.message}`, 'error');
+
+                resultDiv.innerHTML = `
+                    <div style="color: #10b981;">✅ الاتصال ناجح!</div>
+                    <div style="margin-top: 10px;">✅ Supabase متصل وجاهز للعمل</div>
+                `;
+                addLog('✅ الاتصال ناجح', 'success');
+
+            } catch (e) {
+                resultDiv.innerHTML = `<div style="color: #ef4444;">❌ خطأ: ${e.message}</div>`;
+                addLog('❌ فشل الاتصال: ' + e.message, 'error');
             }
         }
 
-        // 5. تنظيف التخزين
-        function clearStorage() {
+        // 2. فحص الباقات
+        async function testPackages() {
+            const resultDiv = document.getElementById('packages-result');
+            resultDiv.innerHTML = '🔄 جاري جلب الباقات...';
+            addLog('بدء جلب الباقات...');
+
+            try {
+                const client = await initSupabase();
+                if (!client) throw new Error('فشل إنشاء العميل');
+
+                // جلب الباقات
+                const { data, error } = await client
+                    .from('packages')
+                    .select('*');
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    resultDiv.innerHTML = `
+                        <div style="color: #f59e0b;">⚠️ لا توجد باقات في قاعدة البيانات</div>
+                        <div style="margin-top: 10px;">اضغط على "إضافة الباقات الأساسية" لحل المشكلة</div>
+                    `;
+                    addLog('⚠️ لا توجد باقات', 'warning');
+                    return;
+                }
+
+                let html = `<div style="color: #10b981;">✅ تم العثور على ${data.length} باقات:</div>`;
+                data.forEach((pkg, index) => {
+                    html += `
+                        <div class="package-box">
+                            <div class="package-name">${pkg.name || 'بدون اسم'}</div>
+                            <div class="package-price">💰 ${pkg.price || 0}$</div>
+                            <div style="margin-top: 5px; color: #94a3b8;">
+                                📊 الفئة: ${pkg.category || 'غير محددة'}<br>
+                                📈 الربح: ${pkg.profit || 2.5}%<br>
+                                🆔 ID: ${pkg.id || 'لا يوجد'}
+                            </div>
+                        </div>
+                    `;
+                });
+                resultDiv.innerHTML = html;
+                addLog(`✅ تم جلب ${data.length} باقات`, 'success');
+
+            } catch (e) {
+                resultDiv.innerHTML = `<div style="color: #ef4444;">❌ خطأ: ${e.message}</div>`;
+                addLog('❌ فشل جلب الباقات: ' + e.message, 'error');
+            }
+        }
+
+        // 3. إضافة الباقات الأساسية
+        async function fixPackages() {
+            const resultDiv = document.getElementById('fix-result');
+            resultDiv.innerHTML = '🔄 جاري إضافة الباقات...';
+            addLog('بدء إضافة الباقات...');
+
+            try {
+                const client = await initSupabase();
+                if (!client) throw new Error('فشل إنشاء العميل');
+
+                // حذف الباقات القديمة
+                await client.from('packages').delete().neq('id', '0');
+
+                // إضافة الباقات الجديدة
+                const packages = [
+                    {
+                        id: '11111111-1111-1111-1111-111111111111',
+                        name: 'الباقة الفضية',
+                        price: 500,
+                        profit: 2.5,
+                        daily_profit: 12.5,
+                        tasks: 5,
+                        duration: 30,
+                        category: 'standard',
+                        description: 'الباقة المثالية للمبتدئين',
+                        status: 'active'
+                    },
+                    {
+                        id: '22222222-2222-2222-2222-222222222222',
+                        name: 'الباقة الذهبية',
+                        price: 1000,
+                        profit: 2.5,
+                        daily_profit: 25,
+                        tasks: 5,
+                        duration: 30,
+                        category: 'premium',
+                        description: 'الباقة الأكثر طلباً',
+                        status: 'active'
+                    },
+                    {
+                        id: '33333333-3333-3333-3333-333333333333',
+                        name: 'الباقة الماسية',
+                        price: 5000,
+                        profit: 2.5,
+                        daily_profit: 125,
+                        tasks: 5,
+                        duration: 30,
+                        category: 'vip',
+                        description: 'للحصول على أفضل العوائد',
+                        status: 'active'
+                    }
+                ];
+
+                const { error } = await client
+                    .from('packages')
+                    .insert(packages);
+
+                if (error) throw error;
+
+                resultDiv.innerHTML = '<div style="color: #10b981;">✅ تم إضافة الباقات بنجاح!</div>';
+                addLog('✅ تم إضافة الباقات', 'success');
+
+                // عرض الباقات المضافة
+                await testPackages();
+
+            } catch (e) {
+                resultDiv.innerHTML = `<div style="color: #ef4444;">❌ خطأ: ${e.message}</div>`;
+                addLog('❌ فشل إضافة الباقات: ' + e.message, 'error');
+            }
+        }
+
+        // 4. مسح الكاش
+        function clearCache() {
             localStorage.clear();
             sessionStorage.clear();
-            showResult('✅ تم تنظيف localStorage و sessionStorage', 'success');
+            addLog('✅ تم مسح التخزين المحلي', 'success');
+            alert('✅ تم مسح الكاش. أعد تحميل الصفحة.');
+            location.reload();
         }
 
-        // تشغيل فحص الاتصال تلقائياً عند فتح الصفحة
+        // تشغيل فحص تلقائي عند تحميل الصفحة
         window.onload = function() {
             setTimeout(testConnection, 500);
         };
