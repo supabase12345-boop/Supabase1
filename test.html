@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار Supabase</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>🔍 اختبار Supabase - بسيط</title>
     <style>
         body {
             background: #0f172a;
@@ -12,193 +11,234 @@
             font-family: Arial;
             padding: 20px;
             text-align: center;
+            direction: rtl;
+        }
+        h1 {
+            color: #7c3aed;
+            font-size: 24px;
         }
         button {
             background: #7c3aed;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 15px;
             border-radius: 10px;
             font-size: 18px;
-            margin: 10px;
-            width: 90%;
+            margin: 10px 0;
+            width: 100%;
             cursor: pointer;
+            font-weight: bold;
         }
-        .result {
+        .result-box {
             background: #1e293b;
-            padding: 20px;
+            border: 2px solid #7c3aed;
             border-radius: 10px;
+            padding: 20px;
             margin-top: 20px;
             text-align: right;
-            font-size: 14px;
+            min-height: 100px;
+            font-size: 16px;
+            direction: ltr;
         }
-        .success { color: #10b981; }
-        .error { color: #ef4444; }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .info {
+            color: #3b82f6;
+        }
+        hr {
+            border: 1px solid #334155;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
     <h1>🔍 اختبار Supabase</h1>
-    <p>اضغط على الأزرار للفحص</p>
+    <p>اضغط على الأزرار للفحص المباشر</p>
 
-    <button onclick="testConnection()">📡 1. فحص الاتصال</button>
-    <button onclick="testUsers()">👥 2. فحص المستخدمين</button>
-    <button onclick="testPackages()">📦 3. فحص الباقات</button>
-    <button onclick="testLogin()">🔑 4. تجربة تسجيل الدخول</button>
-    <button onclick="clearAll()">🧹 تنظيف localStorage</button>
+    <button onclick="testConnection()">📡 1. فحص الاتصال بقاعدة البيانات</button>
+    <button onclick="testUsers()">👥 2. عرض جميع المستخدمين</button>
+    <button onclick="testPackages()">📦 3. عرض جميع الباقات</button>
+    <button onclick="testLogin()">🔑 4. تجربة تسجيل الدخول (admin/admin123)</button>
+    <button onclick="clearStorage()">🧹 5. تنظيف التخزين المحلي</button>
 
-    <div class="result" id="result">
-        النتائج تظهر هنا...
+    <hr>
+
+    <div class="result-box" id="result">
+        ⏳ النتائج تظهر هنا...
     </div>
 
     <script>
-        // بيانات Supabase
+        // بيانات Supabase مباشرة بدون مكتبة
         const SUPABASE_URL = 'https://kfwbcewtnfoofllhxron.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2JjZXd0bmZvb2ZsbGh4cm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEwMzksImV4cCI6MjA4NjQ5NzAzOX0.Mgf7Dg4Ji3eKHQPz3SUGTfwSfsl7anYneA4ZPIYgbIU';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2JjZXd0bmZvb2ZsbGh4cm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEwMzksImV4cCI6MjA4NjQ5NzAzOX0.Mgf7Dg4Ji3eKHQPz3SUGTfwSfsl7anYneA4ZPIYgbIU';
 
-        let supabase = null;
-
-        function showResult(text, isError = false) {
-            document.getElementById('result').innerHTML = 
-                `<div class="${isError ? 'error' : 'success'}">${text}</div>`;
+        // دالة عرض النتائج
+        function showResult(text, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            resultDiv.innerHTML = `<div class="${className}">${text}</div>`;
+            console.log(text);
         }
 
-        // تهيئة الاتصال
-        async function initSupabase() {
+        // دالة الاتصال بـ Supabase (بدون مكتبة)
+        async function fetchFromSupabase(table) {
             try {
-                if (!supabase) {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${error}`);
                 }
-                return true;
-            } catch (e) {
-                showResult('❌ خطأ: ' + e.message, true);
-                return false;
+                
+                return await response.json();
+            } catch (error) {
+                throw error;
             }
         }
 
         // 1. فحص الاتصال
         async function testConnection() {
-            showResult('🔄 جاري فحص الاتصال...');
-            
-            if (!await initSupabase()) return;
+            showResult('🔄 جاري فحص الاتصال...', 'info');
             
             try {
-                const { error } = await supabase.from('users').select('count', { count: 'exact', head: true });
-                
-                if (error) {
-                    if (error.code === '42P01') {
-                        showResult('❌ الجداول غير موجودة! يجب إنشاء الجداول أولاً.', true);
-                    } else if (error.code === '42501') {
-                        showResult('❌ مشكلة في الصلاحيات (RLS). اضغط على زر تنظيف localStorage ثم جرب.', true);
-                    } else {
-                        showResult('❌ خطأ: ' + error.message, true);
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
+                });
+                
+                if (response.ok) {
+                    showResult('✅ الاتصال ناجح! قاعدة البيانات شغالة', 'success');
                 } else {
-                    showResult('✅ الاتصال ناجح! قاعدة البيانات شغالة.');
+                    showResult(`❌ فشل الاتصال: ${response.status}`, 'error');
                 }
-            } catch (e) {
-                showResult('❌ خطأ: ' + e.message, true);
+            } catch (error) {
+                showResult(`❌ خطأ في الاتصال: ${error.message}`, 'error');
             }
         }
 
-        // 2. فحص المستخدمين
+        // 2. عرض المستخدمين
         async function testUsers() {
-            showResult('🔄 جلب المستخدمين...');
-            
-            if (!await initSupabase()) return;
+            showResult('🔄 جلب المستخدمين...', 'info');
             
             try {
-                const { data, error } = await supabase.from('users').select('*');
+                const users = await fetchFromSupabase('users');
                 
-                if (error) {
-                    showResult('❌ خطأ: ' + error.message, true);
-                } else if (!data || data.length === 0) {
-                    showResult('⚠️ لا يوجد مستخدمين في قاعدة البيانات.');
+                if (!users || users.length === 0) {
+                    showResult('⚠️ لا يوجد مستخدمين في قاعدة البيانات', 'info');
                 } else {
-                    let text = '✅ المستخدمين:\n';
-                    data.forEach(u => {
-                        text += `\n👤 ${u.username} | كلمة: ${u.password} | ${u.is_admin ? 'مشرف' : 'مستخدم'}`;
+                    let result = '✅ المستخدمين:\n\n';
+                    users.forEach(user => {
+                        result += `👤 ${user.username} / ${user.password}`;
+                        if (user.is_admin) result += ' (👑 مشرف)';
+                        result += `\n   📧 ${user.email}`;
+                        result += `\n   💰 ${user.balance || 0}$\n\n`;
                     });
-                    showResult(text);
+                    showResult(result, 'success');
                 }
-            } catch (e) {
-                showResult('❌ خطأ: ' + e.message, true);
+            } catch (error) {
+                if (error.message.includes('404')) {
+                    showResult('❌ جدول users غير موجود! يجب إنشاء الجداول أولاً', 'error');
+                } else if (error.message.includes('401') || error.message.includes('403')) {
+                    showResult('❌ مشكلة في الصلاحيات (RLS) - اضغط على زر التنظيف', 'error');
+                } else {
+                    showResult(`❌ خطأ: ${error.message}`, 'error');
+                }
             }
         }
 
-        // 3. فحص الباقات
+        // 3. عرض الباقات
         async function testPackages() {
-            showResult('🔄 جلب الباقات...');
-            
-            if (!await initSupabase()) return;
+            showResult('🔄 جلب الباقات...', 'info');
             
             try {
-                const { data, error } = await supabase.from('packages').select('*');
+                const packages = await fetchFromSupabase('packages');
                 
-                if (error) {
-                    showResult('❌ خطأ: ' + error.message, true);
-                } else if (!data || data.length === 0) {
-                    showResult('⚠️ لا يوجد باقات في قاعدة البيانات.');
+                if (!packages || packages.length === 0) {
+                    showResult('⚠️ لا يوجد باقات في قاعدة البيانات', 'info');
                 } else {
-                    let text = '✅ الباقات:\n';
-                    data.forEach(p => {
-                        text += `\n📦 ${p.name} | ${p.price}$`;
+                    let result = '✅ الباقات:\n\n';
+                    packages.forEach(pkg => {
+                        result += `📦 ${pkg.name}\n`;
+                        result += `   💰 ${pkg.price}$\n`;
+                        result += `   📈 ربح: ${pkg.profit || 2.5}%\n\n`;
                     });
-                    showResult(text);
+                    showResult(result, 'success');
                 }
-            } catch (e) {
-                showResult('❌ خطأ: ' + e.message, true);
+            } catch (error) {
+                if (error.message.includes('404')) {
+                    showResult('❌ جدول packages غير موجود!', 'error');
+                } else {
+                    showResult(`❌ خطأ: ${error.message}`, 'error');
+                }
             }
         }
 
         // 4. تجربة تسجيل الدخول
         async function testLogin() {
-            showResult('🔄 محاولة تسجيل الدخول...');
-            
-            if (!await initSupabase()) return;
+            showResult('🔄 محاولة تسجيل الدخول...', 'info');
             
             try {
-                // جرب admin
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', 'admin')
-                    .eq('password', 'admin123')
-                    .maybeSingle();
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/users?username=eq.admin&password=eq.admin123&select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
                 
-                if (error) {
-                    showResult('❌ خطأ: ' + error.message, true);
-                } else if (data) {
-                    showResult(`✅ تسجيل دخول ناجح! مرحباً ${data.name} (مشرف)`);
+                const users = await response.json();
+                
+                if (users && users.length > 0) {
+                    const user = users[0];
+                    showResult(`✅ تسجيل الدخول ناجح!\n👤 ${user.name}\n💰 الرصيد: ${user.balance || 0}$`, 'success');
                     
                     // حفظ في localStorage
-                    localStorage.setItem('current_user', JSON.stringify(data));
+                    localStorage.setItem('current_user', JSON.stringify(user));
                 } else {
                     // جرب ahmed
-                    const { data: data2 } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('username', 'ahmed')
-                        .eq('password', '123456')
-                        .maybeSingle();
+                    const response2 = await fetch(`${SUPABASE_URL}/rest/v1/users?username=eq.ahmed&password=eq.123456&select=*`, {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+                    const users2 = await response2.json();
                     
-                    if (data2) {
-                        showResult(`✅ تسجيل دخول ناجح! مرحباً ${data2.name}`);
-                        localStorage.setItem('current_user', JSON.stringify(data2));
+                    if (users2 && users2.length > 0) {
+                        showResult(`✅ تسجيل الدخول ناجح!\n👤 ${users2[0].name}`, 'success');
+                        localStorage.setItem('current_user', JSON.stringify(users2[0]));
                     } else {
-                        showResult('❌ لا يوجد مستخدمين. يجب إضافتهم أولاً.', true);
+                        showResult('❌ لا يوجد مستخدم admin أو ahmed في قاعدة البيانات', 'error');
                     }
                 }
-            } catch (e) {
-                showResult('❌ خطأ: ' + e.message, true);
+            } catch (error) {
+                showResult(`❌ خطأ: ${error.message}`, 'error');
             }
         }
 
-        // تنظيف
-        function clearAll() {
+        // 5. تنظيف التخزين
+        function clearStorage() {
             localStorage.clear();
             sessionStorage.clear();
-            showResult('✅ تم تنظيف التخزين المحلي. جرب تسجيل الدخول الآن.');
+            showResult('✅ تم تنظيف localStorage و sessionStorage', 'success');
         }
+
+        // تشغيل فحص الاتصال تلقائياً عند فتح الصفحة
+        window.onload = function() {
+            setTimeout(testConnection, 500);
+        };
     </script>
 </body>
 </html>
