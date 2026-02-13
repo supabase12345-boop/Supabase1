@@ -1438,12 +1438,18 @@
             // التحقق من المستخدم الحالي
             const savedUser = localStorage.getItem('current_user');
             if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                const user = await window.sharedData.getUserById(currentUser.id);
-                if (user) {
-                    currentUser = user;
-                    localStorage.setItem('current_user', JSON.stringify(user));
-                    updateUIForLoggedInUser();
+                try {
+                    const parsedUser = JSON.parse(savedUser);
+                    const user = await window.sharedData.getUserById(parsedUser.id);
+                    if (user) {
+                        currentUser = user;
+                        localStorage.setItem('current_user', JSON.stringify(user));
+                        updateUIForLoggedInUser();
+                    } else {
+                        localStorage.removeItem('current_user');
+                    }
+                } catch (e) {
+                    localStorage.removeItem('current_user');
                 }
             }
             
@@ -1472,6 +1478,7 @@
                         <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
                             <i class="fas fa-box-open" style="font-size: 60px; color: #4b5563; margin-bottom: 20px;"></i>
                             <h3 style="color: #94a3b8;">لا توجد باقات متاحة حالياً</h3>
+                            <p style="color: #94a3b8; margin-top: 20px;">يرجى إضافة باقات من لوحة الإدارة</p>
                         </div>
                     `;
                     return;
@@ -1519,6 +1526,7 @@
                     <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 60px; color: #ef4444; margin-bottom: 20px;"></i>
                         <h3 style="color: #ef4444;">حدث خطأ في تحميل الباقات</h3>
+                        <p style="color: #94a3b8; margin-top: 10px;">${error.message}</p>
                         <button class="btn btn-primary mt-4" onclick="location.reload()">
                             <i class="fas fa-redo"></i> إعادة تحميل
                         </button>
@@ -1532,7 +1540,16 @@
             try {
                 const stats = await window.sharedData.getDashboardStats();
                 document.getElementById('statUsers').textContent = stats.totalUsers || '0';
-                document.getElementById('statDeposits').textContent = `$${stats.totalDeposits?.toFixed(0) || '0'}+`;
+                
+                // تنسيق المبلغ
+                const deposits = stats.totalDeposits || 0;
+                if (deposits >= 1000000) {
+                    document.getElementById('statDeposits').textContent = `$${(deposits/1000000).toFixed(1)}M+`;
+                } else if (deposits >= 1000) {
+                    document.getElementById('statDeposits').textContent = `$${(deposits/1000).toFixed(1)}K+`;
+                } else {
+                    document.getElementById('statDeposits').textContent = `$${deposits}+`;
+                }
             } catch (error) {
                 console.error('خطأ في تحميل الإحصائيات:', error);
             }
@@ -1553,7 +1570,7 @@
 
         // ========== تطبيق كود الإحالة ==========
         function applyReferralCode() {
-            const code = document.getElementById('quickReferralCode').value.trim();
+            const code = document.getElementById('quickReferralCode').value.trim().toUpperCase();
             if (!code) {
                 showNotification('❌ يرجى إدخال كود الإحالة', 'error');
                 return;
@@ -1589,26 +1606,30 @@
                 return;
             }
             
-            const pkg = await window.sharedData.getPackageById(packageId);
-            if (!pkg) {
-                showNotification('❌ الباقة غير متاحة', 'error');
-                return;
+            try {
+                const pkg = await window.sharedData.getPackageById(packageId);
+                if (!pkg) {
+                    showNotification('❌ الباقة غير متاحة', 'error');
+                    return;
+                }
+                
+                selectedPackage = pkg;
+                
+                document.getElementById('selectedPackageName').textContent = pkg.name;
+                document.getElementById('selectedPackagePrice').textContent = pkg.price + '$';
+                document.getElementById('selectedPackageDaily').textContent = 
+                    `+${(pkg.price * (pkg.profit || 2.5) / 100).toFixed(2)}$ يومياً`;
+                
+                if (currentUser.referral_code) {
+                    document.getElementById('referralCodeSection').style.display = 'block';
+                    document.getElementById('userReferralCodeDisplay').value = currentUser.referral_code;
+                }
+                
+                document.getElementById('paymentModal').classList.add('active');
+                removeImage();
+            } catch (error) {
+                showNotification('❌ خطأ في تحميل الباقة', 'error');
             }
-            
-            selectedPackage = pkg;
-            
-            document.getElementById('selectedPackageName').textContent = pkg.name;
-            document.getElementById('selectedPackagePrice').textContent = pkg.price + '$';
-            document.getElementById('selectedPackageDaily').textContent = 
-                `+${(pkg.price * (pkg.profit || 2.5) / 100).toFixed(2)}$ يومياً`;
-            
-            if (currentUser.referral_code) {
-                document.getElementById('referralCodeSection').style.display = 'block';
-                document.getElementById('userReferralCodeDisplay').value = currentUser.referral_code;
-            }
-            
-            document.getElementById('paymentModal').classList.add('active');
-            removeImage();
         }
 
         // ========== تقديم طلب الدفع ==========
@@ -1647,7 +1668,7 @@
                 
             } catch (error) {
                 console.error('خطأ في تقديم الطلب:', error);
-                showNotification('❌ فشل تقديم الطلب. حاول مرة أخرى.', 'error');
+                showNotification('❌ فشل تقديم الطلب: ' + error.message, 'error');
             }
         }
 
@@ -1660,6 +1681,13 @@
             document.getElementById('userAvatar').textContent = currentUser.name?.charAt(0).toUpperCase() || 'م';
             document.getElementById('dropdownName').textContent = currentUser.name || 'مستخدم';
             document.getElementById('dropdownEmail').textContent = currentUser.email || '';
+            
+            if (currentUser.package) {
+                document.getElementById('dropdownPackage').innerHTML = `<span class="badge" style="background: var(--primary);">${currentUser.package.name}</span>`;
+            } else {
+                document.getElementById('dropdownPackage').innerHTML = `<span style="color: #94a3b8;">لا توجد باقة</span>`;
+            }
+            
             document.getElementById('nonUserReferral').style.display = 'none';
             
             if (currentUser.referral_code) {
@@ -1695,6 +1723,13 @@
             document.getElementById('authModal').classList.remove('active');
             document.getElementById('loginUsername').value = '';
             document.getElementById('loginPassword').value = '';
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPhone').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerConfirmPassword').value = '';
+            document.getElementById('registerReferral').value = '';
         }
 
         function showTab(tabName) {
@@ -1731,12 +1766,12 @@
             e.preventDefault();
             
             const name = document.getElementById('registerName').value.trim();
-            const username = document.getElementById('registerUsername').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
+            const username = document.getElementById('registerUsername').value.trim().toLowerCase();
+            const email = document.getElementById('registerEmail').value.trim().toLowerCase();
             const phone = document.getElementById('registerPhone').value.trim();
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            const referralCode = document.getElementById('registerReferral').value.trim();
+            let referralCode = document.getElementById('registerReferral').value.trim().toUpperCase();
             
             if (!name || !username || !email || !phone || !password || !confirmPassword) {
                 showNotification('❌ يرجى ملء جميع الحقول المطلوبة', 'error');
@@ -1753,23 +1788,53 @@
                 return;
             }
             
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('❌ البريد الإلكتروني غير صالح', 'error');
+                return;
+            }
+            
+            if (username.includes(' ')) {
+                showNotification('❌ اسم المستخدم يجب ألا يحتوي على مسافات', 'error');
+                return;
+            }
+            
+            if (phone.replace(/\D/g, '').length < 10) {
+                showNotification('❌ رقم الهاتف غير صالح (يجب أن يكون 10 أرقام على الأقل)', 'error');
+                return;
+            }
+            
             try {
+                // التحقق من كود الإحالة المخزن
+                if (!referralCode) {
+                    const pending = sessionStorage.getItem('pending_referral');
+                    if (pending) referralCode = pending;
+                }
+                
                 const userData = {
-                    name, username, email, phone, password, confirmPassword,
-                    referralCode: referralCode || sessionStorage.getItem('pending_referral')
+                    name, 
+                    username, 
+                    email, 
+                    phone, 
+                    password, 
+                    confirmPassword,
+                    referralCode: referralCode
                 };
                 
-                const result = await window.app.register(userData);
+                const user = await window.sharedData.registerUser(userData);
                 
-                if (result.success) {
-                    currentUser = result.user;
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('current_user', JSON.stringify(user));
+                    updateUIForLoggedInUser();
                     closeAuthModal();
-                    if (result.hasReferral) {
+                    
+                    if (referralCode) {
                         showNotification('🎉 تم إنشاء الحساب! ستحصل على 20$ عند تفعيل أول باقة', 'success');
+                        sessionStorage.removeItem('pending_referral');
                     } else {
                         showNotification('🎉 تم إنشاء حسابك بنجاح', 'success');
                     }
-                    sessionStorage.removeItem('pending_referral');
                 }
             } catch (error) {
                 showNotification('❌ ' + error.message, 'error');
@@ -1778,10 +1843,18 @@
 
         // ========== دوال مساعدة ==========
         function copyText(text) {
+            if (!text) return;
             navigator.clipboard.writeText(text).then(() => {
                 showNotification('✅ تم النسخ إلى الحافظة', 'success');
             }).catch(() => {
-                showNotification('❌ حدث خطأ في النسخ', 'error');
+                // طريقة بديلة
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('✅ تم النسخ إلى الحافظة', 'success');
             });
         }
 
@@ -1840,6 +1913,8 @@
             const uploadContainer = document.getElementById('uploadContainer');
             const fileInput = document.getElementById('fileInput');
             
+            if (!uploadContainer || !fileInput) return;
+            
             uploadContainer.addEventListener('click', () => fileInput.click());
             
             uploadContainer.addEventListener('dragover', (e) => {
@@ -1886,6 +1961,7 @@
                 document.getElementById('previewImage').src = selectedImage;
                 document.getElementById('fileName').textContent = file.name;
                 document.getElementById('uploadPreview').style.display = 'block';
+                document.getElementById('uploadContainer').style.borderColor = 'var(--success)';
                 showNotification('✅ تم رفع الصورة بنجاح', 'success');
             };
             reader.readAsDataURL(file);
@@ -1897,6 +1973,7 @@
             document.getElementById('fileName').textContent = '';
             document.getElementById('uploadPreview').style.display = 'none';
             document.getElementById('fileInput').value = '';
+            document.getElementById('uploadContainer').style.borderColor = 'rgba(124,58,237,0.3)';
         }
 
         // ========== نافذة الدفع ==========
@@ -1909,6 +1986,8 @@
         // ========== الإشعارات ==========
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
+            if (!notification) return;
+            
             const icon = type === 'success' ? '✅' : 
                         type === 'error' ? '❌' : 
                         type === 'warning' ? '⚠️' : 'ℹ️';
@@ -1947,6 +2026,7 @@
                         if (user) {
                             currentUser = user;
                             localStorage.setItem('current_user', JSON.stringify(user));
+                            updateUIForLoggedInUser();
                         }
                     });
                 }
@@ -1956,7 +2036,12 @@
         }
 
         // ========== التهيئة ==========
-        document.addEventListener('DOMContentLoaded', initIndexPage);
+        document.addEventListener('DOMContentLoaded', function() {
+            initIndexPage().catch(error => {
+                console.error('خطأ في التهيئة:', error);
+                showNotification('❌ حدث خطأ في تحميل الصفحة', 'error');
+            });
+        });
     </script>
 </body>
 </html>
