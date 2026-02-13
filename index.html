@@ -7,6 +7,7 @@
     <!-- ملفات المشروع - بالترتيب -->
     <script src="supabase.js"></script>
     <script src="shared-data.js"></script>
+    <script src="app.js"></script>
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -1015,8 +1016,7 @@
         
         <!-- زر تسجيل الدخول -->
         <button class="login-btn" id="loginBtn">
-            <i class="fas fa-sign-in-alt"></i>
-            دخول / تسجيل
+            <i class="fas fa-sign-in-alt"></i> دخول / تسجيل
         </button>
         
         <!-- قائمة المستخدم -->
@@ -1300,8 +1300,7 @@
             <h1>استثمر بذكاء واربح يومياً</h1>
             <p>انضم إلى المنصة الاستثمارية الأسرع نمواً وابدأ رحلتك نحو النجاح المالي مع Elite Investors</p>
             <button class="btn btn-glow" onclick="openAuthModal()" style="width: auto; padding: 16px 48px;">
-                <i class="fas fa-rocket"></i>
-                ابدأ الآن
+                <i class="fas fa-rocket"></i> ابدأ الآن
             </button>
         </section>
         
@@ -1559,19 +1558,21 @@
             setupEventListeners();
         }
 
-        // ========== تحميل الباقات ==========
+        // ========== تحميل الباقات (معدلة) ==========
         async function loadPackages() {
             const packagesGrid = document.getElementById('packagesGrid');
             
             try {
+                // استخدام shared-data مباشرة
                 const packages = await window.sharedData.getAllPackages();
+                console.log('📦 الباقات المحملة:', packages);
                 
                 if (!packages || packages.length === 0) {
                     packagesGrid.innerHTML = `
-                        <div class="text-center" style="grid-column: 1/-1; padding: 60px;">
+                        <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
                             <i class="fas fa-box-open" style="font-size: 60px; color: #4b5563; margin-bottom: 20px;"></i>
                             <h3 style="color: #94a3b8;">لا توجد باقات متاحة حالياً</h3>
-                            <p class="text-muted mt-3">يرجى إضافة باقات من لوحة الإدارة</p>
+                            <p style="color: #94a3b8; margin-top: 20px;">يرجى إضافة باقات من لوحة الإدارة</p>
                         </div>
                     `;
                     return;
@@ -1592,7 +1593,7 @@
                                     ${pkg.price}$ <small>USDT</small>
                                 </div>
                             </div>
-                            ${pkg.description ? `<p class="text-center text-muted mb-4">${pkg.description}</p>` : ''}
+                            ${pkg.description ? `<p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">${pkg.description}</p>` : ''}
                             <ul class="package-features">
                                 <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>${dailyProfit}$</strong></li>
                                 <li><i class="fas fa-check-circle"></i> ${pkg.tasks || 5} مهمات يومية</li>
@@ -1612,9 +1613,10 @@
             } catch (error) {
                 console.error('❌ خطأ في تحميل الباقات:', error);
                 packagesGrid.innerHTML = `
-                    <div class="text-center" style="grid-column: 1/-1; padding: 60px;">
+                    <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 60px; color: #ef4444; margin-bottom: 20px;"></i>
                         <h3 style="color: #ef4444;">حدث خطأ في تحميل الباقات</h3>
+                        <p style="color: #94a3b8; margin-top: 10px;">${error.message}</p>
                         <button class="btn btn-primary mt-4" onclick="location.reload()">
                             <i class="fas fa-redo"></i> إعادة تحميل
                         </button>
@@ -1623,7 +1625,7 @@
             }
         }
 
-        // ========== تحميل إحصائيات المنصة ==========
+        // ========== تحميل إحصائيات المنصة (معدلة) ==========
         async function loadPlatformStats() {
             try {
                 const stats = await window.sharedData.getDashboardStats();
@@ -2123,15 +2125,7 @@
             setupImageUpload();
         }
 
-        // ========== التهيئة ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            initIndexPage().catch(error => {
-                console.error('خطأ في التهيئة:', error);
-                showNotification('❌ حدث خطأ في تحميل الصفحة', 'error');
-            });
-        });
-
-        // دوال مؤقتة للتوافق
+        // ========== دوال مؤقتة للتوافق ==========
         function handleLogin(e) {
             document.getElementById('loginForm').dispatchEvent(new Event('submit'));
         }
@@ -2145,6 +2139,41 @@
                 // already on home
             }
         }
+
+        // ========== التهيئة ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            initIndexPage().catch(error => {
+                console.error('خطأ في التهيئة:', error);
+                showNotification('❌ حدث خطأ في تحميل الصفحة', 'error');
+            });
+        });
+    </script>
+
+    <!-- كود التشخيص -->
+    <script>
+        (async function() {
+            console.log('🔍 فحص النظام...');
+            console.log('✅ sharedData موجود:', !!window.sharedData);
+            
+            try {
+                const packages = await window.sharedData.getAllPackages();
+                console.log('📦 عدد الباقات:', packages?.length || 0);
+                console.log('📦 الباقات:', packages);
+                
+                if (!packages || packages.length === 0) {
+                    console.warn('⚠️ لا توجد باقات في قاعدة البيانات');
+                }
+            } catch (error) {
+                console.error('❌ فشل جلب الباقات:', error);
+            }
+            
+            try {
+                const stats = await window.sharedData.getDashboardStats();
+                console.log('📊 إحصائيات:', stats);
+            } catch (error) {
+                console.error('❌ فشل جلب الإحصائيات:', error);
+            }
+        })();
     </script>
 </body>
 </html>
