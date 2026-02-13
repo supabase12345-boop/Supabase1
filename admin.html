@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <script src="shared-data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة المتقدمة - Elite Investors</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --admin-primary: #1e40af;
+            --admin-secondary: #3b82f6;
+            --admin-success: #059669;
+            --admin-warning: #d97706;
+            --admin-danger: #dc2626;
+            --admin-dark: #111827;
+            --admin-card: #1f2937;
+            --admin-text: #f3f4f6;
+            --admin-purple: #8b5cf6;
+            --admin-info: #0891b2;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--admin-dark);
+            color: var(--admin-text);
+        }
+        
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: var(--admin-dark);
+            border-left: 4px solid var(--admin-primary);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .sidebar-header h2 {
+            color: var(--admin-secondary);
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            color: #9ca3af;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--admin-secondary);
+            border-color: var(--admin-secondary);
+        }
+        
+        .sidebar-menu i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-menu .badge {
+            background: var(--admin-danger);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-right: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-right: 280px;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: var(--admin-card);
+            padding: 20px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--admin-card);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--admin-primary);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--admin-secondary);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-trend {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .trend-up { color: var(--admin-success); }
+        .trend-down { color: var(--admin-danger); }
+        
+        .admin-table {
+            background: var(--admin-card);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .admin-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th {
+            background: rgba(59, 130, 246, 0.2);
+            padding: 15px;
+            text-align: right;
+            border-bottom: 2px solid var(--admin-secondary);
+            font-weight: 600;
+        }
+        
+        .admin-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-table tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 0 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-primary { background: var(--admin-primary); color: white; }
+        .btn-success { background: var(--admin-success); color: white; }
+        .btn-warning { background: var(--admin-warning); color: white; }
+        .btn-danger { background: var(--admin-danger); color: white; }
+        .btn-purple { background: var(--admin-purple); color: white; }
+        .btn-info { background: var(--admin-info); color: white; }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--admin-secondary);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background: rgba(5, 150, 105, 0.2);
+            color: var(--admin-success);
+            border: 1px solid var(--admin-success);
+        }
+        
+        .status-pending {
+            background: rgba(217, 119, 6, 0.2);
+            color: var(--admin-warning);
+            border: 1px solid var(--admin-warning);
+        }
+        
+        .status-rejected {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--admin-danger);
+            border: 1px solid var(--admin-danger);
+        }
+        
+        .status-suspended {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+        
+        .status-banned {
+            background: rgba(220, 38, 38, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .search-box {
+            background: var(--admin-card);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--admin-secondary);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal-content {
+            background: var(--admin-card);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            border: 2px solid var(--admin-primary);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .modal-content.large {
+            max-width: 800px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3b8;
+        }
+        
+        .loading i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--admin-secondary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .badge {
+            background: var(--admin-primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        
+        .badge.success { background: var(--admin-success); }
+        .badge.warning { background: var(--admin-warning); }
+        .badge.danger { background: var(--admin-danger); }
+        .badge.purple { background: var(--admin-purple); }
+        
+        .referral-code {
+            background: linear-gradient(45deg, var(--admin-purple), #7c3aed);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin: 5px 0;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .referral-stats {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .commission-badge {
+            background: var(--admin-success);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        
+        .network-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 5px;
+            color: white;
+        }
+        
+        .trc20-tag { background: #14b8a6; }
+        .erc20-tag { background: #f59e0b; }
+        .bep20-tag { background: #8b5cf6; }
+        
+        .user-detail-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(59,130,246,0.2);
+        }
+        
+        .user-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, var(--admin-primary), var(--admin-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .info-label {
+            color: #9ca3af;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .info-value.success { color: var(--admin-success); }
+        .info-value.warning { color: var(--admin-warning); }
+        .info-value.danger { color: var(--admin-danger); }
+        .info-value.info { color: var(--admin-info); }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .chart-container {
+            background: var(--admin-card);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .chart-title {
+            margin-bottom: 20px;
+            color: var(--admin-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            left: 300px;
+            background: var(--admin-card);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--admin-primary);
+            font-size: 13px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .sync-status.online {
+            border-color: var(--admin-success);
+            color: var(--admin-success);
+        }
+        
+        .sync-status.offline {
+            border-color: var(--admin-danger);
+            color: var(--admin-danger);
+        }
+        
+        .admin-notification {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--admin-card);
+            color: white;
+            padding: 18px 30px;
+            border-radius: 12px;
+            border-right: 6px solid var(--admin-success);
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: slideInDown 0.3s ease;
+            min-width: 350px;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .admin-notification.error {
+            border-right-color: var(--admin-danger);
+        }
+        
+        .admin-notification.warning {
+            border-right-color: var(--admin-warning);
+        }
+        
+        @keyframes slideInDown {
+            from { transform: translate(-50%, -30px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+        
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .admin-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-table {
+                overflow-x: auto;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-detail-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .sync-status {
+                left: 20px;
+                bottom: 80px;
+            }
+        }
+        
+        .text-success { color: var(--admin-success); }
+        .text-warning { color: var(--admin-warning); }
+        .text-danger { color: var(--admin-danger); }
+        .text-info { color: var(--admin-info); }
+        .text-muted { color: #9ca3af; }
+        
+        .mt-2 { margin-top: 10px; }
+        .mt-3 { margin-top: 15px; }
+        .mt-4 { margin-top: 20px; }
+        .mb-2 { margin-bottom: 10px; }
+        .mb-3 { margin-bottom: 15px; }
+        .mb-4 { margin-bottom: 20px; }
+        
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        
+        .w-100 { width: 100%; }
+        
+        .d-flex { display: flex; }
+        .align-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 10px; }
+        .gap-3 { gap: 15px; }
+        .gap-4 { gap: 20px; }
+        
+        .flex-wrap { flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <div class="sync-status online" id="syncStatus">
+        <i class="fas fa-sync-alt fa-spin" style="display: none;" id="syncSpinner"></i>
+        <i class="fas fa-wifi" id="syncIcon"></i>
+        <span id="syncText">متصل بـ Supabase</span>
+    </div>
+
+    <div class="admin-container">
+        <!-- ========== الشريط الجانبي ========== -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-shield-alt"></i> لوحة الإدارة</h2>
+                <small style="color: #9ca3af;">Elite Investors v2.0</small>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" onclick="showSection('dashboard'); return false;">
+                    <i class="fas fa-tachometer-alt"></i> لوحة التحكم
+                    <span id="dashboardBadge" class="badge" style="display: none;">جديد</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('users'); return false;">
+                    <i class="fas fa-users-cog"></i> إدارة المستخدمين
+                    <span id="usersCount" class="badge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('packages'); return false;">
+                    <i class="fas fa-crown"></i> إدارة الباقات
+                    <span id="packagesCount" class="badge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('tasks'); return false;">
+                    <i class="fas fa-tasks"></i> إدارة المهام
+                    <span id="tasksCount" class="badge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('referrals'); return false;">
+                    <i class="fas fa-user-friends"></i> نظام الإحالة
+                    <span id="referralsCount" class="badge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('pending'); return false;">
+                    <i class="fas fa-clock"></i> الطلبات المعلقة
+                    <span id="pendingCount" class="badge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('subscriptions'); return false;">
+                    <i class="fas fa-shopping-cart"></i> الاشتراكات
+                    <span id="subscriptionsCount" class="badge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('withdrawals'); return false;">
+                    <i class="fas fa-money-bill-wave"></i> طلبات السحب
+                    <span id="withdrawalsCount" class="badge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showSection('transactions'); return false;">
+                    <i class="fas fa-exchange-alt"></i> جميع المعاملات
+                </a></li>
+                <li><a href="#" onclick="showSection('reports'); return false;">
+                    <i class="fas fa-chart-bar"></i> التقارير
+                </a></li>
+                <li><a href="#" onclick="showSection('settings'); return false;">
+                    <i class="fas fa-cog"></i> الإعدادات
+                </a></li>
+                <li><a href="index.html" style="color: var(--admin-danger);">
+                    <i class="fas fa-sign-out-alt"></i> العودة للموقع
+                </a></li>
+            </ul>
+        </div>
+        
+        <!-- ========== المحتوى الرئيسي ========== -->
+        <div class="main-content">
+            <!-- ========== قسم لوحة التحكم ========== -->
+            <div id="dashboard-section" class="section active">
+                <div class="admin-header">
+                    <h2><i class="fas fa-tachometer-alt"></i> نظرة عامة على النظام</h2>
+                    <div>
+                        <span id="currentTime" style="margin-left: 15px; color: #9ca3af;"></span>
+                        <button class="btn btn-sm btn-primary" onclick="refreshDashboard()">
+                            <i class="fas fa-sync-alt"></i> تحديث
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <p>إجمالي المستخدمين</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="stat-value" id="totalDeposits">0$</div>
+                        <p>إجمالي الإيداعات</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-friends"></i></div>
+                        <div class="stat-value" id="totalReferrals">0</div>
+                        <p>إجمالي الإحالات</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-value" id="pendingRequests">0</div>
+                        <p>طلبات بانتظار المراجعة</p>
+                    </div>
+                </div>
+                
+                <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="stat-card" style="padding: 15px;"><div class="stat-value success" id="activeUsers">0</div><p>مستخدمين نشطين</p></div>
+                    <div class="stat-card" style="padding: 15px;"><div class="stat-value warning" id="suspendedUsers">0</div><p>معلقين</p></div>
+                    <div class="stat-card" style="padding: 15px;"><div class="stat-value danger" id="bannedUsers">0</div><p>محظورين</p></div>
+                    <div class="stat-card" style="padding: 15px;"><div class="stat-value info" id="activeSubscriptions">0</div><p>باقات نشطة</p></div>
+                    <div class="stat-card" style="padding: 15px;"><div class="stat-value" id="totalWithdrawn">0$</div><p>إجمالي المسحوبات</p></div>
+                </div>
+                
+                <div class="chart-container">
+                    <h4 class="chart-title"><i class="fas fa-chart-pie"></i> توزيع الباقات</h4>
+                    <div id="packagesChart" style="height: 300px;"><canvas id="packagesChartCanvas"></canvas></div>
+                </div>
+            </div>
+            
+            <!-- ========== قسم إدارة المستخدمين ========== -->
+            <div id="users-section" class="section">
+                <div class="admin-header">
+                    <h2><i class="fas fa-users-cog"></i> إدارة المستخدمين</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-sm btn-primary" onclick="refreshUsers()"><i class="fas fa-sync-alt"></i> تحديث</button>
+                        <button class="btn btn-success" onclick="showAddUserModal()"><i class="fas fa-user-plus"></i> إضافة مستخدم</button>
+                    </div>
+                </div>
+                
+                <div class="admin-table">
+                    <table>
+                        <thead><tr><th>#</th><th>المستخدم</th><th>البريد</th><th>الباقة</th><th>الرصيد</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+                        <tbody id="usersTable"><tr><td colspan="7" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- ========== قسم الباقات ========== -->
+            <div id="packages-section" class="section">
+                <div class="admin-header">
+                    <h2><i class="fas fa-crown"></i> إدارة الباقات</h2>
+                    <button class="btn btn-success" onclick="showAddPackageModal()"><i class="fas fa-plus-circle"></i> إضافة باقة</button>
+                </div>
+                
+                <div class="admin-table">
+                    <table>
+                        <thead><tr><th>الاسم</th><th>السعر</th><th>الربح</th><th>الفئة</th><th>الإجراءات</th></tr></thead>
+                        <tbody id="packagesTable"><tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- ========== قسم الطلبات المعلقة ========== -->
+            <div id="pending-section" class="section">
+                <div class="admin-header">
+                    <h2><i class="fas fa-clock"></i> الطلبات المعلقة</h2>
+                    <button class="btn btn-sm btn-primary" onclick="refreshPending()"><i class="fas fa-sync-alt"></i> تحديث</button>
+                </div>
+                
+                <div class="admin-table">
+                    <table>
+                        <thead><tr><th>المستخدم</th><th>الباقة</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+                        <tbody id="pendingPackagesTable"><tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- ========== أقسام أخرى مبسطة ========== -->
+            <div id="tasks-section" class="section"><div class="admin-header"><h2>المهام</h2></div><div class="loading">جاري التطوير...</div></div>
+            <div id="referrals-section" class="section"><div class="admin-header"><h2>الإحالات</h2></div><div class="loading">جاري التطوير...</div></div>
+            <div id="subscriptions-section" class="section"><div class="admin-header"><h2>الاشتراكات</h2></div><div class="loading">جاري التطوير...</div></div>
+            <div id="withdrawals-section" class="section"><div class="admin-header"><h2>السحوبات</h2></div><div class="loading">جاري التطوير...</div></div>
+            <div id="transactions-section" class="section"><div class="admin-header"><h2>المعاملات</h2></div><div class="loading">جاري التطوير...</div></div>
+            <div id="reports-section" class="section"><div class="admin-header"><h2>التقارير</h2></div><div class="loading">جاري التطوير...</div></div>
+            <div id="settings-section" class="section"><div class="admin-header"><h2>الإعدادات</h2></div><div class="loading">جاري التطوير...</div></div>
+        </div>
+    </div>
+
+    <!-- ========== النوافذ المنبثقة ========== -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <h3>إضافة مستخدم</h3>
+            <p>نموذج إضافة مستخدم - قيد التطوير</p>
+            <button class="btn btn-danger" onclick="closeModal('addUserModal')">إغلاق</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="addPackageModal">
+        <div class="modal-content">
+            <h3>إضافة باقة</h3>
+            <p>نموذج إضافة باقة - قيد التطوير</p>
+            <button class="btn btn-danger" onclick="closeModal('addPackageModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <div class="admin-notification" id="notification" style="display:none;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ========== المتغيرات العامة ==========
+        let adminData = { users: [], packages: [], pendingPackages: [] };
+        let supabaseAvailable = false;
+        let packagesChart = null;
+
+        // ========== التحقق من Supabase ==========
+        function checkSupabase() {
+            supabaseAvailable = !!(window.supabaseClient && window.supabaseHelpers);
+            const status = document.getElementById('syncStatus');
+            if (status) {
+                status.className = supabaseAvailable ? 'sync-status online' : 'sync-status offline';
+                document.getElementById('syncIcon').className = supabaseAvailable ? 'fas fa-wifi' : 'fas fa-exclamation-triangle';
+                document.getElementById('syncText').textContent = supabaseAvailable ? 'متصل بـ Supabase' : 'تخزين محلي';
+            }
+        }
+
+        // ========== دالة التنقل بين الأقسام - المصححة ==========
+        function showSection(sectionId) {
+            // إخفاء جميع الأقسام
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // إزالة التفعيل من جميع روابط القائمة
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // تفعيل القسم المطلوب
+            const targetSection = document.getElementById(sectionId + '-section');
+            if (targetSection) {
+                targetSection.classList.add('active');
+            } else {
+                console.error('القسم غير موجود:', sectionId);
+                return;
+            }
+            
+            // تفعيل الرابط الحالي في القائمة
+            const activeLink = Array.from(document.querySelectorAll('.sidebar-menu a')).find(a => 
+                a.getAttribute('onclick')?.includes(sectionId)
+            );
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+            
+            // تحميل البيانات حسب القسم
+            if (sectionId === 'dashboard') {
+                loadDashboardData();
+            } else if (sectionId === 'users') {
+                loadUsers();
+            } else if (sectionId === 'packages') {
+                loadPackages();
+            } else if (sectionId === 'pending') {
+                loadPendingRequests();
+            }
+            
+            console.log('تم التبديل إلى القسم:', sectionId);
+        }
+
+        // ========== تحميل بيانات لوحة التحكم ==========
+        function loadDashboardData() {
+            updateStats();
+            updateCharts();
+        }
+
+        // ========== تحديث الإحصائيات ==========
+        function updateStats() {
+            const users = adminData.users || [];
+            const pending = adminData.pendingPackages || [];
+            
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalDeposits').textContent = '0$';
+            document.getElementById('totalReferrals').textContent = '0';
+            document.getElementById('pendingRequests').textContent = pending.length;
+            document.getElementById('activeUsers').textContent = users.filter(u => u.status === 'active').length;
+            document.getElementById('suspendedUsers').textContent = users.filter(u => u.status === 'suspended').length;
+            document.getElementById('bannedUsers').textContent = users.filter(u => u.status === 'banned').length;
+            document.getElementById('activeSubscriptions').textContent = users.filter(u => u.package).length;
+            document.getElementById('usersCount').textContent = users.length;
+            document.getElementById('pendingCount').textContent = pending.length;
+        }
+
+        // ========== تحميل المستخدمين ==========
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr>';
+            
+            let users = [];
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getAllUsers();
+                    if (result.success) users = result.data;
+                } catch (e) { console.log('⚠️ فشل جلب المستخدمين'); }
+            }
+            if (!users.length) users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            
+            adminData.users = users;
+            
+            if (!users.length) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading"><i class="fas fa-users"></i><p>لا يوجد مستخدمين</p></td></tr>';
+                return;
+            }
+            
+            let html = '';
+            users.slice(0, 10).forEach((user, i) => {
+                let statusClass = user.status === 'suspended' ? 'status-suspended' : user.status === 'banned' ? 'status-banned' : 'status-active';
+                let statusIcon = user.status === 'suspended' ? '🟠' : user.status === 'banned' ? '🔴' : '🟢';
+                
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td><strong>${user.name || '?'}</strong><br><small>@${user.username || ''}</small></td>
+                    <td>${user.email || ''}</td>
+                    <td>${user.package ? user.package.name : '—'}</td>
+                    <td>${(user.balance || 0).toFixed(2)}$</td>
+                    <td><span class="status-badge ${statusClass}">${statusIcon} ${user.status || 'active'}</span></td>
+                    <td><button class="btn btn-sm btn-info" onclick="alert('عرض المستخدم')"><i class="fas fa-eye"></i></button></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+            updateStats();
+        }
+
+        // ========== تحميل الباقات ==========
+        async function loadPackages() {
+            const tbody = document.getElementById('packagesTable');
+            tbody.innerHTML = '<tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr>';
+            
+            let packages = [];
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getAllPackages();
+                    if (result.success) packages = result.data;
+                } catch (e) { console.log('⚠️ فشل جلب الباقات'); }
+            }
+            if (!packages.length && window.sharedData) packages = await window.sharedData.getAllPackages();
+            
+            adminData.packages = packages;
+            document.getElementById('packagesCount').textContent = packages.length;
+            
+            if (!packages.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="loading"><i class="fas fa-box-open"></i><p>لا توجد باقات</p></td></tr>';
+                return;
+            }
+            
+            let html = '';
+            packages.forEach(pkg => {
+                html += `<tr>
+                    <td><strong>${pkg.name}</strong></td>
+                    <td>${pkg.price}$</td>
+                    <td>${pkg.profit_percentage || pkg.profit || 2.5}%</td>
+                    <td><span class="badge ${pkg.category === 'vip' ? 'warning' : pkg.category === 'premium' ? 'purple' : ''}">${pkg.category || 'standard'}</span></td>
+                    <td><button class="btn btn-sm btn-danger" onclick="if(confirm('حذف؟')) deletePackage(${pkg.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ========== تحميل الطلبات المعلقة ==========
+        async function loadPendingRequests() {
+            const tbody = document.getElementById('pendingPackagesTable');
+            tbody.innerHTML = '<tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr>';
+            
+            let pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
+            adminData.pendingPackages = pending;
+            document.getElementById('pendingPackagesCount').textContent = pending.length;
+            
+            if (!pending.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="loading"><i class="fas fa-check-circle" style="color:var(--admin-success);"></i><p>لا توجد طلبات معلقة</p></td></tr>';
+                return;
+            }
+            
+            let html = '';
+            pending.forEach((req, i) => {
+                html += `<tr>
+                    <td>${req.user_name || req.userName || '?'}</td>
+                    <td>${req.package_name || ''}</td>
+                    <td>${(req.amount || 0).toFixed(2)}$</td>
+                    <td><span class="status-badge status-pending">معلق</span></td>
+                    <td><button class="btn btn-sm btn-success" onclick="alert('معالجة الطلب')"><i class="fas fa-cog"></i> معالجة</button></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ========== حذف باقة ==========
+        function deletePackage(id) {
+            if (window.sharedData) window.sharedData.deletePackage(id);
+            loadPackages();
+        }
+
+        // ========== تحديث المخططات ==========
+        function updateCharts() {
+            const ctx = document.getElementById('packagesChartCanvas');
+            if (!ctx || !adminData.packages.length) return;
+            
+            if (packagesChart) packagesChart.destroy();
+            packagesChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: adminData.packages.map(p => p.name),
+                    datasets: [{ data: adminData.packages.map(() => 1), backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981'] }]
+                },
+                options: { plugins: { legend: { labels: { color: 'white' } } } }
+            });
+        }
+
+        // ========== دوال مساعدة ==========
+        function refreshDashboard() { loadDashboardData(); showNotification('✅ تم التحديث'); }
+        function refreshUsers() { loadUsers(); showNotification('✅ تم التحديث'); }
+        function refreshPending() { loadPendingRequests(); showNotification('✅ تم التحديث'); }
+        
+        function showAddUserModal() { document.getElementById('addUserModal').classList.add('active'); }
+        function showAddPackageModal() { document.getElementById('addPackageModal').classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleString('ar-SA');
+        }
+        
+        function showNotification(msg, type = 'success') {
+            const n = document.getElementById('notification');
+            n.innerHTML = `${type === 'success' ? '✅' : '❌'} ${msg}`;
+            n.className = `admin-notification ${type}`;
+            n.style.display = 'flex';
+            setTimeout(() => n.style.display = 'none', 3000);
+        }
+
+        // ========== التهيئة ==========
+        function init() {
+            checkSupabase();
+            showSection('dashboard');
+            updateTime();
+            setInterval(updateTime, 1000);
+            console.log('✅ لوحة الإدارة جاهزة');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
