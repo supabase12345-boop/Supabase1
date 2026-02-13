@@ -48,24 +48,70 @@ async function generateReferralCode(username) {
     return code;
 }
 
-// ========== دوال الباقات ==========
+// ========== دوال الباقات (مصححة) ==========
 
 // الحصول على جميع الباقات النشطة
 async function getAllPackages() {
     const supabase = getSupabase();
-    if (!supabase) return [];
+    if (!supabase) {
+        console.warn('⚠️ Supabase غير متصل، استخدام البيانات الافتراضية');
+        return [
+            {
+                id: '11111111-1111-1111-1111-111111111111',
+                name: "الباقة الفضية",
+                price: 500,
+                profit: 2.5,
+                daily_profit: 12.5,
+                tasks: 5,
+                duration: 30,
+                status: "active",
+                description: "الباقة المثالية للمبتدئين",
+                category: "standard"
+            },
+            {
+                id: '22222222-2222-2222-2222-222222222222',
+                name: "الباقة الذهبية",
+                price: 1000,
+                profit: 2.5,
+                daily_profit: 25,
+                tasks: 5,
+                duration: 30,
+                status: "active",
+                description: "الباقة الأكثر طلباً",
+                category: "premium"
+            },
+            {
+                id: '33333333-3333-3333-3333-333333333333',
+                name: "الباقة الماسية",
+                price: 5000,
+                profit: 2.5,
+                daily_profit: 125,
+                tasks: 5,
+                duration: 30,
+                status: "active",
+                description: "للحصول على أفضل العوائد",
+                category: "vip"
+            }
+        ];
+    }
     
     try {
+        console.log('🔍 جلب الباقات من Supabase...');
         const { data, error } = await supabase
             .from('packages')
             .select('*')
             .eq('status', 'active')
             .order('price', { ascending: true });
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ خطأ في جلب الباقات:', error);
+            return [];
+        }
+        
+        console.log('✅ الباقات المحملة:', data);
         return data || [];
     } catch (error) {
-        console.error('خطأ في جلب الباقات:', error);
+        console.error('❌ استثناء في جلب الباقات:', error);
         return [];
     }
 }
