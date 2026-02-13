@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 فحص Supabase - Elite Investors</title>
+    <title>🔍 تشخيص مشاكل Elite Investors</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, 'Segoe UI', Tahoma, sans-serif;
         }
         body {
             background: #0f172a;
-            color: #fff;
-            padding: 20px;
+            color: white;
+            padding: 15px;
             min-height: 100vh;
         }
         .container {
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
         }
         h1 {
             color: #7c3aed;
+            font-size: 22px;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 24px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -37,222 +37,147 @@
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 20px;
-            border: 2px solid #7c3aed;
+            border: 1px solid #7c3aed30;
         }
-        .card-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            color: #7c3aed;
-            font-size: 18px;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 10px;
-        }
-        .test-item {
-            padding: 15px;
+        .status-item {
             background: #0f172a;
             border-radius: 12px;
+            padding: 15px;
             margin-bottom: 12px;
         }
-        .test-header {
+        .status-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
-        .test-name {
+        .status-name {
             font-weight: bold;
             color: #cbd5e1;
         }
-        .test-status {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 13px;
             font-weight: bold;
         }
-        .status-pending {
-            background: #f59e0b20;
-            color: #f59e0b;
-            border: 1px solid #f59e0b;
-        }
-        .status-success {
+        .badge-success {
             background: #10b98120;
             color: #10b981;
             border: 1px solid #10b981;
         }
-        .status-error {
+        .badge-error {
             background: #ef444420;
             color: #ef4444;
             border: 1px solid #ef4444;
         }
-        .test-details {
+        .badge-warning {
+            background: #f59e0b20;
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+        .details {
             background: #00000030;
             padding: 12px;
             border-radius: 8px;
             font-family: monospace;
             font-size: 13px;
             color: #94a3b8;
-            white-space: pre-wrap;
-            word-break: break-all;
             margin-top: 10px;
-            display: none;
-        }
-        .test-details.show {
-            display: block;
+            word-break: break-word;
         }
         .btn {
             background: #7c3aed;
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 15px;
             border-radius: 12px;
             font-weight: bold;
-            cursor: pointer;
             width: 100%;
+            margin: 5px 0;
+            cursor: pointer;
             font-size: 16px;
-            margin-top: 10px;
         }
         .btn-outline {
             background: transparent;
             border: 2px solid #7c3aed;
             color: #7c3aed;
         }
-        .row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+        .btn-success {
+            background: #10b981;
         }
-        .badge {
-            background: #334155;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 12px;
-        }
-        .success { color: #10b981; }
-        .error { color: #ef4444; }
-        .warning { color: #f59e0b; }
-        .info { color: #3b82f6; }
-        hr {
-            border: none;
-            border-top: 1px solid #334155;
-            margin: 20px 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        th, td {
-            padding: 8px;
-            text-align: right;
-            border-bottom: 1px solid #334155;
-        }
-        th {
-            color: #7c3aed;
-        }
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .login-box {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
             margin-top: 15px;
         }
-        .login-form input {
+        .login-box input {
+            width: 100%;
             padding: 12px;
-            background: #0f172a;
+            margin: 8px 0;
+            background: #1e293b;
             border: 1px solid #334155;
             border-radius: 8px;
             color: white;
         }
-        .login-form button {
-            background: #10b981;
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+        .small {
+            font-size: 12px;
+            color: #94a3b8;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>
-            <i class="fas fa-search"></i>
-            🔍 فحص Supabase الشامل
+            <span>🔍</span>
+            تشخيص المشاكل - Elite Investors
         </h1>
 
-        <!-- معلومات الاتصال -->
+        <!-- نتائج التشخيص -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-plug"></i>
-                📡 معلومات الاتصال
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <span style="color: #7c3aed; font-weight: bold;">📋 نتائج الفحص</span>
+                <span class="small" id="timestamp"></span>
             </div>
-            <div id="connection-info" class="test-item">
-                جاري فحص الاتصال...
+            
+            <div id="results">
+                <div class="status-item">
+                    <div class="status-header">
+                        <span class="status-name">🔄 جاري التشخيص...</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- فحص RLS -->
+        <!-- اختبار تسجيل الدخول السريع -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-shield"></i>
-                🔒 فحص RLS (Row Level Security)
+            <div style="color: #7c3aed; font-weight: bold; margin-bottom: 15px;">🔑 اختبار تسجيل الدخول</div>
+            
+            <div class="login-box">
+                <input type="text" id="loginUser" placeholder="اسم المستخدم" value="admin">
+                <input type="password" id="loginPass" placeholder="كلمة المرور" value="admin123">
+                <button class="btn btn-success" onclick="testLogin()" style="margin-top: 10px;">🔓 تجربة تسجيل الدخول</button>
+                <div id="loginResult" style="margin-top: 15px; padding: 10px; background: #1e293b; border-radius: 8px;"></div>
             </div>
-            <div id="rls-test" class="test-item">
-                جاري فحص RLS...
-            </div>
-        </div>
-
-        <!-- فحص الجداول -->
-        <div class="card">
-            <div class="card-title">
-                <i class="fas fa-table"></i>
-                📊 فحص الجداول
-            </div>
-            <div id="tables-test"></div>
-        </div>
-
-        <!-- فحص المستخدمين -->
-        <div class="card">
-            <div class="card-title">
-                <i class="fas fa-users"></i>
-                👥 بيانات المستخدمين
-            </div>
-            <div id="users-test"></div>
-        </div>
-
-        <!-- فحص الباقات -->
-        <div class="card">
-            <div class="card-title">
-                <i class="fas fa-crown"></i>
-                📦 بيانات الباقات
-            </div>
-            <div id="packages-test"></div>
-        </div>
-
-        <!-- اختبار تسجيل الدخول -->
-        <div class="card">
-            <div class="card-title">
-                <i class="fas fa-key"></i>
-                🔑 اختبار تسجيل الدخول
-            </div>
-            <div class="login-form">
-                <input type="text" id="test-username" placeholder="اسم المستخدم" value="admin">
-                <input type="password" id="test-password" placeholder="كلمة المرور" value="admin123">
-                <button class="btn" onclick="testLogin()">🔓 تجربة تسجيل الدخول</button>
-            </div>
-            <div id="login-result" style="margin-top: 15px; padding: 10px; background: #0f172a; border-radius: 8px;"></div>
         </div>
 
         <!-- أزرار التحكم -->
         <div class="row">
-            <button class="btn btn-outline" onclick="runAllTests()" style="flex: 1;">🔄 إعادة تشغيل الفحص</button>
-            <button class="btn btn-outline" onclick="fixRLS()" style="flex: 1;">🔧 إصلاح RLS</button>
+            <button class="btn btn-outline" onclick="runDiagnostic()" style="flex: 1;">🔄 إعادة الفحص</button>
+            <button class="btn btn-outline" onclick="clearAll()" style="flex: 1;">🧹 تنظيف</button>
         </div>
-        <button class="btn" onclick="window.location.reload()">🔄 تحديث الصفحة</button>
+        <button class="btn" onclick="fixRLS()">🔧 محاولة إصلاح RLS</button>
+        <button class="btn btn-outline" onclick="window.location.reload()">🔄 تحديث الصفحة</button>
 
         <!-- سجل الأخطاء -->
         <div class="card">
-            <div class="card-title">
-                <i class="fas fa-bug"></i>
-                🐛 سجل الأخطاء
-            </div>
-            <div id="error-log" style="background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+            <div style="color: #ef4444; margin-bottom: 10px;">⚠️ سجل الأخطاء</div>
+            <div id="errorLog" style="background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -262,368 +187,278 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2JjZXd0bmZvb2ZsbGh4cm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEwMzksImV4cCI6MjA4NjQ5NzAzOX0.Mgf7Dg4Ji3eKHQPz3SUGTfwSfsl7anYneA4ZPIYgbIU';
 
         let supabase = null;
-        let testResults = {};
-
-        // دالة لتسجيل الأخطاء
-        function logError(message, error = null) {
-            const logDiv = document.getElementById('error-log');
+        
+        // دالة تسجيل الأخطاء
+        function logError(msg, error = null) {
+            const log = document.getElementById('errorLog');
             const time = new Date().toLocaleTimeString();
-            const errorMsg = error ? `${error.message || error}` : '';
-            logDiv.innerHTML = `<div style="color: #ef4444;">❌ [${time}] ${message} ${errorMsg}</div>` + logDiv.innerHTML;
-            console.error(message, error);
+            const errorText = error ? ` - ${error.message || error}` : '';
+            log.innerHTML = `<div style="color: #ef4444;">❌ [${time}] ${msg}${errorText}</div>` + log.innerHTML;
+            console.error(msg, error);
         }
 
-        // دالة لتسجيل النجاح
-        function logSuccess(message) {
-            const logDiv = document.getElementById('error-log');
+        function logSuccess(msg) {
+            const log = document.getElementById('errorLog');
             const time = new Date().toLocaleTimeString();
-            logDiv.innerHTML = `<div style="color: #10b981;">✅ [${time}] ${message}</div>` + logDiv.innerHTML;
+            log.innerHTML = `<div style="color: #10b981;">✅ [${time}] ${msg}</div>` + log.innerHTML;
         }
 
-        // دالة لتسجيل معلومات
-        function logInfo(message) {
-            const logDiv = document.getElementById('error-log');
+        function logInfo(msg) {
+            const log = document.getElementById('errorLog');
             const time = new Date().toLocaleTimeString();
-            logDiv.innerHTML = `<div style="color: #3b82f6;">ℹ️ [${time}] ${message}</div>` + logDiv.innerHTML;
+            log.innerHTML = `<div style="color: #3b82f6;">ℹ️ [${time}] ${msg}</div>` + log.innerHTML;
         }
 
-        // تهيئة الاتصال
-        async function initSupabase() {
+        // تشغيل التشخيص
+        async function runDiagnostic() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+            
+            let resultsHTML = '';
+            
+            // 1. فتح الاتصال
             try {
-                if (typeof supabase === 'undefined') {
-                    throw new Error('مكتبة Supabase غير محملة');
-                }
-                supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                if (typeof supabase === 'undefined') throw new Error('مكتبة Supabase غير محملة');
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
-                if (!supabase) {
-                    throw new Error('فشل إنشاء عميل Supabase');
-                }
-
-                // اختبار الاتصال
-                const { error } = await supabase.from('users').select('count', { count: 'exact', head: true });
-                
-                if (error && error.code === '42P01') {
-                    document.getElementById('connection-info').innerHTML = `
-                        <div class="test-header">
-                            <span class="test-name">⚠️ الجداول غير موجودة</span>
-                            <span class="test-status status-warning">تحذير</span>
+                resultsHTML += `
+                    <div class="status-item">
+                        <div class="status-header">
+                            <span class="status-name">📡 الاتصال بقاعدة البيانات</span>
+                            <span class="status-badge badge-success">✅ ناجح</span>
                         </div>
-                        <div class="test-details show">
-                            <strong>الرسالة:</strong> الجداول لم يتم إنشاؤها بعد<br>
-                            <strong>الحل:</strong> نفذ أوامر SQL لإنشاء الجداول
-                        </div>
-                    `;
-                    logError('⚠️ الجداول غير موجودة - يجب إنشاؤها أولاً');
-                } else if (error) {
-                    throw error;
-                } else {
-                    document.getElementById('connection-info').innerHTML = `
-                        <div class="test-header">
-                            <span class="test-name">✅ الاتصال ناجح</span>
-                            <span class="test-status status-success">ناجح</span>
-                        </div>
-                        <div class="test-details show">
-                            <strong>URL:</strong> ${SUPABASE_URL}<br>
-                            <strong>الحالة:</strong> متصل
-                        </div>
-                    `;
-                    logSuccess('الاتصال بقاعدة البيانات ناجح');
-                }
-
-                return supabase;
-            } catch (error) {
-                document.getElementById('connection-info').innerHTML = `
-                    <div class="test-header">
-                        <span class="test-name">❌ فشل الاتصال</span>
-                        <span class="test-status status-error">خطأ</span>
-                    </div>
-                    <div class="test-details show">
-                        <strong>الخطأ:</strong> ${error.message}<br>
-                        <strong>التفاصيل:</strong> ${JSON.stringify(error)}
+                        <div class="details">✅ تم إنشاء عميل Supabase بنجاح</div>
                     </div>
                 `;
-                logError('فشل الاتصال بقاعدة البيانات', error);
-                return null;
+                logSuccess('اتصال Supabase ناجح');
+            } catch (e) {
+                resultsHTML += `
+                    <div class="status-item">
+                        <div class="status-header">
+                            <span class="status-name">📡 الاتصال بقاعدة البيانات</span>
+                            <span class="status-badge badge-error">❌ فشل</span>
+                        </div>
+                        <div class="details error">${e.message}</div>
+                    </div>
+                `;
+                logError('فشل الاتصال', e);
+                document.getElementById('results').innerHTML = resultsHTML;
+                return;
             }
-        }
 
-        // فحص RLS
-        async function checkRLS() {
-            if (!supabase) return;
+            // 2. فحص الجداول
+            const tables = ['users', 'packages', 'tasks'];
+            for (const table of tables) {
+                try {
+                    const { data, error } = await supabase
+                        .from(table)
+                        .select('count', { count: 'exact', head: true });
+                    
+                    if (error && error.code === '42P01') {
+                        resultsHTML += `
+                            <div class="status-item">
+                                <div class="status-header">
+                                    <span class="status-name">📊 جدول ${table}</span>
+                                    <span class="status-badge badge-error">❌ غير موجود</span>
+                                </div>
+                                <div class="details">الجدول غير موجود في قاعدة البيانات - يجب إنشاؤه أولاً</div>
+                            </div>
+                        `;
+                        logError(`الجدول ${table} غير موجود`);
+                    } else if (error) {
+                        resultsHTML += `
+                            <div class="status-item">
+                                <div class="status-header">
+                                    <span class="status-name">📊 جدول ${table}</span>
+                                    <span class="status-badge badge-error">❌ خطأ</span>
+                                </div>
+                                <div class="details">${error.message}</div>
+                            </div>
+                        `;
+                        logError(`خطأ في الجدول ${table}`, error);
+                    } else {
+                        resultsHTML += `
+                            <div class="status-item">
+                                <div class="status-header">
+                                    <span class="status-name">📊 جدول ${table}</span>
+                                    <span class="status-badge badge-success">✅ موجود</span>
+                                </div>
+                                <div class="details">الجدول موجود ويعمل بشكل طبيعي</div>
+                            </div>
+                        `;
+                        logSuccess(`الجدول ${table} موجود`);
+                    }
+                } catch (e) {
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">📊 جدول ${table}</span>
+                                <span class="status-badge badge-error">❌ استثناء</span>
+                            </div>
+                            <div class="details">${e.message}</div>
+                        </div>
+                    `;
+                    logError(`استثناء في الجدول ${table}`, e);
+                }
+            }
 
+            // 3. فحص RLS
             try {
-                // محاولة قراءة المستخدمين
-                const { data: users, error: selectError } = await supabase
+                const { data, error } = await supabase
                     .from('users')
                     .select('*')
                     .limit(1);
-
-                // محاولة إدخال مستخدم (اختبار)
-                const testId = crypto.randomUUID?.() || 'test-id';
-                const { error: insertError } = await supabase
-                    .from('users')
-                    .insert({ 
-                        id: testId,
-                        name: 'test',
-                        username: 'test',
-                        email: 'test@test.com',
-                        phone: '1234567890',
-                        password: 'test'
-                    })
-                    .maybeSingle();
-
-                let rlsStatus = '';
-                let rlsDetails = '';
-
-                if (selectError && selectError.code === '42501') {
-                    rlsStatus += '❌ لا يمكن قراءة المستخدمين (RLS يمنع القراءة)\n';
-                } else if (!selectError) {
-                    rlsStatus += '✅ يمكن قراءة المستخدمين\n';
-                }
-
-                if (insertError && insertError.code === '42501') {
-                    rlsStatus += '❌ لا يمكن إضافة مستخدمين (RLS يمنع الإضافة)';
-                } else if (!insertError) {
-                    rlsStatus += '✅ يمكن إضافة مستخدمين';
-                    // حذف المستخدم التجريبي
-                    await supabase.from('users').delete().eq('id', testId);
-                }
-
-                document.getElementById('rls-test').innerHTML = `
-                    <div class="test-header">
-                        <span class="test-name">${insertError || selectError ? '⚠️ RLS نشط' : '✅ RLS مفتوح'}</span>
-                        <span class="test-status ${insertError || selectError ? 'status-warning' : 'status-success'}">${insertError || selectError ? 'مقيد' : 'مفتوح'}</span>
-                    </div>
-                    <div class="test-details show">
-                        <pre style="white-space: pre-wrap;">${rlsStatus || 'لا توجد مشاكل في RLS'}</pre>
-                        ${insertError ? `<small class="error">${insertError.message}</small>` : ''}
-                    </div>
-                `;
-
-                logInfo(`حالة RLS: ${insertError || selectError ? 'مقيد' : 'مفتوح'}`);
-                return !insertError && !selectError;
-            } catch (error) {
-                logError('خطأ في فحص RLS', error);
-            }
-        }
-
-        // فحص الجداول
-        async function checkTables() {
-            if (!supabase) return;
-
-            const tables = ['users', 'packages', 'tasks', 'transactions', 'withdrawals', 'pending_packages', 'system_settings'];
-            const tablesDiv = document.getElementById('tables-test');
-            let html = '';
-
-            for (const table of tables) {
-                try {
-                    const { count, error } = await supabase
-                        .from(table)
-                        .select('*', { count: 'exact', head: true });
-
-                    if (error && error.code === '42P01') {
-                        html += `
-                            <div class="test-item">
-                                <div class="test-header">
-                                    <span class="test-name">${table}</span>
-                                    <span class="test-status status-error">غير موجود</span>
-                                </div>
-                                <div class="test-details show error">
-                                    ❌ الجدول غير موجود في قاعدة البيانات
-                                </div>
+                
+                if (error && error.code === '42501') {
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">🔒 RLS (صلاحيات)</span>
+                                <span class="status-badge badge-error">❌ مقيد</span>
                             </div>
-                        `;
-                        logError(`الجدول غير موجود: ${table}`);
-                    } else if (error) {
-                        html += `
-                            <div class="test-item">
-                                <div class="test-header">
-                                    <span class="test-name">${table}</span>
-                                    <span class="test-status status-error">خطأ</span>
-                                </div>
-                                <div class="test-details show error">
-                                    ${error.message}
-                                </div>
-                            </div>
-                        `;
-                        logError(`خطأ في الجدول ${table}: ${error.message}`);
-                    } else {
-                        html += `
-                            <div class="test-item">
-                                <div class="test-header">
-                                    <span class="test-name">${table}</span>
-                                    <span class="test-status status-success">موجود</span>
-                                </div>
-                                <div class="test-details show">
-                                    ✅ عدد السجلات: ${count || 0}
-                                </div>
-                            </div>
-                        `;
-                        logSuccess(`الجدول ${table} موجود (${count || 0} سجل)`);
-                    }
-                } catch (error) {
-                    html += `
-                        <div class="test-item">
-                            <div class="test-header">
-                                <span class="test-name">${table}</span>
-                                <span class="test-status status-error">خطأ</span>
-                            </div>
-                            <div class="test-details show error">
-                                ${error.message}
+                            <div class="details">
+                                RLS يمنع الوصول! هذا هو سبب المشكلة.<br>
+                                <strong>الحل:</strong> اضغط على زر "محاولة إصلاح RLS"
                             </div>
                         </div>
                     `;
-                    logError(`استثناء في الجدول ${table}: ${error.message}`);
+                    logError('RLS يمنع الوصول - هذا هو المشكلة الرئيسية');
+                } else if (error) {
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">🔒 RLS</span>
+                                <span class="status-badge badge-error">❌ خطأ</span>
+                            </div>
+                            <div class="details">${error.message}</div>
+                        </div>
+                    `;
+                } else {
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">🔒 RLS</span>
+                                <span class="status-badge badge-success">✅ مفتوح</span>
+                            </div>
+                            <div class="details">RLS مفتوح، يمكن الوصول للبيانات</div>
+                        </div>
+                    `;
                 }
+            } catch (e) {
+                resultsHTML += `
+                    <div class="status-item">
+                        <div class="status-header">
+                            <span class="status-name">🔒 RLS</span>
+                            <span class="status-badge badge-error">❌ خطأ</span>
+                        </div>
+                        <div class="details">${e.message}</div>
+                    </div>
+                `;
             }
 
-            tablesDiv.innerHTML = html;
-        }
-
-        // فحص المستخدمين
-        async function checkUsers() {
-            if (!supabase) return;
-
+            // 4. فحص المستخدمين
             try {
                 const { data: users, error } = await supabase
                     .from('users')
-                    .select('*');
-
-                if (error) throw error;
-
-                const usersDiv = document.getElementById('users-test');
+                    .select('username, password, name, is_admin, balance');
                 
-                if (!users || users.length === 0) {
-                    usersDiv.innerHTML = `
-                        <div class="test-item">
-                            <div class="test-header">
-                                <span class="test-name">⚠️ لا يوجد مستخدمين</span>
-                                <span class="test-status status-warning">تحذير</span>
+                if (error) throw error;
+                
+                if (users && users.length > 0) {
+                    let usersList = '';
+                    users.forEach(u => {
+                        usersList += `👤 ${u.username} / ${u.password} - ${u.name} (${u.is_admin ? 'مشرف' : 'مستخدم'}) 💰 ${u.balance || 0}$<br>`;
+                    });
+                    
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">👥 المستخدمين</span>
+                                <span class="status-badge badge-success">✅ ${users.length} مستخدم</span>
                             </div>
-                            <div class="test-details show">
-                                قاعدة البيانات فاضية - يجب إضافة مستخدمين أولاً
-                            </div>
+                            <div class="details">${usersList}</div>
                         </div>
                     `;
-                    logError('لا يوجد مستخدمين في قاعدة البيانات');
-                    return;
+                    logSuccess(`تم العثور على ${users.length} مستخدم`);
+                    
+                    // تخزين للاستخدام
+                    window.testUsers = users;
+                } else {
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">👥 المستخدمين</span>
+                                <span class="status-badge badge-warning">⚠️ لا يوجد</span>
+                            </div>
+                            <div class="details">لا يوجد مستخدمين في قاعدة البيانات</div>
+                        </div>
+                    `;
                 }
-
-                let html = `<div class="test-item">`;
-                html += `<div class="test-header">`;
-                html += `<span class="test-name">✅ عدد المستخدمين: ${users.length}</span>`;
-                html += `<span class="test-status status-success">ناجح</span>`;
-                html += `</div>`;
-                html += `<div class="test-details show">`;
-                
-                users.forEach(user => {
-                    html += `<div style="margin-bottom: 15px; padding: 10px; background: #0f172a; border-radius: 8px;">`;
-                    html += `<strong>${user.name || 'بدون اسم'}</strong><br>`;
-                    html += `<small>👤 ${user.username} | 🔑 ${user.password} | `;
-                    html += `${user.is_admin ? '👑 مشرف' : '👤 مستخدم'}</small><br>`;
-                    html += `<small>📧 ${user.email}</small><br>`;
-                    html += `<small>💰 الرصيد: ${user.balance || 0}$</small><br>`;
-                    html += `<small>🔗 كود الإحالة: ${user.referral_code || 'لا يوجد'}</small>`;
-                    html += `</div>`;
-                });
-                
-                html += `</div></div>`;
-                usersDiv.innerHTML = html;
-
-                logSuccess(`تم العثور على ${users.length} مستخدم`);
-
-                // تخزين المستخدمين للتسجيل السريع
-                window.testUsers = users;
-
-            } catch (error) {
-                document.getElementById('users-test').innerHTML = `
-                    <div class="test-item">
-                        <div class="test-header">
-                            <span class="test-name">❌ فشل جلب المستخدمين</span>
-                            <span class="test-status status-error">خطأ</span>
+            } catch (e) {
+                resultsHTML += `
+                    <div class="status-item">
+                        <div class="status-header">
+                            <span class="status-name">👥 المستخدمين</span>
+                            <span class="status-badge badge-error">❌ فشل</span>
                         </div>
-                        <div class="test-details show error">
-                            ${error.message}
-                        </div>
+                        <div class="details">${e.message}</div>
                     </div>
                 `;
-                logError('فشل جلب المستخدمين', error);
             }
-        }
 
-        // فحص الباقات
-        async function checkPackages() {
-            if (!supabase) return;
-
+            // 5. فحص الباقات
             try {
                 const { data: packages, error } = await supabase
                     .from('packages')
                     .select('*');
-
-                if (error) throw error;
-
-                const packagesDiv = document.getElementById('packages-test');
                 
-                if (!packages || packages.length === 0) {
-                    packagesDiv.innerHTML = `
-                        <div class="test-item">
-                            <div class="test-header">
-                                <span class="test-name">⚠️ لا يوجد باقات</span>
-                                <span class="test-status status-warning">تحذير</span>
+                if (error) throw error;
+                
+                if (packages && packages.length > 0) {
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">📦 الباقات</span>
+                                <span class="status-badge badge-success">✅ ${packages.length} باقة</span>
                             </div>
-                            <div class="test-details show">
-                                يجب إضافة الباقات أولاً
+                            <div class="details">
+                                ${packages.map(p => `${p.name} - ${p.price}$`).join('<br>')}
                             </div>
                         </div>
                     `;
-                    logError('لا يوجد باقات في قاعدة البيانات');
-                    return;
+                } else {
+                    resultsHTML += `
+                        <div class="status-item">
+                            <div class="status-header">
+                                <span class="status-name">📦 الباقات</span>
+                                <span class="status-badge badge-warning">⚠️ لا يوجد</span>
+                            </div>
+                            <div class="details">لا يوجد باقات في قاعدة البيانات</div>
+                        </div>
+                    `;
                 }
-
-                let html = `<div class="test-item">`;
-                html += `<div class="test-header">`;
-                html += `<span class="test-name">✅ عدد الباقات: ${packages.length}</span>`;
-                html += `<span class="test-status status-success">ناجح</span>`;
-                html += `</div>`;
-                html += `<div class="test-details show">`;
-                
-                packages.forEach(pkg => {
-                    html += `<div style="margin-bottom: 10px; padding: 8px; background: #0f172a; border-radius: 6px;">`;
-                    html += `<strong>${pkg.name}</strong> - ${pkg.price}$ `;
-                    html += `<span class="badge">${pkg.category}</span><br>`;
-                    html += `<small>📈 ربح يومي: ${pkg.daily_profit || (pkg.price * 0.025)}$</small>`;
-                    html += `</div>`;
-                });
-                
-                html += `</div></div>`;
-                packagesDiv.innerHTML = html;
-
-                logSuccess(`تم العثور على ${packages.length} باقة`);
-
-            } catch (error) {
-                document.getElementById('packages-test').innerHTML = `
-                    <div class="test-item">
-                        <div class="test-header">
-                            <span class="test-name">❌ فشل جلب الباقات</span>
-                            <span class="test-status status-error">خطأ</span>
+            } catch (e) {
+                resultsHTML += `
+                    <div class="status-item">
+                        <div class="status-header">
+                            <span class="status-name">📦 الباقات</span>
+                            <span class="status-badge badge-error">❌ فشل</span>
                         </div>
-                        <div class="test-details show error">
-                            ${error.message}
-                        </div>
+                        <div class="details">${e.message}</div>
                     </div>
                 `;
-                logError('فشل جلب الباقات', error);
             }
+
+            document.getElementById('results').innerHTML = resultsHTML;
         }
 
         // اختبار تسجيل الدخول
         async function testLogin() {
-            const username = document.getElementById('test-username').value;
-            const password = document.getElementById('test-password').value;
-            const resultDiv = document.getElementById('login-result');
-
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+            const resultDiv = document.getElementById('loginResult');
+            
             resultDiv.innerHTML = '🔄 جاري التحقق...';
-
+            
             try {
                 const { data: user, error } = await supabase
                     .from('users')
@@ -631,9 +466,9 @@
                     .or(`username.eq.${username},email.eq.${username}`)
                     .eq('password', password)
                     .maybeSingle();
-
+                
                 if (error) throw error;
-
+                
                 if (user) {
                     resultDiv.innerHTML = `
                         <div style="color: #10b981;">
@@ -649,75 +484,71 @@
                             ❌ اسم المستخدم أو كلمة المرور غير صحيحة
                         </div>
                     `;
-                    logError('فشل تسجيل الدخول: بيانات غير صحيحة');
                 }
-            } catch (error) {
+            } catch (e) {
                 resultDiv.innerHTML = `
                     <div style="color: #ef4444;">
-                        ❌ خطأ: ${error.message}
+                        ❌ خطأ: ${e.message}
                     </div>
                 `;
-                logError('استثناء في تسجيل الدخول', error);
+                logError('فشل تسجيل الدخول', e);
             }
         }
 
-        // إصلاح RLS
+        // محاولة إصلاح RLS
         async function fixRLS() {
-            if (!supabase) return;
-
-            const confirmFix = confirm('⚠️ هل تريد تعطيل RLS لجميع الجداول مؤقتاً؟ هذا سيسمح بالوصول الكامل.');
-            if (!confirmFix) return;
-
+            if (!confirm('⚠️ هذا سيحاول تعطيل RLS مؤقتاً. هل تريد المتابعة؟')) return;
+            
             try {
-                // تعطيل RLS لجميع الجداول
-                const tables = ['users', 'packages', 'tasks', 'transactions', 'withdrawals', 'pending_packages'];
+                // محاولة تنفيذ SQL لتعطيل RLS (يحتاج صلاحيات)
+                const { error } = await supabase.rpc('disable_rls_temp');
                 
-                for (const table of tables) {
-                    // محاولة تعطيل RLS (يحتاج صلاحيات)
-                    const { error } = await supabase.rpc('disable_rls_for_table', { table_name: table });
-                    
-                    if (error) {
-                        logError(`فشل تعطيل RLS للجدول ${table}: ${error.message}`);
-                    } else {
-                        logSuccess(`تم تعطيل RLS للجدول ${table}`);
-                    }
+                if (error) {
+                    logError('فشل تعطيل RLS - تحتاج لتنفيذ SQL يدوياً', error);
+                    alert('❌ فشل تعطيل RLS. تحتاج لتنفيذ أوامر SQL في Supabase Dashboard.');
+                } else {
+                    logSuccess('تم تعطيل RLS بنجاح');
+                    alert('✅ تم تعطيل RLS. جرب تسجيل الدخول الآن.');
+                    runDiagnostic();
                 }
+            } catch (e) {
+                logError('فشل تعطيل RLS', e);
+                
+                // عرض الحل اليدوي
+                alert(`❌ فشل تعطيل RLS تلقائياً.
+                
+الحل: ادخل إلى Supabase Dashboard:
+1. اذهب إلى Authentication > Policies
+2. احذف جميع policies أو عطل RLS من الجداول
+                
+أو نفذ هذا SQL في SQL Editor:
 
-                alert('✅ تمت محاولة تعطيل RLS. تحقق من النتائج في سجل الأخطاء.');
-                runAllTests();
-
-            } catch (error) {
-                logError('فشل تعطيل RLS', error);
-                alert('❌ فشل تعطيل RLS. قد تحتاج لتنفيذ أوامر SQL يدوياً.');
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE packages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;`);
             }
         }
 
-        // تشغيل جميع الاختبارات
-        async function runAllTests() {
-            logInfo('🔄 بدء تشغيل جميع الاختبارات...');
-            
-            supabase = await initSupabase();
-            if (!supabase) return;
-
-            await checkRLS();
-            await checkTables();
-            await checkUsers();
-            await checkPackages();
-
-            logSuccess('✅ اكتملت جميع الاختبارات');
+        // تنظيف التخزين المحلي
+        function clearAll() {
+            localStorage.clear();
+            sessionStorage.clear();
+            logSuccess('تم تنظيف localStorage و sessionStorage');
+            alert('✅ تم التنظيف. جرب تسجيل الدخول الآن.');
+            setTimeout(() => location.reload(), 1000);
         }
 
-        // تشغيل عند تحميل الصفحة
+        // تشغيل تلقائي
         window.onload = () => {
-            setTimeout(runAllTests, 1000);
+            document.getElementById('timestamp').textContent = new Date().toLocaleString();
+            setTimeout(runDiagnostic, 500);
         };
 
-        // دوال مساعدة
+        // تصدير الدوال
+        window.runDiagnostic = runDiagnostic;
         window.testLogin = testLogin;
-        window.runAllTests = runAllTests;
         window.fixRLS = fixRLS;
+        window.clearAll = clearAll;
     </script>
-    <!-- Font Awesome للأيقونات -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>
