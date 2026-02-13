@@ -2,133 +2,234 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <title>منصة الباقات</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Investors</title>
+
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="supabase.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
         body {
+            font-family: Arial;
             background: #0f172a;
             color: white;
-            padding: 20px;
+            margin: 0;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            color: #7c3aed;
-            text-align: center;
-            margin: 30px 0;
-        }
-        .packages-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .package-card {
+
+        .header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
             background: #1e293b;
-            border-radius: 15px;
-            padding: 20px;
-            border: 2px solid #7c3aed;
         }
-        .package-title {
-            font-size: 24px;
-            color: #7c3aed;
-            margin-bottom: 10px;
-        }
-        .package-price {
-            font-size: 32px;
-            color: #10b981;
-            font-weight: bold;
-            margin: 15px 0;
-        }
+
         .btn {
-            background: #7c3aed;
-            color: white;
+            background: #3b82f6;
+            padding: 8px 15px;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            color: white;
             cursor: pointer;
-            width: 100%;
-            font-size: 16px;
+            border-radius: 5px;
         }
-        .loading {
+
+        .packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
-            padding: 50px;
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+        }
+
+        .card h2 {
+            color: #22c55e;
+        }
+
+        .auth-box {
+            max-width: 400px;
+            margin: 30px auto;
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>باقات الاستثمار</h1>
-        <div id="packagesGrid" class="packages-grid">
-            <div class="loading">جاري التحميل...</div>
-        </div>
+
+<div class="header">
+    <h2>منصة الاستثمار</h2>
+    <div id="authArea">
+        <button class="btn" onclick="showLogin()">تسجيل دخول</button>
     </div>
+</div>
 
-    <script>
-        // إعدادات Supabase
-        const SUPABASE_URL = 'https://kjivdgfacwvdcfaxdedb.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaXZkZ2ZhY3d2ZGNmYXhkZWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODY1MDksImV4cCI6MjA4NjU2MjUwOX0.3SW2jU-Cu3i4Ms5yIFjaDZZ8DQCVI78Rc0ZIyFeFaXo';
+<div id="authContainer"></div>
 
-        // إنشاء اتصال Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<h2 style="text-align:center;margin-top:20px;">الباقات المتاحة</h2>
 
-        // تحميل الباقات
-        async function loadPackages() {
-            const grid = document.getElementById('packagesGrid');
-            
-            try {
-                // جلب الباقات من Supabase
-                const { data: packages, error } = await supabase
-                    .from('packages')
-                    .select('*')
-                    .eq('status', 'active');
+<div id="packagesGrid" class="packages">
+    <p style="text-align:center;width:100%;">جاري التحميل...</p>
+</div>
 
-                if (error) throw error;
+<script>
 
-                if (!packages || packages.length === 0) {
-                    grid.innerHTML = '<div class="loading">لا توجد باقات</div>';
-                    return;
-                }
+// ===============================
+// متغيرات عامة
+// ===============================
 
-                // عرض الباقات
-                let html = '';
-                packages.forEach(pkg => {
-                    const dailyProfit = (pkg.price * (pkg.profit || 2.5) / 100).toFixed(2);
-                    
-                    html += `
-                        <div class="package-card">
-                            <div class="package-title">${pkg.name}</div>
-                            <div class="package-price">${pkg.price}$</div>
-                            <div style="margin: 10px 0; color: #94a3b8;">${pkg.description || ''}</div>
-                            <div style="margin: 10px 0;">
-                                <div>💰 ربح يومي: ${dailyProfit}$</div>
-                                <div>📊 المهام: ${pkg.tasks || 5}</div>
-                                <div>⏱️ المدة: ${pkg.duration || 30} يوم</div>
-                            </div>
-                            <button class="btn" onclick="alert('قريباً')">اشترك الآن</button>
-                        </div>
-                    `;
-                });
+let currentUser = null;
 
-                grid.innerHTML = html;
+// ===============================
+// عند تحميل الصفحة
+// ===============================
 
-            } catch (error) {
-                grid.innerHTML = `<div class="loading">خطأ: ${error.message}</div>`;
-            }
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const client = await window.supabaseDb.wait();
+
+    checkSession();
+    loadPackages();
+
+});
+
+// ===============================
+// تحميل الباقات
+// ===============================
+
+async function loadPackages() {
+
+    const grid = document.getElementById("packagesGrid");
+
+    try {
+
+        const client = await window.supabaseDb.wait();
+
+        const { data, error } = await client
+            .from("packages")
+            .select("*")
+            .order("price", { ascending: true });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            grid.innerHTML = "<p style='text-align:center;width:100%;'>لا توجد باقات حالياً</p>";
+            return;
         }
 
-        // تشغيل عند تحميل الصفحة
-        window.onload = loadPackages;
-    </script>
+        let html = "";
+
+        data.forEach(pkg => {
+
+            const dailyProfit = (pkg.price * (pkg.profit || 2.5) / 100).toFixed(2);
+
+            html += `
+                <div class="card">
+                    <h3>${pkg.name}</h3>
+                    <p>${pkg.description || ""}</p>
+                    <h2>${pkg.price}$</h2>
+                    <p>ربح يومي: ${dailyProfit}$</p>
+                </div>
+            `;
+        });
+
+        grid.innerHTML = html;
+
+    } catch (err) {
+        console.error(err);
+        grid.innerHTML = "<p style='text-align:center;width:100%;'>حدث خطأ في تحميل الباقات</p>";
+    }
+
+}
+
+// ===============================
+// تسجيل الدخول
+// ===============================
+
+function showLogin() {
+
+    document.getElementById("authContainer").innerHTML = `
+        <div class="auth-box">
+            <h3>تسجيل الدخول</h3>
+            <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
+            <input type="password" id="loginPassword" placeholder="كلمة المرور">
+            <button class="btn" onclick="login()">دخول</button>
+        </div>
+    `;
+}
+
+async function login() {
+
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    if (!email || !password) {
+        alert("يرجى ملء الحقول");
+        return;
+    }
+
+    const client = await window.supabaseDb.wait();
+
+    const { data, error } = await client.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    localStorage.setItem("current_user", JSON.stringify(data.user));
+    window.location.href = "dashboard.html";
+}
+
+// ===============================
+// فحص الجلسة
+// ===============================
+
+function checkSession() {
+
+    const saved = localStorage.getItem("current_user");
+
+    if (saved) {
+
+        currentUser = JSON.parse(saved);
+
+        document.getElementById("authArea").innerHTML = `
+            <button class="btn" onclick="goDashboard()">لوحة التحكم</button>
+            <button class="btn" onclick="logout()">خروج</button>
+        `;
+    }
+}
+
+function goDashboard() {
+    window.location.href = "dashboard.html";
+}
+
+function logout() {
+    localStorage.removeItem("current_user");
+    location.reload();
+}
+
+</script>
+
 </body>
 </html>
