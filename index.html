@@ -9,7 +9,7 @@
     <!-- تحميل مكتبة Supabase أولاً -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- ملفات المشروع - بالترتيب -->
+    <!-- ملفات المشروع - بالترتيب الصحيح -->
     <script src="supabase.js"></script>
     <script src="shared-data.js"></script>
     <script src="app.js"></script>
@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* نفس الـ style السابق - احتفظ به كما هو */
         :root {
             --primary: #7c3aed;
             --primary-dark: #6d28d9;
@@ -1368,45 +1367,17 @@
         let selectedImage = null;
         const WALLET_ADDRESS = 'Tymk60K9JvCqS7Fqy6BpWpZp8hLpVHw7D';
 
+        // ========== التحقق من تحميل المكتبات ==========
+        console.log('🔍 فتح التطبيق...');
+        console.log('✅ Supabase Client:', !!window.supabaseClient);
+        console.log('✅ Supabase Helpers:', !!window.supabaseHelpers);
+        console.log('✅ Shared Data:', !!window.sharedData);
+
         // ========== تهيئة الصفحة ==========
-   async function loadPackages() {
-
-    const grid = document.getElementById("packagesGrid");
-
-    try {
-
-        const client = window.supabaseClient;
-
-        const { data, error } = await client
-            .from("packages")
-            .select("*")
-            .order("price", { ascending: true });
-
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-            grid.innerHTML = "⚠️ لا توجد باقات";
-            return;
-        }
-
-        let html = "";
-
-        data.forEach(pkg => {
-            html += `
-                <div class="card">
-                    <h3>${pkg.name}</h3>
-                    <h2>${pkg.price}$</h2>
-                </div>
-            `;
-        });
-
-        grid.innerHTML = html;
-
-    } catch (err) {
-        grid.innerHTML = "❌ " + err.message;
-    }
-
-}            // التحقق من المستخدم الحالي
+        async function initIndexPage() {
+            console.log('🚀 بدء تشغيل الصفحة الرئيسية...');
+            
+            // التحقق من المستخدم الحالي
             await checkCurrentUser();
             
             // تحميل الباقات
@@ -1428,10 +1399,30 @@
             if (savedUser) {
                 try {
                     const parsedUser = JSON.parse(savedUser);
-                    const user = await window.sharedData.getUserById(parsedUser.id);
+                    
+                    // محاولة جلب المستخدم من Supabase
+                    if (window.supabaseHelpers) {
+                        const result = await window.supabaseHelpers.getUserById(parsedUser.id);
+                        if (result.success && result.data) {
+                            currentUser = result.data;
+                            
+                            // التحقق من حالة المستخدم
+                            if (currentUser.status === 'banned' || currentUser.status === 'suspended') {
+                                localStorage.removeItem('current_user');
+                                showNotification('❌ حسابك غير نشط', 'error');
+                                return;
+                            }
+                            
+                            updateUIForLoggedInUser();
+                            return;
+                        }
+                    }
+                    
+                    // استخدام التخزين المحلي كاحتياطي
+                    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                    const user = users.find(u => u.id === parsedUser.id);
                     
                     if (user) {
-                        // التحقق من حالة المستخدم
                         if (user.status === 'banned' || user.status === 'suspended') {
                             localStorage.removeItem('current_user');
                             showNotification('❌ حسابك غير نشط', 'error');
@@ -1455,16 +1446,29 @@
             const packagesGrid = document.getElementById('packagesGrid');
             
             try {
-                // إضافة كاش لمنع التخزين المؤقت
-                const packages = await window.sharedData.getAllPackages();
-                console.log('📦 الباقات المحملة:', packages);
+                let packages = [];
+                
+                // محاولة جلب الباقات من Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.getAllPackages();
+                    if (result.success && result.data && result.data.length > 0) {
+                        packages = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (packages.length === 0 && window.sharedData) {
+                    packages = await window.sharedData.getAllPackages();
+                }
+                
+                console.log('📦 الباقات المحملة:', packages.length);
                 
                 if (!packages || packages.length === 0) {
                     packagesGrid.innerHTML = `
                         <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
                             <i class="fas fa-box-open" style="font-size: 60px; color: #4b5563; margin-bottom: 20px;"></i>
                             <h3 style="color: #94a3b8;">لا توجد باقات متاحة حالياً</h3>
-                            <p style="color: #94a3b8; margin-top: 20px;">يرجى إضافة باقات من لوحة الإدارة</p>
+                            <p style="color: #94a3b8; margin-top: 20px;">يرجى المحاولة لاحقاً</p>
                         </div>
                     `;
                     return;
@@ -1472,7 +1476,7 @@
                 
                 let html = '';
                 packages.forEach(pkg => {
-                    const dailyProfit = (pkg.price * (pkg.profit || 2.5) / 100).toFixed(2);
+                    const dailyProfit = (pkg.price * (pkg.profit_percentage || pkg.profit || 2.5) / 100).toFixed(2);
                     const badgeClass = pkg.category === 'vip' ? 'vip' : pkg.category === 'premium' ? 'premium' : '';
                     const badgeText = pkg.category === 'vip' ? '💎 VIP' : pkg.category === 'premium' ? '🥇 مميزة' : '🥈 عادية';
                     
@@ -1488,7 +1492,7 @@
                             ${pkg.description ? `<p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">${pkg.description}</p>` : ''}
                             <ul class="package-features">
                                 <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>${dailyProfit}$</strong></li>
-                                <li><i class="fas fa-check-circle"></i> ${pkg.tasks || 5} مهمات يومية</li>
+                                <li><i class="fas fa-check-circle"></i> ${pkg.tasks_count || pkg.tasks || 5} مهمات يومية</li>
                                 <li><i class="fas fa-check-circle"></i> مدة الباقة: ${pkg.duration || 30} يوم</li>
                                 <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
                                 <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
@@ -1520,16 +1524,32 @@
         // ========== تحميل إحصائيات المنصة ==========
         async function loadPlatformStats() {
             try {
-                const stats = await window.sharedData.getDashboardStats();
-                document.getElementById('statUsers').textContent = stats.totalUsers || '0';
+                let stats = null;
                 
-                const deposits = stats.totalDeposits || 0;
-                if (deposits >= 1000000) {
-                    document.getElementById('statDeposits').textContent = `$${(deposits/1000000).toFixed(1)}M+`;
-                } else if (deposits >= 1000) {
-                    document.getElementById('statDeposits').textContent = `$${(deposits/1000).toFixed(1)}K+`;
-                } else {
-                    document.getElementById('statDeposits').textContent = `$${deposits}+`;
+                // محاولة جلب الإحصائيات من Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.getDashboardStats();
+                    if (result.success && result.data) {
+                        stats = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!stats && window.sharedData) {
+                    stats = await window.sharedData.getDashboardStats();
+                }
+                
+                if (stats) {
+                    document.getElementById('statUsers').textContent = stats.totalUsers || '0';
+                    
+                    const deposits = stats.totalDeposits || 0;
+                    if (deposits >= 1000000) {
+                        document.getElementById('statDeposits').textContent = `$${(deposits/1000000).toFixed(1)}M+`;
+                    } else if (deposits >= 1000) {
+                        document.getElementById('statDeposits').textContent = `$${(deposits/1000).toFixed(1)}K+`;
+                    } else {
+                        document.getElementById('statDeposits').textContent = `$${deposits}+`;
+                    }
                 }
             } catch (error) {
                 console.error('خطأ في تحميل الإحصائيات:', error);
@@ -1563,7 +1583,8 @@
             }
             
             sessionStorage.setItem('pending_referral', code);
-            document.getElementById('registerReferral').value = code;
+            const registerField = document.getElementById('registerReferral');
+            if (registerField) registerField.value = code;
             openAuthModal();
             showAuthTab('register');
             showNotification('✅ تم تطبيق كود الإحالة!', 'success');
@@ -1588,12 +1609,23 @@
             }
             
             try {
-                // جلب الباقة مباشرة من Supabase للتحقق من وجودها
-                const pkg = await window.sharedData.getPackageById(packageId);
+                let pkg = null;
+                
+                // محاولة جلب الباقة من Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.getPackageById(packageId);
+                    if (result.success && result.data) {
+                        pkg = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!pkg && window.sharedData) {
+                    pkg = await window.sharedData.getPackageById(parseInt(packageId));
+                }
                 
                 if (!pkg) {
                     showNotification('❌ الباقة غير متاحة', 'error');
-                    // تحديث قائمة الباقات
                     await loadPackages();
                     return;
                 }
@@ -1603,7 +1635,7 @@
                 document.getElementById('selectedPackageName').textContent = pkg.name;
                 document.getElementById('selectedPackagePrice').textContent = pkg.price + '$';
                 document.getElementById('selectedPackageDaily').textContent = 
-                    `+${(pkg.price * (pkg.profit || 2.5) / 100).toFixed(2)}$ يومياً`;
+                    `+${(pkg.price * (pkg.profit_percentage || pkg.profit || 2.5) / 100).toFixed(2)}$ يومياً`;
                 
                 if (currentUser.referral_code) {
                     document.getElementById('referralCodeSection').style.display = 'block';
@@ -1642,14 +1674,32 @@
                     referredBy: currentUser.referred_by
                 };
                 
-                await window.sharedData.addPendingPackage(pendingPackage);
+                // محاولة حفظ الطلب في Supabase
+                let saved = false;
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.createPendingPackage(pendingPackage);
+                    if (result.success) {
+                        saved = true;
+                        console.log('✅ تم حفظ الطلب في Supabase');
+                    }
+                }
                 
-                closePaymentModal();
+                // استخدام التخزين المحلي كاحتياطي
+                if (!saved && window.sharedData) {
+                    await window.sharedData.addPendingPackage(pendingPackage);
+                    saved = true;
+                }
                 
-                if (selectedImage) {
-                    showNotification('✅ تم تقديم الطلب! سيتم التفعيل خلال ساعة.', 'success');
+                if (saved) {
+                    closePaymentModal();
+                    
+                    if (selectedImage) {
+                        showNotification('✅ تم تقديم الطلب! سيتم التفعيل خلال ساعة.', 'success');
+                    } else {
+                        showNotification('✅ تم تقديم الطلب! سيتم التفعيل خلال 3-6 ساعات.', 'success');
+                    }
                 } else {
-                    showNotification('✅ تم تقديم الطلب! سيتم التفعيل خلال 3-6 ساعات.', 'success');
+                    showNotification('❌ فشل تقديم الطلب', 'error');
                 }
                 
             } catch (error) {
@@ -1742,12 +1792,32 @@
             }
             
             try {
-                const user = await window.sharedData.loginUser(username, password);
-                currentUser = user;
-                localStorage.setItem('current_user', JSON.stringify(user));
+                let user = null;
                 
-                // التوجيه إلى dashboard بعد تسجيل الدخول
-                window.location.href = 'dashboard.html';
+                // محاولة تسجيل الدخول عبر Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.loginUser(username, password);
+                    if (result.success) {
+                        user = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!user && window.sharedData) {
+                    user = await window.sharedData.loginUser(username, password);
+                }
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('current_user', JSON.stringify(user));
+                    
+                    showNotification('✅ تم تسجيل الدخول بنجاح', 'success');
+                    
+                    // التوجيه إلى dashboard بعد تسجيل الدخول
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                }
                 
             } catch (error) {
                 showNotification('❌ ' + error.message, 'error');
@@ -1803,14 +1873,31 @@
                     referralCode: referralCode
                 };
                 
-                const user = await window.sharedData.registerUser(userData);
+                let user = null;
+                
+                // محاولة التسجيل عبر Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.registerUser(userData);
+                    if (result.success) {
+                        user = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!user && window.sharedData) {
+                    user = await window.sharedData.registerUser(userData);
+                }
                 
                 if (user) {
                     currentUser = user;
                     localStorage.setItem('current_user', JSON.stringify(user));
                     
+                    showNotification('✅ تم إنشاء الحساب بنجاح', 'success');
+                    
                     // التوجيه إلى dashboard بعد التسجيل
-                    window.location.href = 'dashboard.html';
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
                 }
             } catch (error) {
                 showNotification('❌ ' + error.message, 'error');
@@ -1984,11 +2071,17 @@
 
         // ========== إعداد مستمعي الأحداث ==========
         function setupEventListeners() {
-            document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', openAuthModal);
+            }
             
-            document.getElementById('userAvatar').addEventListener('click', function() {
-                document.getElementById('userDropdown').classList.toggle('active');
-            });
+            const userAvatar = document.getElementById('userAvatar');
+            if (userAvatar) {
+                userAvatar.addEventListener('click', function() {
+                    document.getElementById('userDropdown').classList.toggle('active');
+                });
+            }
             
             document.addEventListener('click', function(event) {
                 const dropdown = document.getElementById('userDropdown');
@@ -2014,21 +2107,6 @@
                 showNotification('❌ حدث خطأ في تحميل الصفحة', 'error');
             });
         });
-    </script>
-
-    <!-- كود التشخيص -->
-    <script>
-        (async function() {
-            console.log('🔍 فحص النظام...');
-            console.log('✅ sharedData موجود:', !!window.sharedData);
-            
-            try {
-                const packages = await window.sharedData.getAllPackages();
-                console.log('📦 عدد الباقات:', packages?.length || 0);
-            } catch (error) {
-                console.error('❌ فشل جلب الباقات:', error);
-            }
-        })();
     </script>
 </body>
 </html>

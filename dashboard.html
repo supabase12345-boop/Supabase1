@@ -1,59 +1,42 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- منع التخزين المؤقت -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    <!-- تحميل مكتبة Supabase أولاً -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- ملفات المشروع - بالترتيب -->
-    <script src="supabase.js"></script>
     <script src="shared-data.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>لوحة التحكم - Elite Investors</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
             --primary: #7c3aed;
-            --primary-dark: #6d28d9;
             --secondary: #06b6d4;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
             --dark: #0f172a;
-            --dark-light: #1e293b;
-            --dark-lighter: #334155;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
+            --light: #f8fafc;
             --purple: #8b5cf6;
-            --info: #0891b2;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Tajawal', 'Arial', sans-serif;
         }
         
         body {
+            font-family: 'Tajawal', 'Arial', sans-serif;
             background: var(--dark);
-            color: var(--text);
+            color: white;
             padding-bottom: 80px;
-            min-height: 100vh;
         }
         
-        /* ========== الشريط العلوي ========== */
         .dashboard-header {
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.95);
             padding: 15px 20px;
+            border-bottom: 2px solid var(--primary);
             position: fixed;
             top: 0;
             width: 100%;
@@ -61,8 +44,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--primary);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
         }
         
         .user-info {
@@ -85,117 +67,34 @@
             box-shadow: 0 4px 10px rgba(124,58,237,0.3);
         }
         
-        .user-details h3 {
-            font-size: 18px;
-            margin-bottom: 2px;
-        }
-        
-        .user-details small {
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-        
-        .logout-btn {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-            box-shadow: 0 5px 15px rgba(239,68,68,0.3);
-        }
-        
-        /* ========== شريط التنقل السفلي ========== */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 2px solid var(--primary);
-            z-index: 1000;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-muted);
-            transition: all 0.3s;
-            padding: 8px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 12px;
-        }
-        
-        .nav-item.active {
-            color: var(--primary);
-            background: rgba(124, 58, 237, 0.15);
-            transform: translateY(-5px);
-        }
-        
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .nav-label {
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        /* ========== المحتوى الرئيسي ========== */
-        .main-content {
-            padding: 20px;
-            padding-top: 90px;
-            padding-bottom: 90px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        /* ========== بطاقات الإحصائيات ========== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            margin-bottom: 25px;
+            padding: 20px;
+            padding-top: 90px;
         }
         
         .stat-card {
-            background: var(--dark-light);
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 20px;
             text-align: center;
-            border-right: 5px solid var(--primary);
+            border: 1px solid rgba(124, 58, 237, 0.3);
             transition: all 0.3s;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(124,58,237,0.2);
         }
         
         .stat-icon {
             font-size: 30px;
             margin-bottom: 10px;
-            color: var(--secondary);
+            color: var(--primary);
         }
         
         .stat-value {
@@ -209,41 +108,12 @@
         .stat-value.warning { color: var(--warning); }
         .stat-value.info { color: var(--secondary); }
         
-        /* ========== أزرار التنقل بين الأقسام ========== */
-        .section-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            background: var(--dark-light);
-            padding: 10px;
-            border-radius: 15px;
-        }
-        
-        .section-tab {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            background: transparent;
-            color: var(--text-muted);
-            transition: all 0.3s;
-            min-width: 80px;
-        }
-        
-        .section-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        /* ========== الأقسام ========== */
         .section {
-            background: var(--dark-light);
-            border-radius: 15px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            margin: 15px;
             padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 15px;
             border: 1px solid rgba(124, 58, 237, 0.3);
         }
         
@@ -258,64 +128,9 @@
             padding-bottom: 15px;
         }
         
-        /* ========== المهام ========== */
-        .tasks-list {
-            display: grid;
-            gap: 12px;
-        }
-        
-        .task-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(124, 58, 237, 0.1);
-            transition: all 0.3s;
-            border-right: 4px solid var(--info);
-        }
-        
-        .task-item:hover {
-            border-color: var(--primary);
-            background: rgba(124, 58, 237, 0.05);
-        }
-        
-        .task-item.completed {
-            opacity: 0.7;
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--success);
-        }
-        
-        .task-info h4 {
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-        
-        .task-info p {
-            color: var(--text-muted);
-            font-size: 13px;
-            margin: 0;
-        }
-        
-        .task-meta {
-            display: flex;
-            gap: 15px;
-            margin-top: 8px;
-            font-size: 12px;
-            color: #64748b;
-        }
-        
-        .task-reward {
-            font-weight: bold;
-            color: var(--success);
-            font-size: 20px;
-        }
-        
-        /* ========== نظام الإحالة ========== */
         .referral-stats {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             margin: 20px 0;
         }
@@ -350,30 +165,53 @@
             direction: ltr;
         }
         
-        .referral-link {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 10px;
-            word-break: break-all;
-            font-size: 14px;
-            direction: ltr;
-            text-align: left;
-            border: 1px dashed var(--purple);
-            color: var(--purple);
-            margin: 15px 0;
+        .tasks-list {
+            display: grid;
+            gap: 12px;
         }
         
-        .referred-user-item {
-            background: rgba(255,255,255,0.03);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
+        .task-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 18px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            transition: all 0.3s;
+            border-right: 4px solid var(--info);
         }
         
-        /* ========== المعاملات ========== */
+        .task-item:hover {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+        
+        .task-item.completed {
+            opacity: 0.7;
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+        }
+        
+        .task-reward {
+            font-weight: bold;
+            color: var(--success);
+            font-size: 20px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .badge.standard { background: #3b82f6; }
+        .badge.premium { background: #8b5cf6; }
+        .badge.vip { background: #f59e0b; }
+        
         .transactions-list {
             display: grid;
             gap: 10px;
@@ -400,128 +238,47 @@
             border-right-color: var(--purple);
         }
         
-        .transaction-info h4 {
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-        
-        .transaction-info small {
-            color: var(--text-muted);
-            font-size: 12px;
-        }
-        
-        .transaction-amount {
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        /* ========== الباقة الحالية ========== */
-        .current-package {
-            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.15));
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid var(--primary);
-            margin-bottom: 20px;
-        }
-        
-        .package-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .package-name {
-            font-size: 20px;
-            color: var(--primary);
-        }
-        
-        .package-badge {
-            padding: 5px 15px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .badge.standard { background: #3b82f6; }
-        .badge.premium { background: var(--purple); }
-        .badge.vip { background: var(--warning); }
-        
-        .package-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 15px 0;
-        }
-        
-        .package-detail-item small {
-            color: var(--text-muted);
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .package-detail-value {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        /* ========== حالة الطلب المعلق ========== */
-        .pending-section {
-            background: rgba(245,158,11,0.1);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid var(--warning);
-        }
-        
-        .status-pending {
-            color: var(--warning);
-            background: rgba(245,158,11,0.1);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        
-        /* ========== النماذج ========== */
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-        
-        .form-control {
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            padding: 14px 18px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(124,58,237,0.3);
-            border-radius: 10px;
-            color: white;
-            font-size: 15px;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 2px solid var(--primary);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #94a3b8;
             transition: all 0.3s;
+            padding: 8px 16px;
+            border-radius: 12px;
         }
         
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(124,58,237,0.1);
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(124, 58, 237, 0.15);
+            transform: translateY(-5px);
         }
         
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 18px center;
-            padding-left: 45px;
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
         }
         
-        /* ========== الأزرار ========== */
+        .nav-label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
         .btn {
             padding: 12px 24px;
             border-radius: 10px;
@@ -534,26 +291,15 @@
             justify-content: center;
             gap: 10px;
             font-size: 15px;
-            width: 100%;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, var(--primary), #6d28d9);
             color: white;
         }
         
         .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: white;
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-            color: white;
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning), #d97706);
+            background: linear-gradient(135deg, var(--success), #0ea271);
             color: white;
         }
         
@@ -565,7 +311,6 @@
         .btn:hover {
             transform: translateY(-2px);
             opacity: 0.9;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
         .btn:disabled {
@@ -574,7 +319,20 @@
             transform: none;
         }
         
-        /* ========== النوافذ المنبثقة ========== */
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .modal {
             display: none;
             position: fixed;
@@ -601,18 +359,50 @@
         }
         
         .modal-content {
-            background: var(--dark-light);
+            background: var(--dark);
             border-radius: 20px;
             padding: 30px;
             width: 100%;
             max-width: 450px;
             border: 2px solid var(--primary);
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            max-height: 90vh;
-            overflow-y: auto;
         }
         
-        /* ========== مختارات الشبكة ========== */
+        .current-package {
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.15));
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(124,58,237,0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(124,58,237,0.1);
+        }
+        
         .network-selector {
             display: flex;
             gap: 10px;
@@ -625,11 +415,10 @@
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(124,58,237,0.3);
             border-radius: 8px;
-            color: var(--text-muted);
+            color: #94a3b8;
             cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
-            text-align: center;
         }
         
         .network-btn.active {
@@ -638,38 +427,6 @@
             border-color: var(--primary);
         }
         
-        .network-btn:hover:not(.active) {
-            background: rgba(124,58,237,0.1);
-        }
-        
-        /* ========== حالة الطلب ========== */
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
-        .status-active {
-            background: rgba(5, 150, 105, 0.2);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-        
-        .status-pending {
-            background: rgba(217, 119, 6, 0.2);
-            color: var(--warning);
-            border: 1px solid var(--warning);
-        }
-        
-        .status-rejected {
-            background: rgba(220, 38, 38, 0.2);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-        
-        /* ========== الإشعارات ========== */
         .notification {
             position: fixed;
             top: 100px;
@@ -699,77 +456,53 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        /* ========== تنسيقات إضافية ========== */
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
+        .status-pending {
+            color: var(--warning);
+            background: rgba(245,158,11,0.1);
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .badge.standard { background: #3b82f6; }
-        .badge.premium { background: var(--purple); }
-        .badge.vip { background: var(--warning); }
-        
-        .referral-code {
-            background: linear-gradient(45deg, var(--purple), var(--primary));
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            letter-spacing: 1px;
-            display: inline-block;
-            margin: 5px 0;
-            color: white;
+            font-size: 13px;
             font-weight: bold;
         }
         
-        .text-success { color: var(--success); }
-        .text-warning { color: var(--warning); }
-        .text-danger { color: var(--danger); }
-        .text-info { color: var(--secondary); }
-        .text-muted { color: var(--text-muted); }
-        .text-center { text-align: center; }
+        .sync-status {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--dark-light);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--primary);
+            font-size: 13px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }
         
-        .w-100 { width: 100%; }
-        .mt-2 { margin-top: 10px; }
-        .mt-3 { margin-top: 15px; }
-        .mt-4 { margin-top: 20px; }
-        .mb-2 { margin-bottom: 10px; }
-        .mb-3 { margin-bottom: 15px; }
-        .mb-4 { margin-bottom: 20px; }
+        .sync-status.online {
+            border-color: var(--success);
+            color: var(--success);
+        }
         
-        .d-flex { display: flex; }
-        .align-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 10px; }
-        .gap-3 { gap: 15px; }
-        .flex-wrap { flex-wrap: wrap; }
-        
-        /* ========== التجاوب ========== */
-        @media (min-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .referral-stats {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .package-details {
-                grid-template-columns: repeat(4, 1fr);
-            }
+        .sync-status.offline {
+            border-color: var(--danger);
+            color: var(--danger);
         }
         
         @media (max-width: 768px) {
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
             }
             
             .referral-stats {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .section {
+                margin: 10px;
+                padding: 15px;
             }
             
             .task-item {
@@ -792,10 +525,6 @@
                 font-size: 18px;
                 letter-spacing: 2px;
             }
-            
-            .user-details {
-                display: none;
-            }
         }
         
         @media (max-width: 480px) {
@@ -803,56 +532,40 @@
                 grid-template-columns: 1fr;
             }
             
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .stat-value {
                 font-size: 24px;
             }
-            
-            .section-tab {
-                font-size: 13px;
-                padding: 8px;
-            }
         }
+        
+        .text-center { text-align: center; }
+        .w-100 { width: 100%; }
+        .mt-3 { margin-top: 15px; }
+        .mt-4 { margin-top: 20px; }
+        .mb-3 { margin-bottom: 15px; }
+        .mb-4 { margin-bottom: 20px; }
     </style>
 </head>
 <body>
+    <div class="sync-status online" id="syncStatus">
+        <i class="fas fa-sync-alt fa-spin" style="display: none;" id="syncSpinner"></i>
+        <i class="fas fa-wifi" id="syncIcon"></i>
+        <span id="syncText">متصل</span>
+    </div>
 
-<script>
-    // فحص سريع للمستخدم
-    (function() {
-        const user = localStorage.getItem('current_user');
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            console.log('👤 المستخدم:', JSON.parse(user).name);
-        }
-    })();
-</script>
-
-
-
-
-
-    <!-- ========== الشريط العلوي ========== -->
     <div class="dashboard-header">
         <div class="user-info">
             <div class="user-avatar" id="userAvatar">م</div>
-            <div class="user-details">
-                <h3 id="userName">جاري التحميل...</h3>
-                <small id="userEmail">...</small>
+            <div>
+                <h3 id="userName">محمد أحمد</h3>
+                <small id="userEmail" style="color: #94a3b8;">mohamed@example.com</small>
             </div>
         </div>
-        <button class="logout-btn" onclick="logout()">
+        <button class="btn btn-primary" onclick="logout()">
             <i class="fas fa-sign-out-alt"></i> خروج
         </button>
     </div>
 
-    <!-- ========== المحتوى الرئيسي ========== -->
-    <div class="main-content">
-        <!-- إحصائيات سريعة -->
+    <div id="home-page" class="page active">
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">
@@ -866,7 +579,7 @@
                 <div class="stat-icon">
                     <i class="fas fa-coins"></i>
                 </div>
-                <div class="stat-value success" id="todayProfit">0$</div>
+                <div class="stat-value success" id="today-profit">0$</div>
                 <p>أرباح اليوم</p>
             </div>
             
@@ -874,7 +587,7 @@
                 <div class="stat-icon">
                     <i class="fas fa-tasks"></i>
                 </div>
-                <div class="stat-value warning" id="tasksCompleted">0</div>
+                <div class="stat-value warning" id="tasks-completed">0/0</div>
                 <p>مهام مكتملة</p>
             </div>
             
@@ -882,130 +595,102 @@
                 <div class="stat-icon">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                <div class="stat-value info" id="totalEarned">0$</div>
+                <div class="stat-value info" id="total-earned">0$</div>
                 <p>إجمالي الأرباح</p>
             </div>
         </div>
 
-        <!-- قسم الطلب المعلق (يظهر فقط إذا كان هناك طلب) -->
         <div id="pendingRequestSection" style="display: none;"></div>
 
-        <!-- أزرار التنقل بين الأقسام -->
-        <div class="section-tabs">
-            <button class="section-tab active" onclick="showSection('home')">الرئيسية</button>
-            <button class="section-tab" onclick="showSection('tasks')">المهام</button>
-            <button class="section-tab" onclick="showSection('referral')">الإحالة</button>
-            <button class="section-tab" onclick="showSection('history')">السجل</button>
-            <button class="section-tab" onclick="showSection('profile')">حسابي</button>
-        </div>
-
-        <!-- القسم: الرئيسية -->
-        <div id="home-section" class="section active-section">
+        <div class="section">
             <div class="section-title">
-                <i class="fas fa-crown"></i>
-                <h3>باقتك الحالية</h3>
-            </div>
-            <div class="current-package" id="currentPackage">
-                <div class="text-center" style="padding: 20px;">
-                    <i class="fas fa-box-open" style="font-size: 40px; color: var(--text-muted); margin-bottom: 15px;"></i>
-                    <p class="text-muted">لا توجد باقة نشطة</p>
-                    <small class="text-muted">اشترك في إحدى باقاتنا وابدأ الربح اليومي</small>
-                </div>
-            </div>
-            <button class="btn btn-primary w-100 mt-3" onclick="goToPackages()">
-                <i class="fas fa-plus-circle"></i> شراء باقة جديدة
-            </button>
-
-            <div class="section-title mt-4">
                 <i class="fas fa-bolt" style="color: var(--warning);"></i>
                 <h3>مهام اليوم السريعة</h3>
             </div>
-            <div id="quickTasks" class="tasks-list">
-                <p class="text-center text-muted">لا توجد مهام متاحة</p>
-            </div>
+            <div id="quickTasks" class="tasks-list"></div>
         </div>
 
-        <!-- القسم: المهام -->
-        <div id="tasks-section" class="section" style="display: none;">
+        <div class="section">
             <div class="section-title">
-                <i class="fas fa-tasks"></i>
+                <i class="fas fa-crown" style="color: var(--primary);"></i>
+                <h3>باقتك الحالية</h3>
+            </div>
+            <div class="current-package" id="currentPackage">
+                <p style="text-align: center; color: #94a3b8;">لا يوجد باقة نشطة</p>
+            </div>
+            <button class="btn btn-primary w-100 mt-4" onclick="goToPackages()">
+                <i class="fas fa-plus-circle"></i> شراء باقة جديدة
+            </button>
+        </div>
+    </div>
+
+    <div id="tasks-page" class="page">
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-tasks" style="color: var(--success);"></i>
                 <h3>المهام المتاحة</h3>
                 <div style="margin-right: auto;">
-                    <button class="btn btn-sm btn-primary" onclick="loadUserTasks()">
+                    <button class="btn btn-sm btn-primary" onclick="refreshTasks()">
                         <i class="fas fa-sync-alt"></i> تحديث
                     </button>
                 </div>
             </div>
             <div id="tasksContainer" class="tasks-list"></div>
         </div>
+    </div>
 
-        <!-- القسم: الإحالة -->
-        <div id="referral-section" class="section" style="display: none;">
+    <div id="referral-page" class="page">
+        <div class="section">
             <div class="section-title">
                 <i class="fas fa-user-friends" style="color: var(--purple);"></i>
                 <h3>نظام الإحالة</h3>
             </div>
             
-            <div class="referral-stats" id="referralStats">
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value" id="referralCount">0</div>
-                    <div class="text-muted">إجمالي المحالين</div>
-                </div>
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value" style="color: var(--success);" id="activeReferrals">0</div>
-                    <div class="text-muted">نشطين</div>
-                </div>
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value" style="color: var(--warning);" id="pendingReferrals">0</div>
-                    <div class="text-muted">بانتظار</div>
-                </div>
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value" style="color: var(--success);" id="referralEarnings">0$</div>
-                    <div class="text-muted">أرباح الإحالة</div>
-                </div>
-            </div>
+            <div class="referral-stats" id="referralStats"></div>
             
             <div style="margin: 25px 0;">
-                <h4 class="text-center mb-3">
+                <h4 style="color: #cbd5e1; margin-bottom: 15px; text-align: center;">
                     <i class="fas fa-gift"></i> كود الإحالة الخاص بك
                 </h4>
-                <div class="referral-code-box" id="referralCodeDisplay">-</div>
+                <div class="referral-code-box" id="referralCodeDisplay"></div>
                 <button class="btn btn-primary w-100 mt-2" onclick="copyReferralCode()">
                     <i class="fas fa-copy"></i> نسخ كود الإحالة
                 </button>
             </div>
             
             <div style="margin: 25px 0;">
-                <h4 class="text-center mb-3">
+                <h4 style="color: #cbd5e1; margin-bottom: 15px; text-align: center;">
                     <i class="fas fa-link"></i> رابط الإحالة
                 </h4>
-                <div class="referral-link" id="referralLinkDisplay"></div>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; word-break: break-all; font-size: 14px; direction: ltr; text-align: left;" id="referralLinkDisplay"></div>
                 <button class="btn btn-success w-100 mt-2" onclick="copyReferralLink()">
                     <i class="fas fa-copy"></i> نسخ رابط الإحالة
                 </button>
             </div>
             
             <div style="margin-top: 30px;">
-                <h4 class="text-center mb-3">
+                <h4 style="color: var(--primary); margin-bottom: 15px; text-align: center;">
                     <i class="fas fa-users"></i> قائمة المحالين
                 </h4>
                 <div id="referredUsersList" style="max-height: 350px; overflow-y: auto; padding: 5px;"></div>
             </div>
         </div>
+    </div>
 
-        <!-- القسم: السجل -->
-        <div id="history-section" class="section" style="display: none;">
+    <div id="history-page" class="page">
+        <div class="section">
             <div class="section-title">
                 <i class="fas fa-history" style="color: var(--secondary);"></i>
                 <h3>سجل المعاملات</h3>
             </div>
             <div class="transactions-list" id="transactionsList"></div>
         </div>
+    </div>
 
-        <!-- القسم: الملف الشخصي -->
-        <div id="profile-section" class="section" style="display: none;">
+    <div id="profile-page" class="page">
+        <div class="section">
             <div class="section-title">
-                <i class="fas fa-user-cog"></i>
+                <i class="fas fa-user-cog" style="color: var(--primary);"></i>
                 <h3>معلومات الحساب</h3>
             </div>
             
@@ -1026,15 +711,15 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>💳 عنوان محفظة USDT (TRC20)</label>
-                    <input type="text" class="form-control" id="walletAddress" placeholder="أدخل عنوان محفظتك">
+                    <label>💳 عنوان محفظة USDT</label>
+                    <input type="text" class="form-control" id="walletAddress" placeholder="أدخل عنوان محفظتك (TRC20)">
                 </div>
                 
                 <div class="form-group">
                     <label>🌐 شبكة المحفظة</label>
                     <select class="form-control" id="walletNetwork">
-                        <option value="TRC20">TRC20 (موصى به)</option>
-                        <option value="ERC20">ERC20 (رسوم أعلى)</option>
+                        <option value="TRC20">TRC20</option>
+                        <option value="ERC20">ERC20</option>
                         <option value="BEP20">BEP20</option>
                     </select>
                 </div>
@@ -1043,18 +728,20 @@
                     <i class="fas fa-save"></i> حفظ التغييرات
                 </button>
             </div>
+        </div>
 
-            <div class="section-title mt-4">
+        <div class="section">
+            <div class="section-title">
                 <i class="fas fa-wallet" style="color: var(--success);"></i>
                 <h3>طلبات السحب</h3>
             </div>
             
             <div style="background: rgba(16,185,129,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                <div class="d-flex justify-between align-center">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span>💰 الرصيد القابل للسحب</span>
                     <span style="font-size: 22px; font-weight: bold; color: var(--success);" id="withdrawableBalance">0$</span>
                 </div>
-                <small class="text-muted">الحد الأدنى للسحب: 50$</small>
+                <small style="color: #94a3b8;">الحد الأدنى للسحب: 50$</small>
             </div>
             
             <button class="btn btn-success w-100" onclick="showWithdrawalModal()">
@@ -1065,34 +752,32 @@
         </div>
     </div>
 
-    <!-- ========== شريط التنقل السفلي ========== -->
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="showSection('home')">
+        <a href="#" class="nav-item active" onclick="showPage('home'); event.preventDefault();">
             <i class="fas fa-home nav-icon"></i>
             <span class="nav-label">الرئيسية</span>
-        </button>
-        <button class="nav-item" onclick="showSection('tasks')">
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('tasks'); event.preventDefault();">
             <i class="fas fa-tasks nav-icon"></i>
             <span class="nav-label">المهام</span>
-        </button>
-        <button class="nav-item" onclick="showSection('referral')">
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('referral'); event.preventDefault();">
             <i class="fas fa-user-friends nav-icon"></i>
             <span class="nav-label">الإحالة</span>
-        </button>
-        <button class="nav-item" onclick="showSection('history')">
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('history'); event.preventDefault();">
             <i class="fas fa-history nav-icon"></i>
             <span class="nav-label">السجل</span>
-        </button>
-        <button class="nav-item" onclick="showSection('profile')">
+        </a>
+        <a href="#" class="nav-item" onclick="showPage('profile'); event.preventDefault();">
             <i class="fas fa-user nav-icon"></i>
             <span class="nav-label">حسابي</span>
-        </button>
+        </a>
     </div>
 
-    <!-- ========== نافذة طلب السحب ========== -->
     <div class="modal" id="withdrawalModal">
         <div class="modal-content">
-            <h3 class="text-center mb-4">
+            <h3 style="text-align: center; margin-bottom: 25px;">
                 <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
                 طلب سحب رصيد
             </h3>
@@ -1100,7 +785,7 @@
             <div class="form-group">
                 <label>💰 المبلغ المطلوب سحبه ($) *</label>
                 <input type="number" id="withdrawAmount" class="form-control" placeholder="أدخل المبلغ" min="50" step="10">
-                <small class="text-muted">الحد الأدنى: 50$</small>
+                <small style="color: #94a3b8;">الحد الأدنى: 50$</small>
             </div>
             
             <div class="form-group">
@@ -1115,45 +800,42 @@
                     <button type="button" class="network-btn" data-network="ERC20" onclick="selectWithdrawalNetwork('ERC20')">ERC20</button>
                     <button type="button" class="network-btn" data-network="BEP20" onclick="selectWithdrawalNetwork('BEP20')">BEP20</button>
                 </div>
-                <small class="text-muted" id="withdrawalFee">رسوم السحب: 5$ (TRC20)</small>
+                <small style="color: #94a3b8;" id="withdrawalFee">رسوم السحب: 5$ (TRC20)</small>
             </div>
             
             <div style="background: rgba(245,158,11,0.1); padding: 15px; border-radius: 10px; margin: 20px 0;">
-                <div class="d-flex justify-between">
+                <div style="display: flex; justify-content: space-between;">
                     <span>المبلغ المطلوب:</span>
                     <span id="withdrawAmountDisplay">0$</span>
                 </div>
-                <div class="d-flex justify-between mt-2">
+                <div style="display: flex; justify-content: space-between; margin-top: 8px;">
                     <span>رسوم الشبكة:</span>
                     <span id="withdrawFeeDisplay">5$</span>
                 </div>
-                <div class="d-flex justify-between mt-2 fw-bold">
+                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-weight: bold;">
                     <span>الإجمالي المخصوم:</span>
                     <span id="withdrawTotalDisplay">0$</span>
                 </div>
             </div>
             
-            <div class="d-flex gap-3">
-                <button class="btn" style="flex: 1; background: var(--danger);" onclick="closeWithdrawalModal()">
-                    إلغاء
-                </button>
-                <button class="btn" style="flex: 2; background: var(--success);" onclick="submitWithdrawal()">
-                    تأكيد طلب السحب
-                </button>
+            <div style="display: flex; gap: 15px;">
+                <button class="btn" style="flex: 1; background: var(--danger);" onclick="closeWithdrawalModal()">إلغاء</button>
+                <button class="btn" style="flex: 2; background: var(--success);" onclick="submitWithdrawal()">تأكيد طلب السحب</button>
             </div>
         </div>
     </div>
 
-    <!-- ========== الإشعار ========== -->
     <div class="notification" id="notification"></div>
 
-<script>
-        // ========== متغيرات عامة ==========
+    <script>
+        // ==================== نظام لوحة التحكم - متوافق مع Supabase ====================
+        
         let currentUser = null;
         let transactions = [];
         let withdrawals = [];
         let userTasks = [];
         let withdrawalNetwork = 'TRC20';
+        let supabaseAvailable = false;
         
         const withdrawalFees = {
             'TRC20': 5,
@@ -1161,56 +843,74 @@
             'BEP20': 3
         };
 
+        // ========== التحقق من توفر Supabase ==========
+        function checkSupabase() {
+            supabaseAvailable = typeof window !== 'undefined' && 
+                               window.supabaseClient && 
+                               window.supabaseHelpers;
+            
+            const syncStatus = document.getElementById('syncStatus');
+            const syncIcon = document.getElementById('syncIcon');
+            const syncText = document.getElementById('syncText');
+            
+            if (supabaseAvailable) {
+                syncStatus.className = 'sync-status online';
+                syncIcon.className = 'fas fa-wifi';
+                syncText.textContent = 'متصل بـ Supabase';
+            } else {
+                syncStatus.className = 'sync-status offline';
+                syncIcon.className = 'fas fa-exclamation-triangle';
+                syncText.textContent = 'وضع عدم الاتصال (تخزين محلي)';
+            }
+            
+            return supabaseAvailable;
+        }
+
         // ========== تهيئة لوحة التحكم ==========
         async function initDashboard() {
             console.log('🚀 بدء تشغيل لوحة التحكم...');
             
-            // التحقق من تسجيل الدخول
+            // التحقق من الاتصال بـ Supabase
+            checkSupabase();
+            
             const userData = localStorage.getItem('current_user');
             if (!userData) {
                 window.location.href = 'index.html';
                 return;
             }
             
+            currentUser = JSON.parse(userData);
+            
+            // محاولة تحديث بيانات المستخدم من Supabase
+            await refreshUserFromSupabase();
+            
+            await loadUserData();
+            await loadTransactions();
+            await loadWithdrawals();
+            await loadUserTasks();
+            await loadReferralStats();
+            
+            // تحديث دوري للبيانات
+            setInterval(async () => {
+                if (currentUser) {
+                    await refreshUserData();
+                }
+            }, 30000);
+        }
+
+        // ========== تحديث بيانات المستخدم من Supabase ==========
+        async function refreshUserFromSupabase() {
+            if (!currentUser || !supabaseAvailable) return;
+            
             try {
-                currentUser = JSON.parse(userData);
-                
-                // التحقق من صحة المستخدم في Supabase
-                const user = await window.sharedData.getUserById(currentUser.id);
-                
-                if (!user) {
-                    throw new Error('المستخدم غير موجود');
+                const result = await window.supabaseHelpers.getUserById(currentUser.id);
+                if (result.success && result.data) {
+                    currentUser = result.data;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                    console.log('✅ تم تحديث بيانات المستخدم من Supabase');
                 }
-                
-                // التحقق من حالة المستخدم
-                if (user.status === 'banned') {
-                    showNotification('❌ حسابك محظور', 'error');
-                    localStorage.removeItem('current_user');
-                    setTimeout(() => window.location.href = 'index.html', 2000);
-                    return;
-                }
-                
-                if (user.status === 'suspended') {
-                    showNotification('⚠️ حسابك معلق مؤقتاً', 'warning');
-                }
-                
-                currentUser = user;
-                localStorage.setItem('current_user', JSON.stringify(user));
-                
-                // تحميل البيانات
-                await loadUserData();
-                await loadTransactions();
-                await loadWithdrawals();
-                await loadUserTasks();
-                await loadReferralStats();
-                
-                // تحديث دوري
-                setInterval(refreshUserData, 30000);
-                
             } catch (error) {
-                console.error('خطأ في التهيئة:', error);
-                localStorage.removeItem('current_user');
-                window.location.href = 'index.html';
+                console.log('⚠️ فشل تحديث المستخدم من Supabase، استخدام المحلي');
             }
         }
 
@@ -1225,8 +925,8 @@
             document.getElementById('profileName').value = currentUser.name || '';
             document.getElementById('profileEmail').value = currentUser.email || '';
             document.getElementById('profilePhone').value = currentUser.phone || '';
-            document.getElementById('walletAddress').value = currentUser.wallet_address || '';
-            document.getElementById('walletNetwork').value = currentUser.wallet_network || 'TRC20';
+            document.getElementById('walletAddress').value = currentUser.wallet_address || currentUser.walletAddress || '';
+            document.getElementById('walletNetwork').value = currentUser.wallet_network || currentUser.walletNetwork || 'TRC20';
             
             updateBalance();
             updatePackageInfo();
@@ -1237,32 +937,36 @@
         async function refreshUserData() {
             if (!currentUser) return;
             
-            try {
-                const user = await window.sharedData.getUserById(currentUser.id);
-                if (user) {
-                    currentUser = user;
-                    localStorage.setItem('current_user', JSON.stringify(user));
-                    await loadUserData();
-                    await loadReferralStats();
-                    await loadUserTasks();
+            // محاولة التحديث من Supabase
+            if (supabaseAvailable) {
+                await refreshUserFromSupabase();
+            } else {
+                // استخدام التخزين المحلي كاحتياطي
+                const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                const updatedUser = users.find(u => u.id === currentUser.id);
+                
+                if (updatedUser) {
+                    currentUser = updatedUser;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
                 }
-            } catch (error) {
-                console.error('خطأ في تحديث البيانات:', error);
             }
+            
+            await loadUserData();
+            await loadReferralStats();
+            await loadUserTasks();
         }
 
         // ========== تحديث الرصيد ==========
         function updateBalance() {
             document.getElementById('balance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
-            document.getElementById('totalEarned').textContent = (currentUser?.total_earned || 0).toFixed(2) + '$';
+            document.getElementById('total-earned').textContent = (currentUser?.total_earned || currentUser?.totalEarned || 0).toFixed(2) + '$';
             document.getElementById('withdrawableBalance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
-            document.getElementById('tasksCompleted').textContent = currentUser?.tasks_completed || 0;
             
             if (currentUser?.package) {
-                const dailyProfit = currentUser.package.dailyProfit || (currentUser.package.amount * 0.025);
-                document.getElementById('todayProfit').textContent = dailyProfit.toFixed(2) + '$';
-            } else {
-                document.getElementById('todayProfit').textContent = '0$';
+                const dailyProfit = currentUser.package.daily_profit || 
+                                   currentUser.package.dailyProfit || 
+                                   (currentUser.package.amount * 0.025);
+                document.getElementById('today-profit').textContent = dailyProfit.toFixed(2) + '$';
             }
         }
 
@@ -1272,8 +976,10 @@
             
             if (currentUser?.package) {
                 const pkg = currentUser.package;
-                const daysLeft = calculateDaysLeft(pkg.purchaseDate, pkg.duration || 30);
-                const dailyProfit = pkg.dailyProfit || (pkg.amount * 0.025);
+                const purchaseDate = pkg.purchase_date || pkg.purchaseDate;
+                const duration = pkg.duration || 30;
+                const daysLeft = calculateDaysLeft(purchaseDate, duration);
+                const dailyProfit = pkg.daily_profit || pkg.dailyProfit || (pkg.amount * 0.025);
                 
                 let badgeClass = 'standard';
                 let badgeText = 'عادية';
@@ -1287,35 +993,34 @@
                 }
                 
                 packageDiv.innerHTML = `
-                    <div class="package-header">
-                        <h4 class="package-name">${pkg.name}</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4 style="color: var(--primary); margin: 0;">${pkg.name}</h4>
                         <span class="badge ${badgeClass}">${badgeText}</span>
                     </div>
-                    <div class="package-details">
-                        <div class="package-detail-item">
-                            <small>الاستثمار</small>
-                            <div class="package-detail-value success">${pkg.amount}$</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div>
+                            <small style="color: #94a3b8;">الاستثمار</small>
+                            <div style="font-size: 20px; font-weight: bold; color: var(--success);">${pkg.amount}$</div>
                         </div>
-                        <div class="package-detail-item">
-                            <small>الربح اليومي</small>
-                            <div class="package-detail-value warning">${dailyProfit.toFixed(2)}$</div>
+                        <div>
+                            <small style="color: #94a3b8;">الربح اليومي</small>
+                            <div style="font-size: 20px; font-weight: bold; color: var(--warning);">${dailyProfit.toFixed(2)}$</div>
                         </div>
-                        <div class="package-detail-item">
-                            <small>الأيام المتبقية</small>
-                            <div class="package-detail-value">${daysLeft} يوم</div>
-                        </div>
-                        <div class="package-detail-item">
-                            <small>الحالة</small>
-                            <div class="package-detail-value success">نشط</div>
-                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <small style="color: #94a3b8;">الأيام المتبقية</small>
+                        <div style="font-size: 18px; font-weight: bold; color: white;">${daysLeft} يوم</div>
+                    </div>
+                    <div style="margin-top: 15px; color: var(--success);">
+                        <i class="fas fa-check-circle"></i> نشطة
                     </div>
                 `;
             } else {
                 packageDiv.innerHTML = `
-                    <div class="text-center" style="padding: 20px;">
-                        <i class="fas fa-box-open" style="font-size: 40px; color: var(--text-muted); margin-bottom: 15px;"></i>
-                        <p class="text-muted">لا توجد باقة نشطة</p>
-                        <small class="text-muted">اشترك في إحدى باقاتنا وابدأ الربح اليومي</small>
+                    <div style="text-align: center; padding: 20px;">
+                        <i class="fas fa-box-open" style="font-size: 40px; color: #94a3b8; margin-bottom: 15px;"></i>
+                        <p style="color: #94a3b8;">لا توجد باقة نشطة</p>
+                        <small>اشترك في إحدى باقاتنا وابدأ الربح اليومي</small>
                     </div>
                 `;
             }
@@ -1332,71 +1037,87 @@
             return Math.max(0, daysLeft);
         }
 
-        // ========== التحقق من الطلب المعلق ==========
+        // ========== التحقق من وجود طلب معلق ==========
         function checkPendingPackage() {
             const pendingSection = document.getElementById('pendingRequestSection');
             
-            if (!currentUser?.pending_package) {
+            if (!currentUser?.pending_package && !currentUser?.pendingPackage) {
                 pendingSection.style.display = 'none';
                 return;
             }
             
-            const pending = currentUser.pending_package;
+            const pending = currentUser.pending_package || currentUser.pendingPackage;
             
             pendingSection.style.display = 'block';
-            pendingSection.className = 'pending-section';
+            pendingSection.className = 'section';
             pendingSection.innerHTML = `
-                <div class="d-flex justify-between align-center">
-                    <h4 style="color: var(--warning); margin: 0;">${pending.name}</h4>
-                    <span class="status-pending">
-                        <i class="fas fa-clock"></i> بانتظار المراجعة
-                    </span>
+                <div class="section-title">
+                    <i class="fas fa-clock" style="color: var(--warning);"></i>
+                    <h3>حالة طلب الاشتراك</h3>
                 </div>
-                <div class="d-flex justify-between mt-3">
-                    <span class="text-muted">المبلغ:</span>
-                    <strong>${pending.amount}$</strong>
-                </div>
-                <div class="d-flex justify-between mt-2">
-                    <span class="text-muted">تاريخ الطلب:</span>
-                    <span>${new Date(pending.requestedDate).toLocaleString('ar-SA')}</span>
-                </div>
-                <div class="mt-3 text-muted">
-                    <i class="fas fa-info-circle"></i>
-                    سيتم تفعيل باقتك خلال ${pending.estimatedActivation || '3-6 ساعات'}
+                <div style="background: rgba(245,158,11,0.1); padding: 20px; border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="color: var(--warning); margin: 0;">${pending.name}</h4>
+                        <span class="status-pending">
+                            <i class="fas fa-clock"></i> بانتظار المراجعة
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                        <span style="color: #94a3b8;">المبلغ:</span>
+                        <strong style="color: white;">${pending.amount}$</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        <span style="color: #94a3b8;">تاريخ الطلب:</span>
+                        <span style="color: white;">${new Date(pending.requested_date || pending.requestedDate).toLocaleString('ar-SA')}</span>
+                    </div>
+                    <div style="margin-top: 15px; color: #94a3b8; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i> سيتم تفعيل باقتك خلال ${pending.estimated_activation || pending.estimatedActivation || '3-6 ساعات'}
+                    </div>
                 </div>
             `;
         }
 
-        // ========== تحميل المهام ==========
+        // ========== تحميل مهام المستخدم ==========
         async function loadUserTasks() {
             if (!currentUser) return;
             
-            try {
-                if (!currentUser.package) {
-                    userTasks = [];
-                    displayUserTasks();
-                    displayQuickTasks();
-                    return;
-                }
-                
-                userTasks = await window.sharedData.getUserTasks(currentUser.package) || [];
-                
-                // ترتيب المهام (المكتملة في الأسفل)
-                const today = new Date().toDateString();
-                userTasks.sort((a, b) => {
-                    const aCompleted = localStorage.getItem(`task_${a.id}_${today}`);
-                    const bCompleted = localStorage.getItem(`task_${b.id}_${today}`);
-                    if (aCompleted && !bCompleted) return 1;
-                    if (!aCompleted && bCompleted) return -1;
-                    return 0;
-                });
-                
+            if (!currentUser.package) {
+                userTasks = [];
                 displayUserTasks();
                 displayQuickTasks();
-                
-            } catch (error) {
-                console.error('خطأ في تحميل المهام:', error);
+                updateTasksStats();
+                return;
             }
+            
+            // محاولة جلب المهام من Supabase
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getUserTasks(currentUser.package.category);
+                    if (result.success && result.data) {
+                        userTasks = result.data;
+                    }
+                } catch (error) {
+                    console.log('⚠️ فشل جلب المهام من Supabase');
+                }
+            }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (userTasks.length === 0 && window.sharedData) {
+                userTasks = await window.sharedData.getUserTasks(currentUser.package) || [];
+            }
+            
+            const today = new Date().toDateString();
+            userTasks.sort((a, b) => {
+                const aCompleted = localStorage.getItem(`task_${a.id}_${today}`);
+                const bCompleted = localStorage.getItem(`task_${b.id}_${today}`);
+                if (aCompleted && !bCompleted) return 1;
+                if (!aCompleted && bCompleted) return -1;
+                return 0;
+            });
+            
+            displayUserTasks();
+            displayQuickTasks();
+            updateTasksStats();
         }
 
         // ========== عرض المهام السريعة ==========
@@ -1406,11 +1127,11 @@
             
             if (!currentUser?.package) {
                 container.innerHTML = `
-                    <div class="text-center" style="padding: 30px; background: rgba(245,158,11,0.1); border-radius: 12px;">
+                    <div style="text-align: center; padding: 30px; background: rgba(245,158,11,0.1); border-radius: 12px;">
                         <i class="fas fa-crown" style="font-size: 40px; color: var(--warning); margin-bottom: 15px;"></i>
                         <h4 style="color: var(--warning); margin-bottom: 10px;">لا توجد باقة نشطة</h4>
-                        <p class="text-muted mb-3">اشترك في إحدى باقاتنا لبدء المهام اليومية</p>
-                        <button class="btn btn-primary" onclick="window.location.href='index.html#packages'">
+                        <p style="color: #94a3b8; margin-bottom: 15px;">اشترك في إحدى باقاتنا لبدء المهام اليومية</p>
+                        <button class="btn btn-primary" onclick="goToPackages()">
                             <i class="fas fa-plus-circle"></i> اشترك الآن
                         </button>
                     </div>
@@ -1420,10 +1141,10 @@
             
             if (userTasks.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center" style="padding: 30px; background: rgba(16,185,129,0.1); border-radius: 12px;">
+                    <div style="text-align: center; padding: 30px; background: rgba(16,185,129,0.1); border-radius: 12px;">
                         <i class="fas fa-check-circle" style="font-size: 40px; color: var(--success); margin-bottom: 15px;"></i>
                         <h4 style="color: var(--success); margin-bottom: 10px;">لا توجد مهام متاحة حالياً</h4>
-                        <p class="text-muted">سيتم إضافة مهام جديدة قريباً لباقتك</p>
+                        <p style="color: #94a3b8;">سيتم إضافة مهام جديدة قريباً لباقتك</p>
                     </div>
                 `;
                 return;
@@ -1436,9 +1157,9 @@
             
             if (availableTasks.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center" style="padding: 20px; background: rgba(16,185,129,0.1); border-radius: 10px;">
+                    <div style="text-align: center; padding: 20px; background: rgba(16,185,129,0.1); border-radius: 10px;">
                         <i class="fas fa-check-circle" style="color: var(--success); font-size: 24px; margin-bottom: 10px;"></i>
-                        <p class="text-muted">أكملت جميع مهام اليوم! 🎉</p>
+                        <p style="color: #94a3b8;">أكملت جميع مهام اليوم! 🎉</p>
                     </div>
                 `;
                 return;
@@ -1448,28 +1169,25 @@
             availableTasks.forEach(task => {
                 let badgeClass = 'standard';
                 let badgeText = 'عادية';
-                let borderColor = 'var(--info)';
                 
-                if (task.package_categories?.includes('vip')) {
+                if (task.package_categories?.includes('vip') || task.packageCategories?.includes('vip')) {
                     badgeClass = 'vip';
                     badgeText = 'VIP';
-                    borderColor = 'var(--warning)';
-                } else if (task.package_categories?.includes('premium')) {
+                } else if (task.package_categories?.includes('premium') || task.packageCategories?.includes('premium')) {
                     badgeClass = 'premium';
                     badgeText = 'مميزة';
-                    borderColor = 'var(--primary)';
                 }
                 
                 html += `
-                    <div class="task-item" style="border-right-color: ${borderColor};">
+                    <div class="task-item" style="border-right-color: ${badgeClass === 'vip' ? 'var(--warning)' : badgeClass === 'premium' ? 'var(--primary)' : 'var(--info)'};">
                         <div style="flex: 1;">
-                            <div class="d-flex align-center gap-2 mb-2">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
                                 <h4 style="margin: 0; font-size: 16px;">${task.title}</h4>
                                 <span class="badge ${badgeClass}">${badgeText}</span>
                             </div>
-                            <p class="text-muted" style="font-size: 13px;">${task.description.substring(0, 60)}...</p>
+                            <p style="color: #94a3b8; font-size: 13px; margin: 0;">${task.description.substring(0, 60)}...</p>
                         </div>
-                        <button class="btn btn-success btn-sm" onclick="completeTask('${task.id}', ${task.reward})">
+                        <button class="btn btn-success btn-sm" onclick="completeTask(${task.id}, ${task.reward})">
                             +${task.reward}$
                         </button>
                     </div>
@@ -1486,11 +1204,11 @@
             
             if (!currentUser?.package) {
                 container.innerHTML = `
-                    <div class="text-center" style="padding: 60px; background: rgba(245,158,11,0.1); border-radius: 15px;">
+                    <div style="text-align: center; padding: 60px; background: rgba(245,158,11,0.1); border-radius: 15px;">
                         <i class="fas fa-crown" style="font-size: 60px; color: var(--warning); margin-bottom: 20px;"></i>
                         <h3 style="color: var(--warning); margin-bottom: 15px;">لا توجد باقة نشطة</h3>
-                        <p class="text-muted mb-4">المهام متاحة فقط للمشتركين في الباقات</p>
-                        <button class="btn btn-primary" onclick="window.location.href='index.html#packages'">
+                        <p style="color: #94a3b8; margin-bottom: 20px;">المهام متاحة فقط للمشتركين في الباقات</p>
+                        <button class="btn btn-primary" onclick="goToPackages()">
                             <i class="fas fa-plus-circle"></i> اشترك الآن
                         </button>
                     </div>
@@ -1500,11 +1218,11 @@
             
             if (userTasks.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center" style="padding: 50px; background: rgba(16,185,129,0.1); border-radius: 15px;">
+                    <div style="text-align: center; padding: 50px; background: rgba(16,185,129,0.1); border-radius: 15px;">
                         <i class="fas fa-tasks" style="font-size: 50px; color: var(--success); margin-bottom: 20px;"></i>
                         <h3 style="color: var(--success); margin-bottom: 10px;">لا توجد مهام متاحة</h3>
-                        <p class="text-muted">باقتك (${currentUser.package.name}) لا تتوفر لها مهام حالياً</p>
-                        <p class="text-muted mt-2">سيتم إضافة مهام جديدة قريباً</p>
+                        <p style="color: #94a3b8;">باقتك (${currentUser.package.name}) لا تتوفر لها مهام حالياً</p>
+                        <p style="color: #94a3b8; margin-top: 10px;">سيتم إضافة مهام جديدة قريباً</p>
                     </div>
                 `;
                 return;
@@ -1513,6 +1231,31 @@
             const today = new Date().toDateString();
             let html = '';
             
+            let packageBadgeClass = 'standard';
+            let packageBadgeText = 'عادية';
+            
+            if (currentUser.package.category === 'vip') {
+                packageBadgeClass = 'vip';
+                packageBadgeText = 'VIP';
+            } else if (currentUser.package.category === 'premium') {
+                packageBadgeClass = 'premium';
+                packageBadgeText = 'مميزة';
+            }
+            
+            html += `
+                <div style="background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1)); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="color: #94a3b8;">باقتك الحالية:</span>
+                        <strong style="color: var(--primary); margin-right: 10px;">${currentUser.package.name}</strong>
+                        <span class="badge ${packageBadgeClass}">${packageBadgeText}</span>
+                    </div>
+                    <div>
+                        <span style="color: #94a3b8;">إجمالي المهام:</span>
+                        <strong style="color: white; margin-right: 5px;">${userTasks.length}</strong>
+                    </div>
+                </div>
+            `;
+            
             userTasks.forEach(task => {
                 const completedToday = localStorage.getItem(`task_${task.id}_${today}`);
                 
@@ -1520,11 +1263,11 @@
                 let badgeText = 'عادية';
                 let borderColor = 'var(--info)';
                 
-                if (task.package_categories?.includes('vip')) {
+                if (task.package_categories?.includes('vip') || task.packageCategories?.includes('vip')) {
                     badgeClass = 'vip';
                     badgeText = 'VIP';
                     borderColor = 'var(--warning)';
-                } else if (task.package_categories?.includes('premium')) {
+                } else if (task.package_categories?.includes('premium') || task.packageCategories?.includes('premium')) {
                     badgeClass = 'premium';
                     badgeText = 'مميزة';
                     borderColor = 'var(--primary)';
@@ -1544,23 +1287,24 @@
                 html += `
                     <div class="task-item ${completedToday ? 'completed' : ''}" style="border-right-color: ${borderColor};">
                         <div style="flex: 1;">
-                            <div class="d-flex align-center gap-2 mb-2 flex-wrap">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
                                 <h4 style="margin: 0; font-size: 18px;">${task.title}</h4>
                                 <span class="badge ${badgeClass}">${badgeText}</span>
                                 <span class="badge" style="background: ${difficultyColor};">${difficultyText}</span>
                             </div>
-                            <p class="text-muted mb-2">${task.description}</p>
-                            <div class="task-meta">
-                                <span><i class="fas fa-clock"></i> ${task.time_required || 2} دقيقة</span>
+                            <p style="color: #94a3b8; margin-bottom: 8px; font-size: 14px;">${task.description}</p>
+                            <div style="display: flex; gap: 15px; font-size: 13px; color: #64748b;">
+                                <span><i class="fas fa-clock"></i> ${task.time_required || task.timeRequired || 2} دقيقة</span>
                                 <span><i class="fas fa-redo"></i> ${task.type === 'daily' ? 'يومية' : 'أسبوعية'}</span>
+                                <span><i class="fas fa-check-circle"></i> ${task.completions || 0} إكمال</span>
                             </div>
                         </div>
                         <div style="text-align: left; min-width: 120px;">
-                            <div class="task-reward mb-2">
+                            <div class="task-reward" style="font-size: 22px; margin-bottom: 10px;">
                                 +${task.reward}$
                             </div>
                             <button class="btn ${completedToday ? 'btn-secondary' : 'btn-success'} btn-sm w-100" 
-                                    onclick="completeTask('${task.id}', ${task.reward})"
+                                    onclick="completeTask(${task.id}, ${task.reward})"
                                     ${completedToday ? 'disabled' : ''}>
                                 ${completedToday ? '✓ مكتملة' : 'إكمال المهمة'}
                             </button>
@@ -1572,6 +1316,25 @@
             container.innerHTML = html;
         }
 
+        // ========== تحديث إحصائيات المهام ==========
+        function updateTasksStats() {
+            if (!currentUser?.package) {
+                document.getElementById('tasks-completed').textContent = '0/0';
+                return;
+            }
+            
+            const today = new Date().toDateString();
+            let completedCount = 0;
+            
+            userTasks.forEach(task => {
+                if (localStorage.getItem(`task_${task.id}_${today}`)) {
+                    completedCount++;
+                }
+            });
+            
+            document.getElementById('tasks-completed').textContent = `${completedCount}/${userTasks.length}`;
+        }
+
         // ========== إكمال مهمة ==========
         async function completeTask(taskId, reward) {
             if (!currentUser) {
@@ -1581,12 +1344,6 @@
             
             if (!currentUser.package) {
                 showNotification('❌ لا يمكن إكمال المهام بدون باقة نشطة', 'error');
-                return;
-            }
-            
-            const canComplete = await window.sharedData.canUserCompleteTask(taskId, currentUser.package);
-            if (!canComplete) {
-                showNotification('❌ هذه المهمة غير متاحة لباقتك الحالية', 'error');
                 return;
             }
             
@@ -1602,79 +1359,108 @@
                 return;
             }
             
-            try {
-                // تحديث رصيد المستخدم
-                const newBalance = (currentUser.balance || 0) + reward;
-                const newTotalEarned = (currentUser.total_earned || 0) + reward;
-                const newTasksCompleted = (currentUser.tasks_completed || 0) + 1;
-                
-                await window.sharedData.updateUser(currentUser.id, {
-                    balance: newBalance,
-                    total_earned: newTotalEarned,
-                    tasks_completed: newTasksCompleted
-                });
-                
-                // تحديث إحصائيات المهمة
-                await window.sharedData.incrementTaskCompletion(taskId);
-                
-                // تحديث البيانات المحلية
-                currentUser.balance = newBalance;
-                currentUser.total_earned = newTotalEarned;
-                currentUser.tasks_completed = newTasksCompleted;
-                localStorage.setItem('current_user', JSON.stringify(currentUser));
-                
-                localStorage.setItem(`task_${task.id}_${today}`, 'completed');
-                
-                // إضافة معاملة
-                await addTransaction({
-                    type: 'ربح',
-                    amount: reward,
-                    description: `إكمال مهمة: ${task.title}`,
-                    date: new Date().toLocaleString('ar-SA')
-                });
-                
-                // تحديث الواجهة
-                updateBalance();
-                await loadUserTasks();
-                
-                showNotification(`✅ مبروك! لقد ربحت ${reward}$`, 'success');
-                
-            } catch (error) {
-                console.error('خطأ في إكمال المهمة:', error);
-                showNotification('❌ فشل إكمال المهمة', 'error');
+            // تحديث الرصيد
+            currentUser.balance = (currentUser.balance || 0) + reward;
+            currentUser.total_earned = (currentUser.total_earned || currentUser.totalEarned || 0) + reward;
+            currentUser.tasks_completed = (currentUser.tasks_completed || currentUser.tasksCompleted || 0) + 1;
+            
+            localStorage.setItem(`task_${task.id}_${today}`, 'completed');
+            
+            // تحديث إحصائيات المهمة
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.incrementTaskCompletion(taskId);
+                } catch (error) {
+                    console.log('⚠️ فشل تحديث إحصائيات المهمة في Supabase');
+                }
             }
+            
+            if (window.sharedData) {
+                window.sharedData.incrementTaskCompletion(taskId);
+            }
+            
+            await saveUserData();
+            
+            addTransaction({
+                type: 'ربح',
+                amount: reward,
+                description: `إكمال مهمة: ${task.title}`,
+                date: new Date().toLocaleString('ar-SA')
+            });
+            
+            updateBalance();
+            await loadUserTasks();
+            
+            showNotification(`✅ مبروك! لقد ربحت ${reward}$`, 'success');
+        }
+
+        // ========== تحديث المهام ==========
+        function refreshTasks() {
+            loadUserTasks();
+            showNotification('✅ تم تحديث المهام', 'success');
         }
 
         // ========== تحميل إحصائيات الإحالة ==========
         async function loadReferralStats() {
             if (!currentUser) return;
             
-            try {
-                const stats = await window.sharedData.getReferralStats(currentUser.id);
-                if (!stats) return;
-                
-                displayReferralStats(stats);
-                displayReferralCode(stats);
-                displayReferredUsers(stats);
-                
-            } catch (error) {
-                console.error('خطأ في تحميل إحصائيات الإحالة:', error);
+            let stats = null;
+            
+            // محاولة جلب الإحصائيات من Supabase
+            if (supabaseAvailable && window.supabaseHelpers) {
+                // يمكن إضافة دالة getReferralStats في supabase.js لاحقاً
             }
+            
+            // استخدام shared-data
+            if (window.sharedData) {
+                stats = window.sharedData.getReferralStats(currentUser.id);
+            }
+            
+            if (!stats) {
+                if (!currentUser.referral_code && !currentUser.referralCode) {
+                    const code = window.sharedData?.generateReferralCode(currentUser.username || currentUser.email);
+                    currentUser.referral_code = code;
+                    await saveUserData();
+                }
+                setTimeout(loadReferralStats, 100);
+                return;
+            }
+            
+            displayReferralStats(stats);
+            displayReferralCode(stats);
+            displayReferredUsers(stats);
         }
 
         // ========== عرض إحصائيات الإحالة ==========
         function displayReferralStats(stats) {
-            document.getElementById('referralCount').textContent = stats.referredCount || 0;
-            document.getElementById('activeReferrals').textContent = stats.activeReferrals || 0;
-            document.getElementById('pendingReferrals').textContent = stats.pendingReferrals || 0;
-            document.getElementById('referralEarnings').textContent = (stats.totalEarned || 0).toFixed(2) + '$';
+            const container = document.getElementById('referralStats');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value">${stats.referredCount || 0}</div>
+                    <div style="color: #94a3b8;">إجمالي المحالين</div>
+                </div>
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value" style="color: var(--success);">${stats.activeReferrals || 0}</div>
+                    <div style="color: #94a3b8;">مشتركين نشطين</div>
+                </div>
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value" style="color: var(--warning);">${stats.pendingReferrals || 0}</div>
+                    <div style="color: #94a3b8;">بانتظار الباقة</div>
+                </div>
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value" style="color: var(--success);">${(stats.totalEarned || 0).toFixed(2)}$</div>
+                    <div style="color: #94a3b8;">أرباح الإحالة</div>
+                </div>
+            `;
         }
 
         // ========== عرض كود الإحالة ==========
         function displayReferralCode(stats) {
             const codeDisplay = document.getElementById('referralCodeDisplay');
             if (codeDisplay) {
-                codeDisplay.textContent = stats.referralCode || '-';
+                codeDisplay.textContent = stats.referralCode || '';
             }
             
             const linkDisplay = document.getElementById('referralLinkDisplay');
@@ -1698,12 +1484,12 @@
                         '<span style="color: var(--warning);"><i class="fas fa-clock"></i> بانتظار الباقة</span>';
                     
                     html += `
-                        <div class="referred-user-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.03); margin-bottom: 10px; border-radius: 10px;">
                             <div>
                                 <strong>${user.name}</strong><br>
-                                <small class="text-muted">${joinDate}</small>
+                                <small style="color: #94a3b8;">${joinDate}</small>
                             </div>
-                            <div>
+                            <div style="text-align: left;">
                                 <span class="badge" style="background: ${user.hasPackage ? 'var(--success)' : 'var(--warning)'};">
                                     ${user.hasPackage ? 'مشترك' : 'بانتظار'}
                                 </span>
@@ -1715,7 +1501,7 @@
                 usersList.innerHTML = html;
             } else {
                 usersList.innerHTML = `
-                    <div class="text-center" style="padding: 40px; color: var(--text-muted);">
+                    <div style="text-align: center; padding: 40px; color: #94a3b8;">
                         <i class="fas fa-user-friends" style="font-size: 48px; margin-bottom: 15px;"></i>
                         <p>لم تقم بإحالة أي مستخدم بعد</p>
                         <small>شارك رابط الإحالة مع أصدقائك لبدء الربح</small>
@@ -1727,8 +1513,12 @@
         // ========== نسخ كود الإحالة ==========
         function copyReferralCode() {
             const code = document.getElementById('referralCodeDisplay')?.textContent;
-            if (code && code !== '-') {
-                copyText(code);
+            if (code) {
+                navigator.clipboard.writeText(code).then(() => {
+                    showNotification('✅ تم نسخ كود الإحالة');
+                }).catch(() => {
+                    showNotification('❌ حدث خطأ في النسخ', 'error');
+                });
             }
         }
 
@@ -1736,7 +1526,11 @@
         function copyReferralLink() {
             const link = document.getElementById('referralLinkDisplay')?.textContent;
             if (link) {
-                copyText(link);
+                navigator.clipboard.writeText(link).then(() => {
+                    showNotification('✅ تم نسخ رابط الإحالة');
+                }).catch(() => {
+                    showNotification('❌ حدث خطأ في النسخ', 'error');
+                });
             }
         }
 
@@ -1744,12 +1538,25 @@
         async function loadTransactions() {
             if (!currentUser) return;
             
-            try {
-                transactions = await window.sharedData.getUserTransactions(currentUser.id) || [];
-                displayTransactions();
-            } catch (error) {
-                console.error('خطأ في تحميل المعاملات:', error);
+            // محاولة جلب المعاملات من Supabase
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getUserTransactions(currentUser.id);
+                    if (result.success && result.data) {
+                        transactions = result.data;
+                    }
+                } catch (error) {
+                    console.log('⚠️ فشل جلب المعاملات من Supabase');
+                }
             }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (transactions.length === 0) {
+                const saved = localStorage.getItem(`user_transactions_${currentUser.id}`);
+                transactions = saved ? JSON.parse(saved) : [];
+            }
+            
+            displayTransactions();
         }
 
         // ========== عرض المعاملات ==========
@@ -1758,7 +1565,7 @@
             if (!list) return;
             
             if (transactions.length === 0) {
-                list.innerHTML = '<p class="text-center text-muted" style="padding: 30px;">لا توجد معاملات بعد</p>';
+                list.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 30px;">لا توجد معاملات بعد</p>';
                 return;
             }
             
@@ -1779,12 +1586,12 @@
                 
                 html += `
                     <div class="transaction-item" style="border-right-color: ${borderColor};">
-                        <div class="transaction-info">
-                            <h4>${t.description || t.type}</h4>
-                            <small>${t.date || ''}</small>
+                        <div>
+                            <h4 style="margin-bottom: 5px; font-size: 16px;">${t.description || t.type}</h4>
+                            <small style="color: #94a3b8;">${t.date || t.created_at}</small>
                         </div>
-                        <span class="transaction-amount" style="color: ${borderColor};">
-                            ${sign}${(t.amount || 0).toFixed(2)}$
+                        <span style="color: ${borderColor}; font-weight: bold; font-size: 18px;">
+                            ${sign}${t.amount}$
                         </span>
                     </div>
                 `;
@@ -1793,22 +1600,32 @@
             list.innerHTML = html;
         }
 
-        // ========== إضافة معاملة ==========
+        // ========== إضافة معاملة جديدة ==========
         async function addTransaction(transaction) {
-            if (!currentUser) return;
+            transactions.unshift({
+                id: Date.now(),
+                ...transaction
+            });
             
-            try {
-                const newTransaction = {
-                    user_id: currentUser.id,
-                    ...transaction,
-                    date: transaction.date || new Date().toLocaleString('ar-SA')
-                };
+            if (currentUser) {
+                // حفظ في التخزين المحلي
+                localStorage.setItem(`user_transactions_${currentUser.id}`, JSON.stringify(transactions.slice(0, 100)));
                 
-                await window.sharedData.addTransaction(newTransaction);
-                await loadTransactions();
+                // محاولة الحفظ في Supabase
+                if (supabaseAvailable) {
+                    try {
+                        await window.supabaseHelpers.createTransaction({
+                            userId: currentUser.id,
+                            ...transaction
+                        });
+                    } catch (error) {
+                        console.log('⚠️ فشل حفظ المعاملة في Supabase');
+                    }
+                }
                 
-            } catch (error) {
-                console.error('خطأ في إضافة المعاملة:', error);
+                if (document.getElementById('history-page').classList.contains('active')) {
+                    displayTransactions();
+                }
             }
         }
 
@@ -1816,12 +1633,25 @@
         async function loadWithdrawals() {
             if (!currentUser) return;
             
-            try {
-                withdrawals = await window.sharedData.getUserWithdrawals(currentUser.id) || [];
-                displayWithdrawals();
-            } catch (error) {
-                console.error('خطأ في تحميل طلبات السحب:', error);
+            // محاولة جلب طلبات السحب من Supabase
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getUserWithdrawals(currentUser.id);
+                    if (result.success && result.data) {
+                        withdrawals = result.data;
+                    }
+                } catch (error) {
+                    console.log('⚠️ فشل جلب طلبات السحب من Supabase');
+                }
             }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (withdrawals.length === 0) {
+                const saved = localStorage.getItem(`user_withdrawals_${currentUser.id}`);
+                withdrawals = saved ? JSON.parse(saved) : [];
+            }
+            
+            displayWithdrawals();
         }
 
         // ========== عرض طلبات السحب ==========
@@ -1830,26 +1660,26 @@
             if (!list) return;
             
             if (withdrawals.length === 0) {
-                list.innerHTML = '<p class="text-center text-muted" style="padding: 20px;">لا توجد طلبات سحب سابقة</p>';
+                list.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد طلبات سحب سابقة</p>';
                 return;
             }
             
             let html = '';
             withdrawals.slice(0, 5).forEach(w => {
-                const statusColor = w.status === 'مكتمل' ? 'var(--success)' : 
-                                  w.status === 'معلق' ? 'var(--warning)' : 'var(--danger)';
-                const statusText = w.status === 'مكتمل' ? '✅ مكتمل' : 
-                                 w.status === 'معلق' ? '⏳ معلق' : '❌ مرفوض';
+                const statusColor = w.status === 'مكتمل' || w.status === 'completed' ? 'var(--success)' : 
+                                  w.status === 'معلق' || w.status === 'pending' ? 'var(--warning)' : 'var(--danger)';
+                const statusText = w.status === 'مكتمل' || w.status === 'completed' ? '✅ مكتمل' : 
+                                 w.status === 'معلق' || w.status === 'pending' ? '⏳ معلق' : '❌ مرفوض';
                 
                 html += `
                     <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 12px;">
-                        <div class="d-flex justify-between mb-2">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="font-weight: bold;">💰 ${w.amount}$</span>
                             <span style="color: ${statusColor};">${statusText}</span>
                         </div>
-                        <div class="d-flex justify-between">
-                            <small class="text-muted">${w.date}</small>
-                            <small class="text-muted">${w.network || 'TRC20'}</small>
+                        <div style="display: flex; justify-content: space-between;">
+                            <small style="color: #94a3b8;">${w.date || w.created_at}</small>
+                            <small style="color: #94a3b8;">${w.network || 'TRC20'}</small>
                         </div>
                     </div>
                 `;
@@ -1875,15 +1705,16 @@
                 return;
             }
             
-            if (!currentUser.wallet_address) {
+            const wallet = currentUser.wallet_address || currentUser.walletAddress;
+            if (!wallet) {
                 showNotification('⚠️ يرجى إضافة عنوان محفظتك أولاً', 'warning');
-                showSection('profile');
+                showPage('profile');
                 return;
             }
             
-            document.getElementById('withdrawWallet').value = currentUser.wallet_address;
+            document.getElementById('withdrawWallet').value = wallet;
             
-            withdrawalNetwork = currentUser.wallet_network || 'TRC20';
+            withdrawalNetwork = currentUser.wallet_network || currentUser.walletNetwork || 'TRC20';
             document.querySelectorAll('.network-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.network === withdrawalNetwork) {
@@ -1959,35 +1790,89 @@
             }
             
             if (network === 'TRC20' && wallet.length < 30) {
-                showNotification('❌ عنوان محفظة TRC20 غير صحيح', 'error');
+                showNotification('❌ عنوان محفظة TRC20 غير صحيح (يجب أن يكون 34 حرف)', 'error');
                 return;
             }
             
-            try {
-                const withdrawalData = {
-                    user_id: currentUser.id,
-                    amount: amount,
-                    wallet: wallet,
-                    network: network,
-                    fee: fee,
-                    total: total
-                };
-                
-                await window.sharedData.addWithdrawal(withdrawalData);
-                
-                // تحديث الرصيد محلياً
-                currentUser.balance -= total;
-                localStorage.setItem('current_user', JSON.stringify(currentUser));
-                
-                await loadWithdrawals();
-                updateBalance();
-                closeWithdrawalModal();
-                
-                showNotification(`✅ تم إرسال طلب سحب بقيمة ${amount}$`, 'success');
-                
-            } catch (error) {
-                console.error('خطأ في تقديم طلب السحب:', error);
-                showNotification('❌ فشل إرسال الطلب', 'error');
+            if (network === 'ERC20' && wallet.length < 40) {
+                showNotification('❌ عنوان محفظة ERC20 غير صحيح', 'error');
+                return;
+            }
+            
+            if (network === 'BEP20' && wallet.length < 40) {
+                showNotification('❌ عنوان محفظة BEP20 غير صحيح', 'error');
+                return;
+            }
+            
+            // خصم الرصيد
+            currentUser.balance -= total;
+            
+            const withdrawal = {
+                id: Date.now(),
+                amount: amount,
+                wallet: wallet,
+                network: network,
+                fee: fee,
+                total: total,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                date: new Date().toLocaleString('ar-SA')
+            };
+            
+            withdrawals.unshift(withdrawal);
+            
+            // حفظ في التخزين المحلي
+            localStorage.setItem(`user_withdrawals_${currentUser.id}`, JSON.stringify(withdrawals));
+            
+            // محاولة الحفظ في Supabase
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.createWithdrawal({
+                        userId: currentUser.id,
+                        ...withdrawal
+                    });
+                } catch (error) {
+                    console.log('⚠️ فشل حفظ طلب السحب في Supabase');
+                }
+            }
+            
+            addTransaction({
+                type: 'سحب',
+                amount: -total,
+                description: `طلب سحب ${amount}$ (${fee}$ رسوم ${network})`,
+                date: new Date().toLocaleString('ar-SA')
+            });
+            
+            await saveUserData();
+            updateBalance();
+            displayWithdrawals();
+            closeWithdrawalModal();
+            
+            showNotification(`✅ تم إرسال طلب سحب بقيمة ${amount}$`, 'success');
+        }
+
+        // ========== حفظ بيانات المستخدم ==========
+        async function saveUserData() {
+            if (!currentUser) return;
+            
+            // حفظ في التخزين المحلي
+            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            
+            if (userIndex !== -1) {
+                users[userIndex] = currentUser;
+                localStorage.setItem('elite_users', JSON.stringify(users));
+            }
+            
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
+            
+            // محاولة التحديث في Supabase
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.updateUser(currentUser.id, currentUser);
+                } catch (error) {
+                    console.log('⚠️ فشل تحديث المستخدم في Supabase');
+                }
             }
         }
 
@@ -2010,76 +1895,64 @@
                 return;
             }
             
-            try {
-                await window.sharedData.updateUser(currentUser.id, {
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    wallet_address: wallet,
-                    wallet_network: walletNetwork
-                });
-                
-                currentUser.name = name;
-                currentUser.email = email;
-                currentUser.phone = phone;
-                currentUser.wallet_address = wallet;
-                currentUser.wallet_network = walletNetwork;
-                
-                localStorage.setItem('current_user', JSON.stringify(currentUser));
-                
-                document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-                document.getElementById('userName').textContent = name;
-                document.getElementById('userEmail').textContent = email;
-                
-                showNotification('✅ تم حفظ التغييرات', 'success');
-                
-            } catch (error) {
-                console.error('خطأ في حفظ الملف الشخصي:', error);
-                showNotification('❌ فشل حفظ التغييرات', 'error');
+            const phoneRegex = /^[0-9]{10,}$/;
+            if (phone && !phoneRegex.test(phone.replace(/\D/g, ''))) {
+                showNotification('❌ رقم الهاتف غير صالح (يجب أن يكون 10 أرقام على الأقل)', 'error');
+                return;
             }
+            
+            currentUser.name = name;
+            currentUser.email = email;
+            currentUser.phone = phone;
+            currentUser.wallet_address = wallet;
+            currentUser.wallet_network = walletNetwork;
+            
+            await saveUserData();
+            
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('userName').textContent = name;
+            document.getElementById('userEmail').textContent = email;
+            
+            showNotification('✅ تم حفظ التغييرات', 'success');
         }
 
-        // ========== نسخ نص ==========
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('✅ تم النسخ إلى الحافظة', 'success');
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showNotification('✅ تم النسخ إلى الحافظة', 'success');
+        // ========== إظهار الإشعارات ==========
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification ' + (type || 'success');
+            notification.style.display = 'block';
+            
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            notification.innerHTML = `${icon} ${message}`;
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // ========== إظهار صفحة ==========
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
             });
-        }
-
-        // ========== التنقل بين الأقسام ==========
-        function showSection(sectionName) {
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            document.getElementById(sectionName + '-section').style.display = 'block';
             
-            document.querySelectorAll('.section-tab').forEach(tab => tab.classList.remove('active'));
-            const tabs = document.querySelectorAll('.section-tab');
-            const tabIndex = { home: 0, tasks: 1, referral: 2, history: 3, profile: 4 };
-            if (tabs[tabIndex[sectionName]]) {
-                tabs[tabIndex[sectionName]].classList.add('active');
-            }
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
             
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            const navItems = document.querySelectorAll('.nav-item');
-            if (navItems[tabIndex[sectionName]]) {
-                navItems[tabIndex[sectionName]].classList.add('active');
-            }
+            document.getElementById(pageName + '-page').classList.add('active');
+            event.currentTarget.classList.add('active');
             
-            // تحميل البيانات حسب القسم
-            if (sectionName === 'history') {
+            if (pageName === 'history') {
                 displayTransactions();
-            } else if (sectionName === 'profile') {
+            } else if (pageName === 'profile') {
                 displayWithdrawals();
-            } else if (sectionName === 'tasks') {
+            } else if (pageName === 'tasks') {
                 loadUserTasks();
-            } else if (sectionName === 'referral') {
+            } else if (pageName === 'referral') {
                 loadReferralStats();
             }
         }
@@ -2087,6 +1960,7 @@
         // ========== الذهاب إلى الباقات ==========
         function goToPackages() {
             if (currentUser) {
+                saveUserData();
                 window.location.href = 'index.html#packages';
             }
         }
@@ -2094,28 +1968,15 @@
         // ========== تسجيل الخروج ==========
         async function logout() {
             if (confirm('هل تريد تسجيل الخروج؟')) {
+                if (currentUser) {
+                    await saveUserData();
+                }
                 localStorage.removeItem('current_user');
                 window.location.href = 'index.html';
             }
         }
 
-        // ========== الإشعارات ==========
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            const icon = type === 'success' ? '✅' : 
-                        type === 'error' ? '❌' : 
-                        type === 'warning' ? '⚠️' : 'ℹ️';
-            
-            notification.innerHTML = `${icon} ${message}`;
-            notification.className = 'notification ' + type;
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
-        }
-
-        // ========== التهيئة ==========
+        // ========== تهيئة الصفحة ==========
         document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>
