@@ -1,10 +1,9 @@
 // ===================================
-// ملف: supabase.js
-// الاتصال بقاعدة بيانات Supabase - الإصدار النهائي
+// ملف الاتصال بـ Supabase
 // ===================================
 
-const SUPABASE_URL = 'https://kfwbcewtnfoofllhxron.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtmd2JjZXd0bmZvb2ZsbGh4cm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5MjEwMzksImV4cCI6MjA4NjQ5NzAzOX0.Mgf7Dg4Ji3eKHQPz3SUGTfwSfsl7anYneA4ZPIYgbIU';
+const SUPABASE_URL = 'https://kjivdgfacwvdcfaxdedb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqaXZkZ2ZhY3d2ZGNmYXhkZWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODY1MDksImV4cCI6MjA4NjU2MjUwOX0.3SW2jU-Cu3i4Ms5yIFjaDZZ8DQCVI78Rc0ZIyFeFaXo';
 
 // إنشاء عميل Supabase
 let supabaseClient = null;

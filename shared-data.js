@@ -1,6 +1,5 @@
 // ===================================
-// ملف: shared-data.js
-// نظام البيانات المشتركة - إصدار Supabase فقط - كامل ومصحح
+// نظام البيانات المشتركة - إصدار Supabase
 // ===================================
 
 // ========== التحقق من الاتصال ==========
@@ -10,7 +9,11 @@ function getSupabase() {
 
 // ========== دوال مساعدة ==========
 function generateUUID() {
-    return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 // توليد كود إحالة فريد
@@ -188,7 +191,7 @@ async function getAllTasks() {
             .from('tasks')
             .select('*')
             .eq('status', 'active')
-            .order('id', { ascending: true });
+            .order('created_at', { ascending: true });
         
         if (error) throw error;
         return data || [];
@@ -200,7 +203,7 @@ async function getAllTasks() {
 
 // الحصول على مهام المستخدم حسب باقته
 async function getUserTasks(userPackage) {
-    if (!userPackage) return [];
+    if (!userPackage || !userPackage.category) return [];
     
     const supabase = getSupabase();
     if (!supabase) return [];
@@ -351,15 +354,13 @@ async function incrementTaskCompletion(taskId) {
         
         const newCompletions = (task.completions || 0) + 1;
         
-        const { data, error } = await supabase
+        const { error } = await supabase
             .from('tasks')
             .update({ 
                 completions: newCompletions,
                 updated_at: new Date().toISOString()
             })
-            .eq('id', taskId)
-            .select()
-            .single();
+            .eq('id', taskId);
         
         if (error) throw error;
         return newCompletions;
@@ -371,7 +372,7 @@ async function incrementTaskCompletion(taskId) {
 
 // التحقق من إمكانية إكمال المهمة
 async function canUserCompleteTask(taskId, userPackage) {
-    if (!userPackage) return false;
+    if (!userPackage || !userPackage.category) return false;
     const task = await getTaskById(taskId);
     if (!task) return false;
     return task.package_categories?.includes(userPackage.category) || false;
@@ -640,7 +641,7 @@ async function getReferralStats(userId) {
     let pendingCommission = 0;
     referredUsers?.forEach(u => {
         if (u.package && u.package.amount && u.referral_reward_paid !== true) {
-            pendingCommission += 50; // قيمة العمولة الافتراضية
+            pendingCommission += 50;
         }
     });
 
@@ -1208,11 +1209,6 @@ async function getDashboardStats() {
             totalCompletions: totalCompletions,
             totalTasksReward: totalTasksReward,
             packagesCount: packagesCount || 0,
-            todayDeposits: 0, // يمكن حسابه لاحقاً
-            todayWithdrawals: 0, // يمكن حسابه لاحقاً
-            totalProfits: 0, // يمكن حسابه لاحقاً
-            totalReferralEarnings: 0, // يمكن حسابه لاحقاً
-            totalReferrals: 0, // يمكن حسابه لاحقاً
             netRevenue: totalDeposits - totalWithdrawals
         };
     } catch (error) {

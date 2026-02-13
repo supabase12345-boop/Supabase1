@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-‏<head>
-    <!-- مكتبة Supabase -->
-‏    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<head>
+    <!-- تحميل مكتبة Supabase أولاً -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- ملفات المشروع - بالترتيب -->
-‏    <script src="supabase.js"></script>
-‏    <script src="shared-data.js"></script>
-‏    <script src="app.js"></script>
+    <script src="supabase.js"></script>
+    <script src="shared-data.js"></script>
     
-   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>لوحة التحكم - Elite Investors</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --primary: #7c3aed;
@@ -22,27 +21,33 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --dark: #0f172a;
-            --light: #f8fafc;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
             --purple: #8b5cf6;
+            --info: #0891b2;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Tajawal', 'Arial', sans-serif;
         }
         
         body {
-            font-family: 'Tajawal', 'Arial', sans-serif;
             background: var(--dark);
-            color: white;
+            color: var(--text);
             padding-bottom: 80px;
+            min-height: 100vh;
         }
         
+        /* ========== الشريط العلوي ========== */
         .dashboard-header {
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(10px);
             padding: 15px 20px;
-            border-bottom: 2px solid var(--primary);
             position: fixed;
             top: 0;
             width: 100%;
@@ -50,7 +55,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary);
         }
         
         .user-info {
@@ -73,34 +78,91 @@
             box-shadow: 0 4px 10px rgba(124,58,237,0.3);
         }
         
+        .user-details h3 {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+        
+        .user-details small {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        
+        /* ========== شريط التنقل السفلي ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 2px solid var(--primary);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 12px;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(124, 58, 237, 0.15);
+            transform: translateY(-5px);
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        /* ========== المحتوى الرئيسي ========== */
+        .main-content {
+            padding: 20px;
+            padding-top: 90px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* ========== بطاقات الإحصائيات ========== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            padding: 20px;
-            padding-top: 90px;
+            margin-bottom: 25px;
         }
         
         .stat-card {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
+            background: var(--dark-light);
             border-radius: 15px;
             padding: 20px;
             text-align: center;
-            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-right: 5px solid var(--primary);
             transition: all 0.3s;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 10px 25px rgba(124,58,237,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         
         .stat-icon {
             font-size: 30px;
             margin-bottom: 10px;
-            color: var(--primary);
+            color: var(--secondary);
         }
         
         .stat-value {
@@ -114,12 +176,12 @@
         .stat-value.warning { color: var(--warning); }
         .stat-value.info { color: var(--secondary); }
         
+        /* ========== الأقسام ========== */
         .section {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            margin: 15px;
-            padding: 20px;
+            background: var(--dark-light);
             border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
             border: 1px solid rgba(124, 58, 237, 0.3);
         }
         
@@ -134,9 +196,64 @@
             padding-bottom: 15px;
         }
         
+        /* ========== المهام ========== */
+        .tasks-list {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(124, 58, 237, 0.1);
+            transition: all 0.3s;
+            border-right: 4px solid var(--info);
+        }
+        
+        .task-item:hover {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+        
+        .task-item.completed {
+            opacity: 0.7;
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+        }
+        
+        .task-info h4 {
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .task-info p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 0;
+        }
+        
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .task-reward {
+            font-weight: bold;
+            color: var(--success);
+            font-size: 20px;
+        }
+        
+        /* ========== نظام الإحالة ========== */
         .referral-stats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin: 20px 0;
         }
@@ -171,53 +288,20 @@
             direction: ltr;
         }
         
-        .tasks-list {
-            display: grid;
-            gap: 12px;
+        .referral-link {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            word-break: break-all;
+            font-size: 14px;
+            direction: ltr;
+            text-align: left;
+            border: 1px dashed var(--purple);
+            color: var(--purple);
+            margin: 15px 0;
         }
         
-        .task-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(124, 58, 237, 0.1);
-            transition: all 0.3s;
-            border-right: 4px solid var(--info);
-        }
-        
-        .task-item:hover {
-            border-color: var(--primary);
-            background: rgba(124, 58, 237, 0.05);
-        }
-        
-        .task-item.completed {
-            opacity: 0.7;
-            background: rgba(16, 185, 129, 0.1);
-            border-color: var(--success);
-        }
-        
-        .task-reward {
-            font-weight: bold;
-            color: var(--success);
-            font-size: 20px;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .badge.standard { background: #3b82f6; }
-        .badge.premium { background: #8b5cf6; }
-        .badge.vip { background: #f59e0b; }
-        
+        /* ========== المعاملات ========== */
         .transactions-list {
             display: grid;
             gap: 10px;
@@ -244,47 +328,110 @@
             border-right-color: var(--purple);
         }
         
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 2px solid var(--primary);
-            z-index: 1000;
+        .transaction-info h4 {
+            margin-bottom: 5px;
+            font-size: 16px;
         }
         
-        .nav-item {
+        .transaction-info small {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        /* ========== الباقة الحالية ========== */
+        .current-package {
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.15));
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .package-header {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            text-decoration: none;
-            color: #94a3b8;
-            transition: all 0.3s;
-            padding: 8px 16px;
-            border-radius: 12px;
+            margin-bottom: 15px;
         }
         
-        .nav-item.active {
+        .package-name {
+            font-size: 20px;
             color: var(--primary);
-            background: rgba(124, 58, 237, 0.15);
-            transform: translateY(-5px);
         }
         
-        .nav-icon {
-            font-size: 24px;
+        .package-badge {
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .badge.standard { background: #3b82f6; }
+        .badge.premium { background: var(--purple); }
+        .badge.vip { background: var(--warning); }
+        
+        .package-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .package-detail-item small {
+            color: var(--text-muted);
+            display: block;
             margin-bottom: 5px;
         }
         
-        .nav-label {
-            font-size: 12px;
-            font-weight: 600;
+        .package-detail-value {
+            font-size: 20px;
+            font-weight: bold;
         }
         
+        /* ========== النماذج ========== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(124,58,237,0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(124,58,237,0.1);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 18px center;
+            padding-left: 45px;
+        }
+        
+        /* ========== الأزرار ========== */
         .btn {
             padding: 12px 24px;
             border-radius: 10px;
@@ -297,6 +444,7 @@
             justify-content: center;
             gap: 10px;
             font-size: 15px;
+            width: 100%;
         }
         
         .btn-primary {
@@ -305,7 +453,17 @@
         }
         
         .btn-success {
-            background: linear-gradient(135deg, var(--success), #0ea271);
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
             color: white;
         }
         
@@ -317,6 +475,7 @@
         .btn:hover {
             transform: translateY(-2px);
             opacity: 0.9;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
         .btn:disabled {
@@ -325,20 +484,7 @@
             transform: none;
         }
         
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
+        /* ========== النوافذ المنبثقة ========== */
         .modal {
             display: none;
             position: fixed;
@@ -365,50 +511,18 @@
         }
         
         .modal-content {
-            background: var(--dark);
+            background: var(--dark-light);
             border-radius: 20px;
             padding: 30px;
             width: 100%;
             max-width: 450px;
             border: 2px solid var(--primary);
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         
-        .current-package {
-            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.15));
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--primary);
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(124,58,237,0.3);
-            border-radius: 10px;
-            color: white;
-            font-size: 15px;
-            transition: all 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(124,58,237,0.1);
-        }
-        
+        /* ========== مختارات الشبكة ========== */
         .network-selector {
             display: flex;
             gap: 10px;
@@ -421,10 +535,11 @@
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(124,58,237,0.3);
             border-radius: 8px;
-            color: #94a3b8;
+            color: var(--text-muted);
             cursor: pointer;
             transition: all 0.3s;
             font-weight: bold;
+            text-align: center;
         }
         
         .network-btn.active {
@@ -433,6 +548,38 @@
             border-color: var(--primary);
         }
         
+        .network-btn:hover:not(.active) {
+            background: rgba(124,58,237,0.1);
+        }
+        
+        /* ========== حالة الطلب ========== */
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background: rgba(5, 150, 105, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .status-pending {
+            background: rgba(217, 119, 6, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+        
+        .status-rejected {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        /* ========== الإشعارات ========== */
         .notification {
             position: fixed;
             top: 100px;
@@ -462,27 +609,77 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        .status-pending {
-            color: var(--warning);
-            background: rgba(245,158,11,0.1);
-            padding: 6px 14px;
+        /* ========== تنسيقات إضافية ========== */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
+            color: white;
+        }
+        
+        .badge.standard { background: #3b82f6; }
+        .badge.premium { background: var(--purple); }
+        .badge.vip { background: var(--warning); }
+        
+        .referral-code {
+            background: linear-gradient(45deg, var(--purple), var(--primary));
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin: 5px 0;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .text-success { color: var(--success); }
+        .text-warning { color: var(--warning); }
+        .text-danger { color: var(--danger); }
+        .text-info { color: var(--secondary); }
+        .text-muted { color: var(--text-muted); }
+        .text-center { text-align: center; }
+        
+        .w-100 { width: 100%; }
+        .mt-2 { margin-top: 10px; }
+        .mt-3 { margin-top: 15px; }
+        .mt-4 { margin-top: 20px; }
+        .mb-2 { margin-bottom: 10px; }
+        .mb-3 { margin-bottom: 15px; }
+        .mb-4 { margin-bottom: 20px; }
+        
+        .d-flex { display: flex; }
+        .align-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 10px; }
+        .gap-3 { gap: 15px; }
+        .flex-wrap { flex-wrap: wrap; }
+        
+        /* ========== التجاوب ========== */
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .referral-stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .package-details {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
         
         @media (max-width: 768px) {
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .referral-stats {
                 grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .section {
-                margin: 10px;
-                padding: 15px;
             }
             
             .task-item {
@@ -512,34 +709,38 @@
                 grid-template-columns: 1fr;
             }
             
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .stat-value {
                 font-size: 24px;
             }
+            
+            .user-details {
+                display: none;
+            }
         }
-        
-        .text-center { text-align: center; }
-        .w-100 { width: 100%; }
-        .mt-3 { margin-top: 15px; }
-        .mt-4 { margin-top: 20px; }
-        .mb-3 { margin-bottom: 15px; }
-        .mb-4 { margin-bottom: 20px; }
     </style>
 </head>
 <body>
+    <!-- ========== الشريط العلوي ========== -->
     <div class="dashboard-header">
         <div class="user-info">
             <div class="user-avatar" id="userAvatar">م</div>
-            <div>
-                <h3 id="userName">محمد أحمد</h3>
-                <small id="userEmail" style="color: #94a3b8;">mohamed@example.com</small>
+            <div class="user-details">
+                <h3 id="userName">جاري التحميل...</h3>
+                <small id="userEmail">...</small>
             </div>
         </div>
-        <button class="btn btn-primary" onclick="logout()">
+        <button class="btn btn-primary" onclick="logout()" style="width: auto; padding: 10px 20px;">
             <i class="fas fa-sign-out-alt"></i> خروج
         </button>
     </div>
 
-    <div id="home-page" class="page active">
+    <!-- ========== المحتوى الرئيسي ========== -->
+    <div class="main-content">
+        <!-- إحصائيات سريعة -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">
@@ -553,7 +754,7 @@
                 <div class="stat-icon">
                     <i class="fas fa-coins"></i>
                 </div>
-                <div class="stat-value success" id="today-profit">0$</div>
+                <div class="stat-value success" id="todayProfit">0$</div>
                 <p>أرباح اليوم</p>
             </div>
             
@@ -561,7 +762,7 @@
                 <div class="stat-icon">
                     <i class="fas fa-tasks"></i>
                 </div>
-                <div class="stat-value warning" id="tasks-completed">0/0</div>
+                <div class="stat-value warning" id="tasksCompleted">0</div>
                 <p>مهام مكتملة</p>
             </div>
             
@@ -569,111 +770,126 @@
                 <div class="stat-icon">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                <div class="stat-value info" id="total-earned">0$</div>
+                <div class="stat-value info" id="totalEarned">0$</div>
                 <p>إجمالي الأرباح</p>
             </div>
         </div>
 
+        <!-- قسم الطلب المعلق (يظهر فقط إذا كان هناك طلب) -->
         <div id="pendingRequestSection" style="display: none;"></div>
 
-        <div class="section">
+        <!-- أزرار التنقل بين الأقسام -->
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+            <button class="btn btn-primary" style="flex:1" onclick="showSection('home')">الرئيسية</button>
+            <button class="btn" style="flex:1" onclick="showSection('tasks')">المهام</button>
+            <button class="btn" style="flex:1" onclick="showSection('referral')">الإحالة</button>
+            <button class="btn" style="flex:1" onclick="showSection('history')">السجل</button>
+            <button class="btn" style="flex:1" onclick="showSection('profile')">حسابي</button>
+        </div>
+
+        <!-- القسم: الرئيسية -->
+        <div id="home-section" class="section active-section">
             <div class="section-title">
+                <i class="fas fa-crown" style="color: var(--primary);"></i>
+                <h3>باقتك الحالية</h3>
+            </div>
+            <div class="current-package" id="currentPackage">
+                <div class="text-center" style="padding: 20px;">
+                    <i class="fas fa-box-open" style="font-size: 40px; color: var(--text-muted); margin-bottom: 15px;"></i>
+                    <p class="text-muted">لا توجد باقة نشطة</p>
+                    <small class="text-muted">اشترك في إحدى باقاتنا وابدأ الربح اليومي</small>
+                </div>
+            </div>
+            <button class="btn btn-primary w-100 mt-3" onclick="goToPackages()">
+                <i class="fas fa-plus-circle"></i> شراء باقة جديدة
+            </button>
+
+            <div class="section-title mt-4">
                 <i class="fas fa-bolt" style="color: var(--warning);"></i>
                 <h3>مهام اليوم السريعة</h3>
             </div>
             <div id="quickTasks" class="tasks-list"></div>
         </div>
 
-        <div class="section">
-            <div class="section-title">
-                <i class="fas fa-crown" style="color: var(--primary);"></i>
-                <h3>باقتك الحالية</h3>
-            </div>
-            <div class="current-package" id="currentPackage">
-                <p style="text-align: center; color: #94a3b8;">لا يوجد باقة نشطة</p>
-            </div>
-            <button class="btn btn-primary w-100 mt-4" onclick="goToPackages()">
-                <i class="fas fa-plus-circle"></i> شراء باقة جديدة
-            </button>
-        </div>
-    </div>
-
-    <div id="tasks-page" class="page">
-        <div class="section">
+        <!-- القسم: المهام -->
+        <div id="tasks-section" class="section" style="display: none;">
             <div class="section-title">
                 <i class="fas fa-tasks" style="color: var(--success);"></i>
                 <h3>المهام المتاحة</h3>
                 <div style="margin-right: auto;">
-                    <button class="btn btn-sm btn-primary" onclick="refreshTasks()">
+                    <button class="btn btn-sm btn-primary" onclick="loadUserTasks()">
                         <i class="fas fa-sync-alt"></i> تحديث
                     </button>
                 </div>
             </div>
             <div id="tasksContainer" class="tasks-list"></div>
         </div>
-    </div>
 
-    <div id="referral-page" class="page">
-        <div class="section">
+        <!-- القسم: الإحالة -->
+        <div id="referral-section" class="section" style="display: none;">
             <div class="section-title">
                 <i class="fas fa-user-friends" style="color: var(--purple);"></i>
                 <h3>نظام الإحالة</h3>
             </div>
             
-            <div class="referral-stats" id="referralStats"></div>
+            <div class="referral-stats" id="referralStats">
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value" id="referralCount">0</div>
+                    <div class="text-muted">إجمالي المحالين</div>
+                </div>
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value" style="color: var(--success);" id="activeReferrals">0</div>
+                    <div class="text-muted">نشطين</div>
+                </div>
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value" style="color: var(--warning);" id="pendingReferrals">0</div>
+                    <div class="text-muted">بانتظار</div>
+                </div>
+                <div class="referral-stat-card">
+                    <div class="referral-stat-value" style="color: var(--success);" id="referralEarnings">0$</div>
+                    <div class="text-muted">أرباح الإحالة</div>
+                </div>
+            </div>
             
             <div style="margin: 25px 0;">
-                <h4 style="color: #cbd5e1; margin-bottom: 15px; text-align: center;">
+                <h4 class="text-center mb-3">
                     <i class="fas fa-gift"></i> كود الإحالة الخاص بك
                 </h4>
-                <div class="referral-code-box" id="referralCodeDisplay"></div>
+                <div class="referral-code-box" id="referralCodeDisplay">-</div>
                 <button class="btn btn-primary w-100 mt-2" onclick="copyReferralCode()">
                     <i class="fas fa-copy"></i> نسخ كود الإحالة
                 </button>
             </div>
             
             <div style="margin: 25px 0;">
-                <h4 style="color: #cbd5e1; margin-bottom: 15px; text-align: center;">
+                <h4 class="text-center mb-3">
                     <i class="fas fa-link"></i> رابط الإحالة
                 </h4>
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; word-break: break-all; font-size: 14px; direction: ltr; text-align: left;" id="referralLinkDisplay"></div>
+                <div class="referral-link" id="referralLinkDisplay"></div>
                 <button class="btn btn-success w-100 mt-2" onclick="copyReferralLink()">
                     <i class="fas fa-copy"></i> نسخ رابط الإحالة
                 </button>
             </div>
             
             <div style="margin-top: 30px;">
-                <h4 style="color: var(--primary); margin-bottom: 15px; text-align: center;">
+                <h4 class="text-center mb-3">
                     <i class="fas fa-users"></i> قائمة المحالين
                 </h4>
                 <div id="referredUsersList" style="max-height: 350px; overflow-y: auto; padding: 5px;"></div>
             </div>
         </div>
-    </div>
 
-
-
-
-
-    <div id="history-page" class="page">
-
-
-        <div class="section">
-
-
+        <!-- القسم: السجل -->
+        <div id="history-section" class="section" style="display: none;">
             <div class="section-title">
-
                 <i class="fas fa-history" style="color: var(--secondary);"></i>
-
-
                 <h3>سجل المعاملات</h3>
             </div>
             <div class="transactions-list" id="transactionsList"></div>
         </div>
-    </div>
 
-    <div id="profile-page" class="page">
-        <div class="section">
+        <!-- القسم: الملف الشخصي -->
+        <div id="profile-section" class="section" style="display: none;">
             <div class="section-title">
                 <i class="fas fa-user-cog" style="color: var(--primary);"></i>
                 <h3>معلومات الحساب</h3>
@@ -696,15 +912,15 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>💳 عنوان محفظة USDT</label>
-                    <input type="text" class="form-control" id="walletAddress" placeholder="أدخل عنوان محفظتك (TRC20)">
+                    <label>💳 عنوان محفظة USDT (TRC20)</label>
+                    <input type="text" class="form-control" id="walletAddress" placeholder="أدخل عنوان محفظتك">
                 </div>
                 
                 <div class="form-group">
                     <label>🌐 شبكة المحفظة</label>
                     <select class="form-control" id="walletNetwork">
-                        <option value="TRC20">TRC20</option>
-                        <option value="ERC20">ERC20</option>
+                        <option value="TRC20">TRC20 (موصى به)</option>
+                        <option value="ERC20">ERC20 (رسوم أعلى)</option>
                         <option value="BEP20">BEP20</option>
                     </select>
                 </div>
@@ -713,20 +929,18 @@
                     <i class="fas fa-save"></i> حفظ التغييرات
                 </button>
             </div>
-        </div>
 
-        <div class="section">
-            <div class="section-title">
+            <div class="section-title mt-4">
                 <i class="fas fa-wallet" style="color: var(--success);"></i>
                 <h3>طلبات السحب</h3>
             </div>
             
             <div style="background: rgba(16,185,129,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="d-flex justify-between align-center">
                     <span>💰 الرصيد القابل للسحب</span>
                     <span style="font-size: 22px; font-weight: bold; color: var(--success);" id="withdrawableBalance">0$</span>
                 </div>
-                <small style="color: #94a3b8;">الحد الأدنى للسحب: 50$</small>
+                <small class="text-muted">الحد الأدنى للسحب: 50$</small>
             </div>
             
             <button class="btn btn-success w-100" onclick="showWithdrawalModal()">
@@ -737,32 +951,34 @@
         </div>
     </div>
 
+    <!-- ========== شريط التنقل السفلي ========== -->
     <div class="bottom-nav">
-        <a href="#" class="nav-item active" onclick="showPage('home'); event.preventDefault();">
+        <button class="nav-item active" onclick="showSection('home')">
             <i class="fas fa-home nav-icon"></i>
-            <span class="nav-label">الرئيسية</span>
-        </a>
-        <a href="#" class="nav-item" onclick="showPage('tasks'); event.preventDefault();">
+            <span>الرئيسية</span>
+        </button>
+        <button class="nav-item" onclick="showSection('tasks')">
             <i class="fas fa-tasks nav-icon"></i>
-            <span class="nav-label">المهام</span>
-        </a>
-        <a href="#" class="nav-item" onclick="showPage('referral'); event.preventDefault();">
+            <span>المهام</span>
+        </button>
+        <button class="nav-item" onclick="showSection('referral')">
             <i class="fas fa-user-friends nav-icon"></i>
-            <span class="nav-label">الإحالة</span>
-        </a>
-        <a href="#" class="nav-item" onclick="showPage('history'); event.preventDefault();">
+            <span>الإحالة</span>
+        </button>
+        <button class="nav-item" onclick="showSection('history')">
             <i class="fas fa-history nav-icon"></i>
-            <span class="nav-label">السجل</span>
-        </a>
-        <a href="#" class="nav-item" onclick="showPage('profile'); event.preventDefault();">
+            <span>السجل</span>
+        </button>
+        <button class="nav-item" onclick="showSection('profile')">
             <i class="fas fa-user nav-icon"></i>
-            <span class="nav-label">حسابي</span>
-        </a>
+            <span>حسابي</span>
+        </button>
     </div>
 
+    <!-- ========== نافذة طلب السحب ========== -->
     <div class="modal" id="withdrawalModal">
         <div class="modal-content">
-            <h3 style="text-align: center; margin-bottom: 25px;">
+            <h3 class="text-center mb-4">
                 <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
                 طلب سحب رصيد
             </h3>
@@ -770,7 +986,7 @@
             <div class="form-group">
                 <label>💰 المبلغ المطلوب سحبه ($) *</label>
                 <input type="number" id="withdrawAmount" class="form-control" placeholder="أدخل المبلغ" min="50" step="10">
-                <small style="color: #94a3b8;">الحد الأدنى: 50$</small>
+                <small class="text-muted">الحد الأدنى: 50$</small>
             </div>
             
             <div class="form-group">
@@ -785,36 +1001,40 @@
                     <button type="button" class="network-btn" data-network="ERC20" onclick="selectWithdrawalNetwork('ERC20')">ERC20</button>
                     <button type="button" class="network-btn" data-network="BEP20" onclick="selectWithdrawalNetwork('BEP20')">BEP20</button>
                 </div>
-                <small style="color: #94a3b8;" id="withdrawalFee">رسوم السحب: 5$ (TRC20)</small>
+                <small class="text-muted" id="withdrawalFee">رسوم السحب: 5$ (TRC20)</small>
             </div>
             
             <div style="background: rgba(245,158,11,0.1); padding: 15px; border-radius: 10px; margin: 20px 0;">
-                <div style="display: flex; justify-content: space-between;">
+                <div class="d-flex justify-between">
                     <span>المبلغ المطلوب:</span>
                     <span id="withdrawAmountDisplay">0$</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                <div class="d-flex justify-between mt-2">
                     <span>رسوم الشبكة:</span>
                     <span id="withdrawFeeDisplay">5$</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-weight: bold;">
+                <div class="d-flex justify-between mt-2 fw-bold">
                     <span>الإجمالي المخصوم:</span>
                     <span id="withdrawTotalDisplay">0$</span>
                 </div>
             </div>
             
-            <div style="display: flex; gap: 15px;">
-                <button class="btn" style="flex: 1; background: var(--danger);" onclick="closeWithdrawalModal()">إلغاء</button>
-                <button class="btn" style="flex: 2; background: var(--success);" onclick="submitWithdrawal()">تأكيد طلب السحب</button>
+            <div class="d-flex gap-3">
+                <button class="btn" style="flex: 1; background: var(--danger);" onclick="closeWithdrawalModal()">
+                    إلغاء
+                </button>
+                <button class="btn" style="flex: 2; background: var(--success);" onclick="submitWithdrawal()">
+                    تأكيد طلب السحب
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- ========== الإشعار ========== -->
     <div class="notification" id="notification"></div>
 
     <script>
-        // ==================== نظام لوحة التحكم - النسخة النهائية المصححة ====================
-        
+        // ========== المتغيرات العامة ==========
         let currentUser = null;
         let transactions = [];
         let withdrawals = [];
@@ -827,31 +1047,49 @@
             'BEP20': 3
         };
 
-        function initDashboard() {
+        // ========== التهيئة ==========
+        async function initDashboard() {
             console.log('🚀 بدء تشغيل لوحة التحكم...');
             
+            // التحقق من تسجيل الدخول
             const userData = localStorage.getItem('current_user');
             if (!userData) {
                 window.location.href = 'index.html';
                 return;
             }
             
-            currentUser = JSON.parse(userData);
-            
-            loadUserData();
-            loadTransactions();
-            loadWithdrawals();
-            loadUserTasks();
-            loadReferralStats();
-            
-            setInterval(() => {
-                if (currentUser) {
-                    refreshUserData();
+            try {
+                currentUser = JSON.parse(userData);
+                
+                // التحقق من صحة المستخدم في Supabase
+                const user = await window.sharedData.getUserById(currentUser.id);
+                if (!user) {
+                    localStorage.removeItem('current_user');
+                    window.location.href = 'index.html';
+                    return;
                 }
-            }, 30000);
+                
+                currentUser = user;
+                localStorage.setItem('current_user', JSON.stringify(user));
+                
+                // تحميل البيانات
+                await loadUserData();
+                await loadTransactions();
+                await loadWithdrawals();
+                await loadUserTasks();
+                await loadReferralStats();
+                
+                // تحديث دوري
+                setInterval(refreshUserData, 30000);
+                
+            } catch (error) {
+                console.error('خطأ في التهيئة:', error);
+                showNotification('❌ حدث خطأ في تحميل البيانات', 'error');
+            }
         }
 
-        function loadUserData() {
+        // ========== تحميل بيانات المستخدم ==========
+        async function loadUserData() {
             if (!currentUser) return;
             
             document.getElementById('userAvatar').textContent = currentUser.name?.charAt(0).toUpperCase() || 'م';
@@ -861,46 +1099,54 @@
             document.getElementById('profileName').value = currentUser.name || '';
             document.getElementById('profileEmail').value = currentUser.email || '';
             document.getElementById('profilePhone').value = currentUser.phone || '';
-            document.getElementById('walletAddress').value = currentUser.walletAddress || '';
-            document.getElementById('walletNetwork').value = currentUser.walletNetwork || 'TRC20';
+            document.getElementById('walletAddress').value = currentUser.wallet_address || '';
+            document.getElementById('walletNetwork').value = currentUser.wallet_network || 'TRC20';
             
             updateBalance();
             updatePackageInfo();
             checkPendingPackage();
         }
 
-        function refreshUserData() {
+        // ========== تحديث بيانات المستخدم ==========
+        async function refreshUserData() {
             if (!currentUser) return;
             
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const updatedUser = users.find(u => u.id === currentUser.id);
-            
-            if (updatedUser) {
-                currentUser = updatedUser;
-                localStorage.setItem('current_user', JSON.stringify(currentUser));
-                loadUserData();
-                loadReferralStats();
-                loadUserTasks();
+            try {
+                const user = await window.sharedData.getUserById(currentUser.id);
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('current_user', JSON.stringify(user));
+                    await loadUserData();
+                    await loadReferralStats();
+                    await loadUserTasks();
+                }
+            } catch (error) {
+                console.error('خطأ في تحديث البيانات:', error);
             }
         }
 
+        // ========== تحديث الرصيد ==========
         function updateBalance() {
             document.getElementById('balance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
-            document.getElementById('total-earned').textContent = (currentUser?.totalEarned || 0).toFixed(2) + '$';
+            document.getElementById('totalEarned').textContent = (currentUser?.total_earned || 0).toFixed(2) + '$';
             document.getElementById('withdrawableBalance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
+            document.getElementById('tasksCompleted').textContent = currentUser?.tasks_completed || 0;
             
             if (currentUser?.package) {
                 const dailyProfit = currentUser.package.dailyProfit || (currentUser.package.amount * 0.025);
-                document.getElementById('today-profit').textContent = dailyProfit.toFixed(2) + '$';
+                document.getElementById('todayProfit').textContent = dailyProfit.toFixed(2) + '$';
+            } else {
+                document.getElementById('todayProfit').textContent = '0$';
             }
         }
 
+        // ========== تحديث معلومات الباقة ==========
         function updatePackageInfo() {
             const packageDiv = document.getElementById('currentPackage');
             
             if (currentUser?.package) {
                 const pkg = currentUser.package;
-                const daysLeft = window.sharedData.calculateDaysLeft(pkg.purchaseDate, pkg.duration || 30);
+                const daysLeft = calculateDaysLeft(pkg.purchaseDate, pkg.duration || 30);
                 const dailyProfit = pkg.dailyProfit || (pkg.amount * 0.025);
                 
                 let badgeClass = 'standard';
@@ -915,48 +1161,61 @@
                 }
                 
                 packageDiv.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h4 style="color: var(--primary); margin: 0;">${pkg.name}</h4>
+                    <div class="package-header">
+                        <h4 class="package-name">${pkg.name}</h4>
                         <span class="badge ${badgeClass}">${badgeText}</span>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                        <div>
-                            <small style="color: #94a3b8;">الاستثمار</small>
-                            <div style="font-size: 20px; font-weight: bold; color: var(--success);">${pkg.amount}$</div>
+                    <div class="package-details">
+                        <div class="package-detail-item">
+                            <small>الاستثمار</small>
+                            <div class="package-detail-value success">${pkg.amount}$</div>
                         </div>
-                        <div>
-                            <small style="color: #94a3b8;">الربح اليومي</small>
-                            <div style="font-size: 20px; font-weight: bold; color: var(--warning);">${dailyProfit.toFixed(2)}$</div>
+                        <div class="package-detail-item">
+                            <small>الربح اليومي</small>
+                            <div class="package-detail-value warning">${dailyProfit.toFixed(2)}$</div>
                         </div>
-                    </div>
-                    <div style="margin-top: 15px;">
-                        <small style="color: #94a3b8;">الأيام المتبقية</small>
-                        <div style="font-size: 18px; font-weight: bold; color: white;">${daysLeft} يوم</div>
-                    </div>
-                    <div style="margin-top: 15px; color: var(--success);">
-                        <i class="fas fa-check-circle"></i> نشطة
+                        <div class="package-detail-item">
+                            <small>الأيام المتبقية</small>
+                            <div class="package-detail-value">${daysLeft} يوم</div>
+                        </div>
+                        <div class="package-detail-item">
+                            <small>الحالة</small>
+                            <div class="package-detail-value success">نشط</div>
+                        </div>
                     </div>
                 `;
             } else {
                 packageDiv.innerHTML = `
-                    <div style="text-align: center; padding: 20px;">
-                        <i class="fas fa-box-open" style="font-size: 40px; color: #94a3b8; margin-bottom: 15px;"></i>
-                        <p style="color: #94a3b8;">لا توجد باقة نشطة</p>
-                        <small>اشترك في إحدى باقاتنا وابدأ الربح اليومي</small>
+                    <div class="text-center" style="padding: 20px;">
+                        <i class="fas fa-box-open" style="font-size: 40px; color: var(--text-muted); margin-bottom: 15px;"></i>
+                        <p class="text-muted">لا توجد باقة نشطة</p>
+                        <small class="text-muted">اشترك في إحدى باقاتنا وابدأ الربح اليومي</small>
                     </div>
                 `;
             }
         }
 
+        // ========== حساب الأيام المتبقية ==========
+        function calculateDaysLeft(purchaseDate, duration = 30) {
+            if (!purchaseDate) return 0;
+            const purchase = new Date(purchaseDate);
+            const endDate = new Date(purchase);
+            endDate.setDate(endDate.getDate() + duration);
+            const today = new Date();
+            const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            return Math.max(0, daysLeft);
+        }
+
+        // ========== التحقق من الطلب المعلق ==========
         function checkPendingPackage() {
             const pendingSection = document.getElementById('pendingRequestSection');
             
-            if (!currentUser?.pendingPackage) {
+            if (!currentUser?.pending_package) {
                 pendingSection.style.display = 'none';
                 return;
             }
             
-            const pending = currentUser.pendingPackage;
+            const pending = currentUser.pending_package;
             
             pendingSection.style.display = 'block';
             pendingSection.className = 'section';
@@ -966,64 +1225,73 @@
                     <h3>حالة طلب الاشتراك</h3>
                 </div>
                 <div style="background: rgba(245,158,11,0.1); padding: 20px; border-radius: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="d-flex justify-between align-center">
                         <h4 style="color: var(--warning); margin: 0;">${pending.name}</h4>
-                        <span class="status-pending">
+                        <span class="status-badge status-pending">
                             <i class="fas fa-clock"></i> بانتظار المراجعة
                         </span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-                        <span style="color: #94a3b8;">المبلغ:</span>
-                        <strong style="color: white;">${pending.amount}$</strong>
+                    <div class="d-flex justify-between mt-3">
+                        <span class="text-muted">المبلغ:</span>
+                        <strong>${pending.amount}$</strong>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                        <span style="color: #94a3b8;">تاريخ الطلب:</span>
-                        <span style="color: white;">${new Date(pending.requestedDate).toLocaleString('ar-SA')}</span>
+                    <div class="d-flex justify-between mt-2">
+                        <span class="text-muted">تاريخ الطلب:</span>
+                        <span>${new Date(pending.requestedDate).toLocaleString('ar-SA')}</span>
                     </div>
-                    <div style="margin-top: 15px; color: #94a3b8; font-size: 14px;">
-                        <i class="fas fa-info-circle"></i> سيتم تفعيل باقتك خلال ${pending.estimatedActivation || '3-6 ساعات'}
+                    <div class="mt-3 text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        سيتم تفعيل باقتك خلال ${pending.estimatedActivation || '3-6 ساعات'}
                     </div>
                 </div>
             `;
         }
 
-        function loadUserTasks() {
+        // ========== تحميل المهام ==========
+        async function loadUserTasks() {
             if (!currentUser) return;
             
-            if (!currentUser.package) {
-                userTasks = [];
+            try {
+                if (!currentUser.package) {
+                    userTasks = [];
+                    displayUserTasks();
+                    displayQuickTasks();
+                    updateTasksStats();
+                    return;
+                }
+                
+                userTasks = await window.sharedData.getUserTasks(currentUser.package) || [];
+                
+                // ترتيب المهام (المكتملة في الأسفل)
+                const today = new Date().toDateString();
+                userTasks.sort((a, b) => {
+                    const aCompleted = localStorage.getItem(`task_${a.id}_${today}`);
+                    const bCompleted = localStorage.getItem(`task_${b.id}_${today}`);
+                    if (aCompleted && !bCompleted) return 1;
+                    if (!aCompleted && bCompleted) return -1;
+                    return 0;
+                });
+                
                 displayUserTasks();
                 displayQuickTasks();
                 updateTasksStats();
-                return;
+                
+            } catch (error) {
+                console.error('خطأ في تحميل المهام:', error);
             }
-            
-            userTasks = window.sharedData?.getUserTasks(currentUser.package) || [];
-            
-            const today = new Date().toDateString();
-            userTasks.sort((a, b) => {
-                const aCompleted = localStorage.getItem(`task_${a.id}_${today}`);
-                const bCompleted = localStorage.getItem(`task_${b.id}_${today}`);
-                if (aCompleted && !bCompleted) return 1;
-                if (!aCompleted && bCompleted) return -1;
-                return 0;
-            });
-            
-            displayUserTasks();
-            displayQuickTasks();
-            updateTasksStats();
         }
 
+        // ========== عرض المهام السريعة ==========
         function displayQuickTasks() {
             const container = document.getElementById('quickTasks');
             if (!container) return;
             
             if (!currentUser?.package) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 30px; background: rgba(245,158,11,0.1); border-radius: 12px;">
+                    <div class="text-center" style="padding: 30px; background: rgba(245,158,11,0.1); border-radius: 12px;">
                         <i class="fas fa-crown" style="font-size: 40px; color: var(--warning); margin-bottom: 15px;"></i>
                         <h4 style="color: var(--warning); margin-bottom: 10px;">لا توجد باقة نشطة</h4>
-                        <p style="color: #94a3b8; margin-bottom: 15px;">اشترك في إحدى باقاتنا لبدء المهام اليومية</p>
+                        <p class="text-muted mb-3">اشترك في إحدى باقاتنا لبدء المهام اليومية</p>
                         <button class="btn btn-primary" onclick="goToPackages()">
                             <i class="fas fa-plus-circle"></i> اشترك الآن
                         </button>
@@ -1034,10 +1302,10 @@
             
             if (userTasks.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 30px; background: rgba(16,185,129,0.1); border-radius: 12px;">
+                    <div class="text-center" style="padding: 30px; background: rgba(16,185,129,0.1); border-radius: 12px;">
                         <i class="fas fa-check-circle" style="font-size: 40px; color: var(--success); margin-bottom: 15px;"></i>
                         <h4 style="color: var(--success); margin-bottom: 10px;">لا توجد مهام متاحة حالياً</h4>
-                        <p style="color: #94a3b8;">سيتم إضافة مهام جديدة قريباً لباقتك</p>
+                        <p class="text-muted">سيتم إضافة مهام جديدة قريباً لباقتك</p>
                     </div>
                 `;
                 return;
@@ -1050,9 +1318,9 @@
             
             if (availableTasks.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 20px; background: rgba(16,185,129,0.1); border-radius: 10px;">
+                    <div class="text-center" style="padding: 20px; background: rgba(16,185,129,0.1); border-radius: 10px;">
                         <i class="fas fa-check-circle" style="color: var(--success); font-size: 24px; margin-bottom: 10px;"></i>
-                        <p style="color: #94a3b8;">أكملت جميع مهام اليوم! 🎉</p>
+                        <p class="text-muted">أكملت جميع مهام اليوم! 🎉</p>
                     </div>
                 `;
                 return;
@@ -1062,25 +1330,28 @@
             availableTasks.forEach(task => {
                 let badgeClass = 'standard';
                 let badgeText = 'عادية';
+                let borderColor = 'var(--info)';
                 
-                if (task.packageCategories?.includes('vip')) {
+                if (task.package_categories?.includes('vip')) {
                     badgeClass = 'vip';
                     badgeText = 'VIP';
-                } else if (task.packageCategories?.includes('premium')) {
+                    borderColor = 'var(--warning)';
+                } else if (task.package_categories?.includes('premium')) {
                     badgeClass = 'premium';
                     badgeText = 'مميزة';
+                    borderColor = 'var(--primary)';
                 }
                 
                 html += `
-                    <div class="task-item" style="border-right-color: ${badgeClass === 'vip' ? 'var(--warning)' : badgeClass === 'premium' ? 'var(--primary)' : 'var(--info)'};">
+                    <div class="task-item" style="border-right-color: ${borderColor};">
                         <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                            <div class="d-flex align-center gap-2 mb-2">
                                 <h4 style="margin: 0; font-size: 16px;">${task.title}</h4>
                                 <span class="badge ${badgeClass}">${badgeText}</span>
                             </div>
-                            <p style="color: #94a3b8; font-size: 13px; margin: 0;">${task.description.substring(0, 60)}...</p>
+                            <p class="text-muted" style="font-size: 13px;">${task.description.substring(0, 60)}...</p>
                         </div>
-                        <button class="btn btn-success btn-sm" onclick="completeTask(${task.id}, ${task.reward})">
+                        <button class="btn btn-success btn-sm" onclick="completeTask('${task.id}', ${task.reward})">
                             +${task.reward}$
                         </button>
                     </div>
@@ -1090,16 +1361,17 @@
             container.innerHTML = html;
         }
 
+        // ========== عرض جميع المهام ==========
         function displayUserTasks() {
             const container = document.getElementById('tasksContainer');
             if (!container) return;
             
             if (!currentUser?.package) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 60px; background: rgba(245,158,11,0.1); border-radius: 15px;">
+                    <div class="text-center" style="padding: 60px; background: rgba(245,158,11,0.1); border-radius: 15px;">
                         <i class="fas fa-crown" style="font-size: 60px; color: var(--warning); margin-bottom: 20px;"></i>
                         <h3 style="color: var(--warning); margin-bottom: 15px;">لا توجد باقة نشطة</h3>
-                        <p style="color: #94a3b8; margin-bottom: 20px;">المهام متاحة فقط للمشتركين في الباقات</p>
+                        <p class="text-muted mb-4">المهام متاحة فقط للمشتركين في الباقات</p>
                         <button class="btn btn-primary" onclick="goToPackages()">
                             <i class="fas fa-plus-circle"></i> اشترك الآن
                         </button>
@@ -1110,11 +1382,11 @@
             
             if (userTasks.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 50px; background: rgba(16,185,129,0.1); border-radius: 15px;">
+                    <div class="text-center" style="padding: 50px; background: rgba(16,185,129,0.1); border-radius: 15px;">
                         <i class="fas fa-tasks" style="font-size: 50px; color: var(--success); margin-bottom: 20px;"></i>
                         <h3 style="color: var(--success); margin-bottom: 10px;">لا توجد مهام متاحة</h3>
-                        <p style="color: #94a3b8;">باقتك (${currentUser.package.name}) لا تتوفر لها مهام حالياً</p>
-                        <p style="color: #94a3b8; margin-top: 10px;">سيتم إضافة مهام جديدة قريباً</p>
+                        <p class="text-muted">باقتك (${currentUser.package.name}) لا تتوفر لها مهام حالياً</p>
+                        <p class="text-muted mt-2">سيتم إضافة مهام جديدة قريباً</p>
                     </div>
                 `;
                 return;
@@ -1123,31 +1395,6 @@
             const today = new Date().toDateString();
             let html = '';
             
-            let packageBadgeClass = 'standard';
-            let packageBadgeText = 'عادية';
-            
-            if (currentUser.package.category === 'vip') {
-                packageBadgeClass = 'vip';
-                packageBadgeText = 'VIP';
-            } else if (currentUser.package.category === 'premium') {
-                packageBadgeClass = 'premium';
-                packageBadgeText = 'مميزة';
-            }
-            
-            html += `
-                <div style="background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(6,182,212,0.1)); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <span style="color: #94a3b8;">باقتك الحالية:</span>
-                        <strong style="color: var(--primary); margin-right: 10px;">${currentUser.package.name}</strong>
-                        <span class="badge ${packageBadgeClass}">${packageBadgeText}</span>
-                    </div>
-                    <div>
-                        <span style="color: #94a3b8;">إجمالي المهام:</span>
-                        <strong style="color: white; margin-right: 5px;">${userTasks.length}</strong>
-                    </div>
-                </div>
-            `;
-            
             userTasks.forEach(task => {
                 const completedToday = localStorage.getItem(`task_${task.id}_${today}`);
                 
@@ -1155,11 +1402,11 @@
                 let badgeText = 'عادية';
                 let borderColor = 'var(--info)';
                 
-                if (task.packageCategories?.includes('vip')) {
+                if (task.package_categories?.includes('vip')) {
                     badgeClass = 'vip';
                     badgeText = 'VIP';
                     borderColor = 'var(--warning)';
-                } else if (task.packageCategories?.includes('premium')) {
+                } else if (task.package_categories?.includes('premium')) {
                     badgeClass = 'premium';
                     badgeText = 'مميزة';
                     borderColor = 'var(--primary)';
@@ -1179,24 +1426,23 @@
                 html += `
                     <div class="task-item ${completedToday ? 'completed' : ''}" style="border-right-color: ${borderColor};">
                         <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap;">
+                            <div class="d-flex align-center gap-2 mb-2 flex-wrap">
                                 <h4 style="margin: 0; font-size: 18px;">${task.title}</h4>
                                 <span class="badge ${badgeClass}">${badgeText}</span>
                                 <span class="badge" style="background: ${difficultyColor};">${difficultyText}</span>
                             </div>
-                            <p style="color: #94a3b8; margin-bottom: 8px; font-size: 14px;">${task.description}</p>
-                            <div style="display: flex; gap: 15px; font-size: 13px; color: #64748b;">
-                                <span><i class="fas fa-clock"></i> ${task.timeRequired || 2} دقيقة</span>
+                            <p class="text-muted mb-2">${task.description}</p>
+                            <div class="task-meta">
+                                <span><i class="fas fa-clock"></i> ${task.time_required || 2} دقيقة</span>
                                 <span><i class="fas fa-redo"></i> ${task.type === 'daily' ? 'يومية' : 'أسبوعية'}</span>
-                                <span><i class="fas fa-check-circle"></i> ${task.completions || 0} إكمال</span>
                             </div>
                         </div>
                         <div style="text-align: left; min-width: 120px;">
-                            <div class="task-reward" style="font-size: 22px; margin-bottom: 10px;">
+                            <div class="task-reward mb-2">
                                 +${task.reward}$
                             </div>
                             <button class="btn ${completedToday ? 'btn-secondary' : 'btn-success'} btn-sm w-100" 
-                                    onclick="completeTask(${task.id}, ${task.reward})"
+                                    onclick="completeTask('${task.id}', ${task.reward})"
                                     ${completedToday ? 'disabled' : ''}>
                                 ${completedToday ? '✓ مكتملة' : 'إكمال المهمة'}
                             </button>
@@ -1208,9 +1454,10 @@
             container.innerHTML = html;
         }
 
+        // ========== تحديث إحصائيات المهام ==========
         function updateTasksStats() {
             if (!currentUser?.package) {
-                document.getElementById('tasks-completed').textContent = '0/0';
+                document.getElementById('tasksCompleted').textContent = '0';
                 return;
             }
             
@@ -1223,10 +1470,11 @@
                 }
             });
             
-            document.getElementById('tasks-completed').textContent = `${completedCount}/${userTasks.length}`;
+            document.getElementById('tasksCompleted').textContent = completedCount;
         }
 
-        function completeTask(taskId, reward) {
+        // ========== إكمال مهمة ==========
+        async function completeTask(taskId, reward) {
             if (!currentUser) {
                 showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
                 return;
@@ -1237,7 +1485,8 @@
                 return;
             }
             
-            if (!window.sharedData?.canUserCompleteTask(taskId, currentUser.package)) {
+            const canComplete = await window.sharedData.canUserCompleteTask(taskId, currentUser.package);
+            if (!canComplete) {
                 showNotification('❌ هذه المهمة غير متاحة لباقتك الحالية', 'error');
                 return;
             }
@@ -1254,79 +1503,79 @@
                 return;
             }
             
-            currentUser.balance = (currentUser.balance || 0) + reward;
-            currentUser.totalEarned = (currentUser.totalEarned || 0) + reward;
-            currentUser.tasksCompleted = (currentUser.tasksCompleted || 0) + 1;
-            
-            localStorage.setItem(`task_${task.id}_${today}`, 'completed');
-            window.sharedData?.incrementTaskCompletion(taskId);
-            
-            saveUserData();
-            
-            addTransaction({
-                type: 'ربح',
-                amount: reward,
-                description: `إكمال مهمة: ${task.title}`,
-                date: new Date().toLocaleString('ar-SA')
-            });
-            
-            updateBalance();
-            loadUserTasks();
-            
-            showNotification(`✅ مبروك! لقد ربحت ${reward}$`, 'success');
+            try {
+                // تحديث رصيد المستخدم
+                const newBalance = (currentUser.balance || 0) + reward;
+                const newTotalEarned = (currentUser.total_earned || 0) + reward;
+                const newTasksCompleted = (currentUser.tasks_completed || 0) + 1;
+                
+                await window.sharedData.updateUser(currentUser.id, {
+                    balance: newBalance,
+                    total_earned: newTotalEarned,
+                    tasks_completed: newTasksCompleted
+                });
+                
+                // تحديث إحصائيات المهمة
+                await window.sharedData.incrementTaskCompletion(taskId);
+                
+                // تحديث البيانات المحلية
+                currentUser.balance = newBalance;
+                currentUser.total_earned = newTotalEarned;
+                currentUser.tasks_completed = newTasksCompleted;
+                localStorage.setItem('current_user', JSON.stringify(currentUser));
+                
+                localStorage.setItem(`task_${task.id}_${today}`, 'completed');
+                
+                // إضافة معاملة
+                await addTransaction({
+                    type: 'ربح',
+                    amount: reward,
+                    description: `إكمال مهمة: ${task.title}`,
+                    date: new Date().toLocaleString('ar-SA')
+                });
+                
+                // تحديث الواجهة
+                updateBalance();
+                await loadUserTasks();
+                
+                showNotification(`✅ مبروك! لقد ربحت ${reward}$`, 'success');
+                
+            } catch (error) {
+                console.error('خطأ في إكمال المهمة:', error);
+                showNotification('❌ فشل إكمال المهمة', 'error');
+            }
         }
 
-        function refreshTasks() {
-            loadUserTasks();
-            showNotification('✅ تم تحديث المهام', 'success');
-        }
-
-        function loadReferralStats() {
+        // ========== تحميل إحصائيات الإحالة ==========
+        async function loadReferralStats() {
             if (!currentUser) return;
             
-            const referralStats = window.sharedData?.getReferralStats(currentUser.id);
-            if (!referralStats) {
-                if (!currentUser.referralCode) {
-                    currentUser.referralCode = window.sharedData?.generateReferralCode(currentUser.username || currentUser.email);
-                    saveUserData();
-                }
-                setTimeout(loadReferralStats, 100);
-                return;
+            try {
+                const stats = await window.sharedData.getReferralStats(currentUser.id);
+                if (!stats) return;
+                
+                displayReferralStats(stats);
+                displayReferralCode(stats);
+                displayReferredUsers(stats);
+                
+            } catch (error) {
+                console.error('خطأ في تحميل إحصائيات الإحالة:', error);
             }
-            
-            displayReferralStats(referralStats);
-            displayReferralCode(referralStats);
-            displayReferredUsers(referralStats);
         }
 
+        // ========== عرض إحصائيات الإحالة ==========
         function displayReferralStats(stats) {
-            const container = document.getElementById('referralStats');
-            if (!container) return;
-            
-            container.innerHTML = `
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value">${stats.referredCount || 0}</div>
-                    <div style="color: #94a3b8;">إجمالي المحالين</div>
-                </div>
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value" style="color: var(--success);">${stats.activeReferrals || 0}</div>
-                    <div style="color: #94a3b8;">مشتركين نشطين</div>
-                </div>
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value" style="color: var(--warning);">${stats.pendingReferrals || 0}</div>
-                    <div style="color: #94a3b8;">بانتظار الباقة</div>
-                </div>
-                <div class="referral-stat-card">
-                    <div class="referral-stat-value" style="color: var(--success);">${stats.totalEarned?.toFixed(2) || 0}$</div>
-                    <div style="color: #94a3b8;">أرباح الإحالة</div>
-                </div>
-            `;
+            document.getElementById('referralCount').textContent = stats.referredCount || 0;
+            document.getElementById('activeReferrals').textContent = stats.activeReferrals || 0;
+            document.getElementById('pendingReferrals').textContent = stats.pendingReferrals || 0;
+            document.getElementById('referralEarnings').textContent = (stats.totalEarned || 0).toFixed(2) + '$';
         }
 
+        // ========== عرض كود الإحالة ==========
         function displayReferralCode(stats) {
             const codeDisplay = document.getElementById('referralCodeDisplay');
             if (codeDisplay) {
-                codeDisplay.textContent = stats.referralCode || '';
+                codeDisplay.textContent = stats.referralCode || '-';
             }
             
             const linkDisplay = document.getElementById('referralLinkDisplay');
@@ -1336,6 +1585,7 @@
             }
         }
 
+        // ========== عرض قائمة المحالين ==========
         function displayReferredUsers(stats) {
             const usersList = document.getElementById('referredUsersList');
             if (!usersList) return;
@@ -1349,16 +1599,18 @@
                         '<span style="color: var(--warning);"><i class="fas fa-clock"></i> بانتظار الباقة</span>';
                     
                     html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.03); margin-bottom: 10px; border-radius: 10px;">
-                            <div>
-                                <strong>${user.name}</strong><br>
-                                <small style="color: #94a3b8;">${joinDate}</small>
-                            </div>
-                            <div style="text-align: left;">
-                                <span class="badge" style="background: ${user.hasPackage ? 'var(--success)' : 'var(--warning)'};">
-                                    ${user.hasPackage ? 'مشترك' : 'بانتظار'}
-                                </span>
-                                <div style="margin-top: 5px; font-size: 12px;">${rewardStatus}</div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 15px; margin-bottom: 10px; border-radius: 10px;">
+                            <div class="d-flex justify-between align-center">
+                                <div>
+                                    <strong>${user.name}</strong><br>
+                                    <small class="text-muted">${joinDate}</small>
+                                </div>
+                                <div>
+                                    <span class="badge" style="background: ${user.hasPackage ? 'var(--success)' : 'var(--warning)'};">
+                                        ${user.hasPackage ? 'مشترك' : 'بانتظار'}
+                                    </span>
+                                    <div style="margin-top: 5px; font-size: 12px;">${rewardStatus}</div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1366,7 +1618,7 @@
                 usersList.innerHTML = html;
             } else {
                 usersList.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                    <div class="text-center" style="padding: 40px; color: var(--text-muted);">
                         <i class="fas fa-user-friends" style="font-size: 48px; margin-bottom: 15px;"></i>
                         <p>لم تقم بإحالة أي مستخدم بعد</p>
                         <small>شارك رابط الإحالة مع أصدقائك لبدء الربح</small>
@@ -1375,42 +1627,41 @@
             }
         }
 
+        // ========== نسخ كود الإحالة ==========
         function copyReferralCode() {
             const code = document.getElementById('referralCodeDisplay')?.textContent;
-            if (code) {
-                navigator.clipboard.writeText(code).then(() => {
-                    showNotification('✅ تم نسخ كود الإحالة');
-                }).catch(() => {
-                    showNotification('❌ حدث خطأ في النسخ', 'error');
-                });
+            if (code && code !== '-') {
+                copyText(code);
             }
         }
 
+        // ========== نسخ رابط الإحالة ==========
         function copyReferralLink() {
             const link = document.getElementById('referralLinkDisplay')?.textContent;
             if (link) {
-                navigator.clipboard.writeText(link).then(() => {
-                    showNotification('✅ تم نسخ رابط الإحالة');
-                }).catch(() => {
-                    showNotification('❌ حدث خطأ في النسخ', 'error');
-                });
+                copyText(link);
             }
         }
 
-        function loadTransactions() {
+        // ========== تحميل المعاملات ==========
+        async function loadTransactions() {
             if (!currentUser) return;
             
-            const saved = localStorage.getItem(`user_transactions_${currentUser.id}`);
-            transactions = saved ? JSON.parse(saved) : [];
-            displayTransactions();
+            try {
+                transactions = await window.sharedData.getUserTransactions(currentUser.id) || [];
+                displayTransactions();
+            } catch (error) {
+                console.error('خطأ في تحميل المعاملات:', error);
+            }
         }
 
+        // ========== عرض المعاملات ==========
         function displayTransactions() {
             const list = document.getElementById('transactionsList');
             if (!list) return;
             
             if (transactions.length === 0) {
-                list.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 30px;">لا توجد معاملات بعد</p>';
+                list.innerHTML = '<p class="text-center text-muted" style="padding: 30px;">لا توجد معاملات بعد</p>';
                 return;
             }
             
@@ -1431,12 +1682,12 @@
                 
                 html += `
                     <div class="transaction-item" style="border-right-color: ${borderColor};">
-                        <div>
-                            <h4 style="margin-bottom: 5px; font-size: 16px;">${t.description || t.type}</h4>
-                            <small style="color: #94a3b8;">${t.date}</small>
+                        <div class="transaction-info">
+                            <h4>${t.description || t.type}</h4>
+                            <small>${t.date || ''}</small>
                         </div>
-                        <span style="color: ${borderColor}; font-weight: bold; font-size: 18px;">
-                            ${sign}${t.amount}$
+                        <span class="transaction-amount" style="color: ${borderColor};">
+                            ${sign}${(t.amount || 0).toFixed(2)}$
                         </span>
                     </div>
                 `;
@@ -1445,34 +1696,44 @@
             list.innerHTML = html;
         }
 
-        function addTransaction(transaction) {
-            transactions.unshift({
-                id: Date.now(),
-                ...transaction
-            });
+        // ========== إضافة معاملة ==========
+        async function addTransaction(transaction) {
+            if (!currentUser) return;
             
-            if (currentUser) {
-                localStorage.setItem(`user_transactions_${currentUser.id}`, JSON.stringify(transactions.slice(0, 100)));
-                if (document.getElementById('history-page').classList.contains('active')) {
-                    displayTransactions();
-                }
+            try {
+                const newTransaction = {
+                    user_id: currentUser.id,
+                    ...transaction,
+                    date: transaction.date || new Date().toLocaleString('ar-SA')
+                };
+                
+                await window.sharedData.addTransaction(newTransaction);
+                await loadTransactions();
+                
+            } catch (error) {
+                console.error('خطأ في إضافة المعاملة:', error);
             }
         }
 
-        function loadWithdrawals() {
+        // ========== تحميل طلبات السحب ==========
+        async function loadWithdrawals() {
             if (!currentUser) return;
             
-            const saved = localStorage.getItem(`user_withdrawals_${currentUser.id}`);
-            withdrawals = saved ? JSON.parse(saved) : [];
-            displayWithdrawals();
+            try {
+                withdrawals = await window.sharedData.getUserWithdrawals(currentUser.id) || [];
+                displayWithdrawals();
+            } catch (error) {
+                console.error('خطأ في تحميل طلبات السحب:', error);
+            }
         }
 
+        // ========== عرض طلبات السحب ==========
         function displayWithdrawals() {
             const list = document.getElementById('withdrawalsList');
             if (!list) return;
             
             if (withdrawals.length === 0) {
-                list.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">لا توجد طلبات سحب سابقة</p>';
+                list.innerHTML = '<p class="text-center text-muted" style="padding: 20px;">لا توجد طلبات سحب سابقة</p>';
                 return;
             }
             
@@ -1485,13 +1746,13 @@
                 
                 html += `
                     <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 12px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <div class="d-flex justify-between mb-2">
                             <span style="font-weight: bold;">💰 ${w.amount}$</span>
                             <span style="color: ${statusColor};">${statusText}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <small style="color: #94a3b8;">${w.date}</small>
-                            <small style="color: #94a3b8;">${w.network || 'TRC20'}</small>
+                        <div class="d-flex justify-between">
+                            <small class="text-muted">${w.date}</small>
+                            <small class="text-muted">${w.network || 'TRC20'}</small>
                         </div>
                     </div>
                 `;
@@ -1500,6 +1761,7 @@
             list.innerHTML = html;
         }
 
+        // ========== إظهار نافذة السحب ==========
         function showWithdrawalModal() {
             if (!currentUser) {
                 showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
@@ -1516,15 +1778,15 @@
                 return;
             }
             
-            if (!currentUser.walletAddress) {
+            if (!currentUser.wallet_address) {
                 showNotification('⚠️ يرجى إضافة عنوان محفظتك أولاً', 'warning');
-                showPage('profile');
+                showSection('profile');
                 return;
             }
             
-            document.getElementById('withdrawWallet').value = currentUser.walletAddress;
+            document.getElementById('withdrawWallet').value = currentUser.wallet_address;
             
-            withdrawalNetwork = currentUser.walletNetwork || 'TRC20';
+            withdrawalNetwork = currentUser.wallet_network || 'TRC20';
             document.querySelectorAll('.network-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.network === withdrawalNetwork) {
@@ -1542,6 +1804,7 @@
             document.getElementById('withdrawalModal').classList.add('active');
         }
 
+        // ========== تحديث إجمالي السحب ==========
         function updateWithdrawalTotal() {
             const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
             const fee = withdrawalFees[withdrawalNetwork] || 5;
@@ -1551,12 +1814,14 @@
             document.getElementById('withdrawTotalDisplay').textContent = total.toFixed(2) + '$';
         }
 
+        // ========== إغلاق نافذة السحب ==========
         function closeWithdrawalModal() {
             document.getElementById('withdrawalModal').classList.remove('active');
             document.getElementById('withdrawAmount').value = '';
             document.getElementById('withdrawAmount').removeEventListener('input', updateWithdrawalTotal);
         }
 
+        // ========== اختيار شبكة السحب ==========
         function selectWithdrawalNetwork(network) {
             withdrawalNetwork = network;
             
@@ -1573,7 +1838,8 @@
             updateWithdrawalTotal();
         }
 
-        function submitWithdrawal() {
+        // ========== تقديم طلب سحب ==========
+        async function submitWithdrawal() {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const wallet = document.getElementById('withdrawWallet').value.trim();
             const network = withdrawalNetwork;
@@ -1596,52 +1862,40 @@
             }
             
             if (network === 'TRC20' && wallet.length < 30) {
-                showNotification('❌ عنوان محفظة TRC20 غير صحيح (يجب أن يكون 34 حرف)', 'error');
+                showNotification('❌ عنوان محفظة TRC20 غير صحيح', 'error');
                 return;
             }
             
-            if (network === 'ERC20' && wallet.length < 40) {
-                showNotification('❌ عنوان محفظة ERC20 غير صحيح', 'error');
-                return;
+            try {
+                const withdrawalData = {
+                    user_id: currentUser.id,
+                    amount: amount,
+                    wallet: wallet,
+                    network: network,
+                    fee: fee,
+                    total: total
+                };
+                
+                await window.sharedData.addWithdrawal(withdrawalData);
+                
+                // تحديث الرصيد محلياً
+                currentUser.balance -= total;
+                localStorage.setItem('current_user', JSON.stringify(currentUser));
+                
+                await loadWithdrawals();
+                updateBalance();
+                closeWithdrawalModal();
+                
+                showNotification(`✅ تم إرسال طلب سحب بقيمة ${amount}$`, 'success');
+                
+            } catch (error) {
+                console.error('خطأ في تقديم طلب السحب:', error);
+                showNotification('❌ فشل إرسال الطلب', 'error');
             }
-            
-            if (network === 'BEP20' && wallet.length < 40) {
-                showNotification('❌ عنوان محفظة BEP20 غير صحيح', 'error');
-                return;
-            }
-            
-            currentUser.balance -= total;
-            
-            const withdrawal = {
-                id: Date.now(),
-                amount: amount,
-                wallet: wallet,
-                network: network,
-                fee: fee,
-                total: total,
-                status: 'معلق',
-                date: new Date().toLocaleString('ar-SA')
-            };
-            
-            withdrawals.unshift(withdrawal);
-            localStorage.setItem(`user_withdrawals_${currentUser.id}`, JSON.stringify(withdrawals));
-            
-            addTransaction({
-                type: 'سحب',
-                amount: -total,
-                description: `طلب سحب ${amount}$ (${fee}$ رسوم ${network})`,
-                date: new Date().toLocaleString('ar-SA')
-            });
-            
-            saveUserData();
-            updateBalance();
-            displayWithdrawals();
-            closeWithdrawalModal();
-            
-            showNotification(`✅ تم إرسال طلب سحب بقيمة ${amount}$`, 'success');
         }
 
-        function saveProfile() {
+        // ========== حفظ الملف الشخصي ==========
+        async function saveProfile() {
             const name = document.getElementById('profileName').value.trim();
             const email = document.getElementById('profileEmail').value.trim();
             const phone = document.getElementById('profilePhone').value.trim();
@@ -1659,97 +1913,103 @@
                 return;
             }
             
-            const phoneRegex = /^[0-9]{10,}$/;
-            if (phone && !phoneRegex.test(phone.replace(/\D/g, ''))) {
-                showNotification('❌ رقم الهاتف غير صالح (يجب أن يكون 10 أرقام على الأقل)', 'error');
-                return;
+            try {
+                await window.sharedData.updateUser(currentUser.id, {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    wallet_address: wallet,
+                    wallet_network: walletNetwork
+                });
+                
+                currentUser.name = name;
+                currentUser.email = email;
+                currentUser.phone = phone;
+                currentUser.wallet_address = wallet;
+                currentUser.wallet_network = walletNetwork;
+                
+                localStorage.setItem('current_user', JSON.stringify(currentUser));
+                
+                document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('userName').textContent = name;
+                document.getElementById('userEmail').textContent = email;
+                
+                showNotification('✅ تم حفظ التغييرات', 'success');
+                
+            } catch (error) {
+                console.error('خطأ في حفظ الملف الشخصي:', error);
+                showNotification('❌ فشل حفظ التغييرات', 'error');
             }
-            
-            currentUser.name = name;
-            currentUser.email = email;
-            currentUser.phone = phone;
-            currentUser.walletAddress = wallet;
-            currentUser.walletNetwork = walletNetwork;
-            
-            saveUserData();
-            
-            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-            document.getElementById('userName').textContent = name;
-            document.getElementById('userEmail').textContent = email;
-            
-            showNotification('✅ تم حفظ التغييرات', 'success');
         }
 
-        function saveUserData() {
-            if (!currentUser) return;
-            
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const userIndex = users.findIndex(u => u.id === currentUser.id);
-            
-            if (userIndex !== -1) {
-                users[userIndex] = currentUser;
-                localStorage.setItem('elite_users', JSON.stringify(users));
-            }
-            
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = 'notification ' + (type || 'success');
-            notification.style.display = 'block';
-            
-            const icon = type === 'success' ? '✅' : 
-                        type === 'error' ? '❌' : 
-                        type === 'warning' ? '⚠️' : 'ℹ️';
-            notification.innerHTML = `${icon} ${message}`;
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        function showPage(pageName) {
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
+        // ========== نسخ نص ==========
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('✅ تم النسخ إلى الحافظة', 'success');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('✅ تم النسخ إلى الحافظة', 'success');
             });
+        }
+
+        // ========== التنقل بين الأقسام ==========
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.getElementById(sectionName + '-section').style.display = 'block';
             
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const navMap = { home: 0, tasks: 1, referral: 2, history: 3, profile: 4 };
+            document.querySelectorAll('.nav-item')[navMap[sectionName]].classList.add('active');
             
-            document.getElementById(pageName + '-page').classList.add('active');
-            event.currentTarget.classList.add('active');
-            
-            if (pageName === 'history') {
+            // تحميل البيانات حسب القسم
+            if (sectionName === 'history') {
                 displayTransactions();
-            } else if (pageName === 'profile') {
+            } else if (sectionName === 'profile') {
                 displayWithdrawals();
-            } else if (pageName === 'tasks') {
+            } else if (sectionName === 'tasks') {
                 loadUserTasks();
-            } else if (pageName === 'referral') {
+            } else if (sectionName === 'referral') {
                 loadReferralStats();
             }
         }
 
+        // ========== الذهاب إلى الباقات ==========
         function goToPackages() {
             if (currentUser) {
-                saveUserData();
                 window.location.href = 'index.html#packages';
             }
         }
 
-        function logout() {
+        // ========== تسجيل الخروج ==========
+        async function logout() {
             if (confirm('هل تريد تسجيل الخروج؟')) {
-                if (currentUser) {
-                    saveUserData();
-                }
                 localStorage.removeItem('current_user');
                 window.location.href = 'index.html';
             }
         }
 
+        // ========== الإشعارات ==========
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            notification.innerHTML = `${icon} ${message}`;
+            notification.className = 'notification ' + type;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+        // ========== التهيئة ==========
         document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>
