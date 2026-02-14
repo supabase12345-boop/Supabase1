@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* ===== المتغيرات والأساسيات ===== */
+        /* نفس التصميم السابق - احتفظ به كما هو */
         :root {
             --primary: #8b5cf6;
             --primary-dark: #7c3aed;
@@ -54,7 +54,6 @@
             position: relative;
         }
 
-        /* ===== الخلفية المتحركة ===== */
         .bg-gradient {
             position: fixed;
             top: 0;
@@ -67,7 +66,6 @@
             z-index: -1;
         }
 
-        /* ===== الشريط العلوي الفاخر ===== */
         .navbar {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
@@ -124,7 +122,6 @@
             letter-spacing: -0.5px;
         }
 
-        /* ===== أزرار فاخرة ===== */
         .btn {
             padding: 14px 32px;
             border-radius: 50px;
@@ -197,7 +194,6 @@
             font-size: 13px;
         }
 
-        /* ===== قائمة المستخدم الفاخرة ===== */
         .user-menu {
             display: none;
             position: relative;
@@ -302,7 +298,6 @@
             color: var(--primary);
         }
 
-        /* ===== الحاوية الرئيسية ===== */
         .container {
             max-width: 1300px;
             margin: 0 auto;
@@ -311,7 +306,6 @@
             padding-bottom: 100px;
         }
 
-        /* ===== بطاقة إحصائيات المستخدم الفاخرة ===== */
         .user-stats-card {
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
             backdrop-filter: blur(10px);
@@ -328,22 +322,6 @@
         .user-stats-card.active {
             display: block;
             animation: fadeInUp 0.5s ease;
-        }
-
-        .user-stats-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
 
         .stats-grid {
@@ -408,7 +386,6 @@
             50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.6); }
         }
 
-        /* ===== قسم البطل (Hero) ===== */
         .hero-section {
             text-align: center;
             padding: 80px 20px;
@@ -436,7 +413,6 @@
             margin: 0 auto 30px;
         }
 
-        /* ===== شبكة الباقات الفاخرة ===== */
         .section-title {
             text-align: center;
             margin-bottom: 40px;
@@ -548,7 +524,6 @@
             color: var(--success);
         }
 
-        /* ===== نظام الإحالة الفاخر ===== */
         .referral-section {
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
             border-radius: var(--radius);
@@ -643,7 +618,6 @@
             margin: 20px auto;
         }
 
-        /* ===== المهام ===== */
         .tasks-grid {
             display: grid;
             gap: 20px;
@@ -702,7 +676,6 @@
         .task-badge.premium { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
         .task-badge.vip { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
 
-        /* ===== المعاملات ===== */
         .transactions-list {
             display: grid;
             gap: 15px;
@@ -738,7 +711,6 @@
             border-right: 4px solid var(--success);
         }
 
-        /* ===== الصفحات ===== */
         .page {
             display: none;
         }
@@ -753,7 +725,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ===== التنقل السفلي الفاخر ===== */
         .bottom-nav {
             position: fixed;
             bottom: 20px;
@@ -806,7 +777,6 @@
             transform: translateY(-5px);
         }
 
-        /* ===== النوافذ المنبثقة الفاخرة ===== */
         .modal {
             display: none;
             position: fixed;
@@ -839,26 +809,6 @@
             animation: slideUp 0.3s ease;
             max-height: 90vh;
             overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary) var(--dark-light);
-        }
-
-        .modal-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-content::-webkit-scrollbar-track {
-            background: var(--dark-light);
-            border-radius: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
         }
 
         @keyframes slideUp {
@@ -903,7 +853,6 @@
             transform: rotate(90deg);
         }
 
-        /* ===== النماذج ===== */
         .form-group {
             margin-bottom: 20px;
         }
@@ -960,7 +909,6 @@
             color: white;
         }
 
-        /* ===== الإشعارات ===== */
         .notification {
             position: fixed;
             top: 100px;
@@ -997,7 +945,6 @@
             }
         }
 
-        /* ===== حالات المستخدم ===== */
         .status-badge {
             padding: 6px 16px;
             border-radius: 50px;
@@ -1031,7 +978,6 @@
             border: 1px solid var(--danger);
         }
 
-        /* ===== حالة الاتصال ===== */
         .connection-status {
             position: fixed;
             bottom: 20px;
@@ -1058,7 +1004,6 @@
             color: var(--danger);
         }
 
-        /* ===== التجاوب مع الشاشات ===== */
         @media (max-width: 1200px) {
             .packages-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -1650,7 +1595,7 @@
     </div>
 
     <script>
-        // ========== إعدادات Supabase ==========
+        // ========== إعدادات Supabase مباشرة ==========
         const SUPABASE_URL = "https://tmksysprwgsbdmavlshm.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRta3N5c3Byd2dzYmRtYXZsc2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTI3NjgsImV4cCI6MjA4NjU4ODc2OH0.-qHz5jtEkTK8S1RseWB5cLmLFfv9vPyTcGkc_D6ru80";
 
@@ -1764,7 +1709,7 @@
             }
         }
 
-// ========== تحديث إحصائيات المستخدم ==========
+        // ========== تحديث إحصائيات المستخدم ==========
         function updateUserStats() {
             document.getElementById('userBalance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
             document.getElementById('totalEarned').textContent = (currentUser?.total_earned || 0).toFixed(2) + '$';
@@ -1772,7 +1717,7 @@
             document.getElementById('withdrawableBalance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
             
             if (currentUser?.packages) {
-                const dailyProfit = (currentUser.packages.price * (currentUser.packages.profit_percentage || 2.5) / 100);
+                const dailyProfit = (currentUser.packages.price * (currentUser.packages.profit || 2.5) / 100);
                 document.getElementById('todayProfit').textContent = dailyProfit.toFixed(2) + '$';
                 document.getElementById('userPackageDisplay').innerHTML = `<span class="package-badge">✅ ${currentUser.packages.name}</span>`;
             } else {
@@ -1803,7 +1748,7 @@
                 
                 let html = '';
                 packages.forEach(p => {
-                    const daily = (p.price * (p.profit_percentage || 2.5) / 100).toFixed(2);
+                    const daily = (p.price * (p.profit || 2.5) / 100).toFixed(2);
                     const badgeClass = p.category === 'vip' ? 'vip' : p.category === 'premium' ? 'premium' : 'standard';
                     const icon = p.category === 'vip' ? 'fa-crown' : p.category === 'premium' ? 'fa-star' : 'fa-bolt';
                     
@@ -1847,7 +1792,7 @@
             document.getElementById('selectedPackageInfo').innerHTML = `
                 <h4 style="color: var(--primary);">${pkg.name}</h4>
                 <p style="font-size: 32px; font-weight: bold; color: var(--success); margin: 15px 0;">${pkg.price}$</p>
-                <p style="color: var(--text-muted);">الربح اليومي: ${(pkg.price * (pkg.profit_percentage || 2.5) / 100).toFixed(2)}$</p>
+                <p style="color: var(--text-muted);">الربح اليومي: ${(pkg.price * (pkg.profit || 2.5) / 100).toFixed(2)}$</p>
             `;
             document.getElementById('paymentModal').classList.add('active');
         }
@@ -1906,7 +1851,7 @@
             document.getElementById('userPackageInfo').innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span><i class="fas fa-crown" style="color: var(--warning);"></i> باقتك: <strong>${userPackage.name}</strong></span>
-                    <span class="status-badge status-active">الربح اليومي: ${(userPackage.price * (userPackage.profit_percentage || 2.5) / 100).toFixed(2)}$</span>
+                    <span class="status-badge status-active">الربح اليومي: ${(userPackage.price * (userPackage.profit || 2.5) / 100).toFixed(2)}$</span>
                 </div>
             `;
             
@@ -1968,7 +1913,18 @@
             
             try {
                 // زيادة عدد إنجازات المهمة
-                await supabase.rpc('increment_task_completion', { task_id: taskId });
+                const { data: task, error: fetchError } = await supabase
+                    .from('tasks')
+                    .select('completions')
+                    .eq('id', taskId)
+                    .single();
+                
+                if (!fetchError) {
+                    await supabase
+                        .from('tasks')
+                        .update({ completions: (task.completions || 0) + 1 })
+                        .eq('id', taskId);
+                }
                 
                 // تحديث رصيد المستخدم
                 const newBalance = (currentUser.balance || 0) + reward;
@@ -2065,7 +2021,6 @@
             if (!currentUser) return;
             
             try {
-                // جلب المحالين
                 const { data: referred, error } = await supabase
                     .from('users')
                     .select('*')
@@ -2075,7 +2030,7 @@
                 
                 const total = referred?.length || 0;
                 const active = referred?.filter(r => r.package_id).length || 0;
-                const pending = referred?.filter(r => !r.package_id && r.pending_package).length || 0;
+                const pending = referred?.filter(r => !r.package_id).length || 0;
                 
                 document.getElementById('totalReferrals').textContent = total;
                 document.getElementById('activeReferrals').textContent = active;
@@ -2120,6 +2075,8 @@
 
         // ========== التنقل بين الصفحات ==========
         function showPage(page) {
+            console.log('🔀 التنقل إلى:', page);
+            
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             
@@ -2225,7 +2182,6 @@
                     showNotification('⚠️ حسابك معلق مؤقتاً', 'warning');
                 }
                 
-                // تحديث آخر تسجيل دخول
                 await supabase
                     .from('users')
                     .update({ last_login: new Date().toISOString() })
@@ -2259,7 +2215,6 @@
             const referralCode = document.getElementById('registerReferral').value || null;
             const generatedCode = generateReferralCode(document.getElementById('registerUsername').value);
             
-            // التحقق من وجود البريد
             const { data: existingEmail } = await supabase
                 .from('users')
                 .select('email')
@@ -2271,7 +2226,6 @@
                 return;
             }
             
-            // التحقق من وجود اسم المستخدم
             const { data: existingUsername } = await supabase
                 .from('users')
                 .select('username')
@@ -2291,7 +2245,7 @@
                 password: password,
                 referred_by: referralCode,
                 referral_code: generatedCode,
-                balance: referralCode ? 20 : 0, // مكافأة التسجيل بكود إحالة
+                balance: referralCode ? 20 : 0,
                 total_earned: referralCode ? 20 : 0,
                 tasks_completed: 0,
                 total_withdrawn: 0,
@@ -2311,7 +2265,6 @@
                 
                 if (error) throw error;
                 
-                // إضافة معاملة المكافأة
                 if (referralCode) {
                     await supabase
                         .from('transactions')
@@ -2388,7 +2341,6 @@
             }
             
             try {
-                // إنشاء طلب السحب
                 const { error: withdrawalError } = await supabase
                     .from('withdrawals')
                     .insert([{
@@ -2406,7 +2358,6 @@
                 
                 if (withdrawalError) throw withdrawalError;
                 
-                // خصم الرصيد
                 const newBalance = (currentUser.balance || 0) - total;
                 
                 const { error: updateError } = await supabase
@@ -2416,7 +2367,6 @@
                 
                 if (updateError) throw updateError;
                 
-                // تسجيل المعاملة
                 await supabase
                     .from('transactions')
                     .insert([{
@@ -2428,7 +2378,6 @@
                         created_at: new Date().toISOString()
                     }]);
                 
-                // تحديث البيانات المحلية
                 currentUser.balance = newBalance;
                 localStorage.setItem('current_user', JSON.stringify(currentUser));
                 
