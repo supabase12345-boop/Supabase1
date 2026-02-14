@@ -1,96 +1,66 @@
 // ===================================
 // ملف: supabase-config.js
-// الوصف: إعدادات الاتصال بـ Supabase
-// الإصدار: 3.0.0 - نسخة مستقرة
+// الوصف: إعدادات Supabase - نسخة مبسطة للهاتف
+// الإصدار: 1.0.0
 // ===================================
 
 // معلومات الاتصال بـ Supabase
 const SUPABASE_URL = 'https://tmksysprwgsbdmavlshm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRta3N5c3Byd2dzYmRtYXZsc2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTI3NjgsImV4cCI6MjA4NjU4ODc2OH0.-qHz5jtEkTK8S1RseWB5cLmLFfv9vPyTcGkc_D6ru80';
 
-// تهيئة عميل Supabase
+// إنشاء عميل Supabase
 let supabaseClient = null;
 let supabaseAvailable = false;
 
-// التحقق من وجود مكتبة Supabase
-if (typeof window !== 'undefined') {
-    try {
-        if (window.supabase) {
-            // إنشاء عميل Supabase
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                auth: {
-                    persistSession: true,
-                    autoRefreshToken: true,
-                    detectSessionInUrl: false
-                }
-            });
-            
-            supabaseAvailable = true;
-            console.log('✅ Supabase connected successfully');
-        } else {
-            console.warn('⚠️ Supabase library not loaded');
-        }
-    } catch (error) {
-        console.error('❌ Failed to initialize Supabase:', error);
+// محاولة الاتصال
+try {
+    if (typeof window !== 'undefined' && window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        supabaseAvailable = true;
+        console.log('✅ Supabase متصل');
+    } else {
+        console.log('⚠️ مكتبة Supabase غير موجودة');
     }
+} catch (e) {
+    console.log('❌ خطأ في الاتصال:', e);
 }
 
-// ========== دوال مساعدة للتعامل مع Supabase ==========
+// دوال بسيطة للتعامل مع Supabase
 const supabaseHelpers = {
-    // التحقق من التوفر
+    // التحقق من الاتصال
     isAvailable() {
         return supabaseAvailable && supabaseClient !== null;
     },
 
-    // ===== دوال المستخدمين =====
+    // جلب جميع المستخدمين
     async getAllUsers() {
+        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available', data: [] };
-            }
-            
-            const { data, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
+            const { data, error } = await supabaseClient.from('users').select('*');
             if (error) throw error;
-            
             return { success: true, data: data || [] };
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            return { success: false, error: error.message, data: [] };
+        } catch (e) {
+            return { success: false, data: [] };
         }
     },
 
-    async getUserById(userId) {
+    // جلب مستخدم بواسطة ID
+    async getUserById(id) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const { data, error } = await supabaseClient
-                .from('users')
-                .select('*')
-                .eq('id', userId)
-                .maybeSingle();
-            
+            const { data, error } = await supabaseClient.from('users').select('*').eq('id', id).single();
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error fetching user:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
+    // تسجيل الدخول
     async loginUser(username, password) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            // البحث بالبريد الإلكتروني
+            // بالبريد
             let { data, error } = await supabaseClient
                 .from('users')
                 .select('*')
@@ -98,530 +68,332 @@ const supabaseHelpers = {
                 .eq('password', password)
                 .maybeSingle();
             
-            // إذا لم يجد، ابحث باسم المستخدم
-            if (!data && !error) {
-                const result = await supabaseClient
+            // بالاسم
+            if (!data) {
+                const res = await supabaseClient
                     .from('users')
                     .select('*')
                     .eq('username', username)
                     .eq('password', password)
                     .maybeSingle();
-                
-                data = result.data;
-                error = result.error;
+                data = res.data;
             }
             
-            if (error) throw error;
-            
-            return { success: true, data };
-        } catch (error) {
-            console.error('Error logging in:', error);
-            return { success: false, error: error.message };
+            return { success: !!data, data };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    async createUser(userData) {
+    // إنشاء مستخدم
+    async createUser(user) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const newUser = {
-                id: userData.id || Date.now(),
-                name: userData.name || '',
-                username: userData.username || '',
-                email: userData.email || '',
-                phone: userData.phone || '',
-                password: userData.password || '',
-                balance: userData.balance || 0,
-                total_earned: userData.total_earned || 0,
-                tasks_completed: userData.tasks_completed || 0,
-                referral_code: userData.referral_code || userData.referralCode || null,
-                referred_by: userData.referred_by || userData.referredBy || null,
-                status: userData.status || 'active',
-                is_admin: userData.is_admin || false,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            
             const { data, error } = await supabaseClient
                 .from('users')
-                .insert([newUser])
+                .insert([{
+                    id: Date.now(),
+                    name: user.name,
+                    username: user.username,
+                    email: user.email,
+                    phone: user.phone || '',
+                    password: user.password,
+                    balance: 0,
+                    status: 'active',
+                    created_at: new Date().toISOString()
+                }])
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error creating user:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    async updateUser(userId, updates) {
+    // تحديث مستخدم
+    async updateUser(id, updates) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
             const { data, error } = await supabaseClient
                 .from('users')
-                .update({
-                    ...updates,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', userId)
+                .update(updates)
+                .eq('id', id)
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error updating user:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    // ===== دوال الباقات =====
+    // جلب جميع الباقات
     async getAllPackages() {
+        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available', data: [] };
-            }
-            
-            const { data, error } = await supabaseClient
-                .from('packages')
-                .select('*')
-                .order('price', { ascending: true });
-            
+            const { data, error } = await supabaseClient.from('packages').select('*');
             if (error) throw error;
-            
             return { success: true, data: data || [] };
-        } catch (error) {
-            console.error('Error fetching packages:', error);
-            return { success: false, error: error.message, data: [] };
+        } catch (e) {
+            return { success: false, data: [] };
         }
     },
 
-    async createPackage(packageData) {
+    // إنشاء باقة
+    async createPackage(pkg) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const dailyProfit = (packageData.price * (packageData.profit || 2.5) / 100).toFixed(2);
-            
-            const newPackage = {
-                id: packageData.id || Date.now(),
-                name: packageData.name,
-                price: parseFloat(packageData.price),
-                profit: parseFloat(packageData.profit || 2.5),
-                daily_profit: parseFloat(dailyProfit),
-                tasks_count: parseInt(packageData.tasks || packageData.tasks_count || 5),
-                duration: parseInt(packageData.duration || 30),
-                category: packageData.category || 'standard',
-                icon: packageData.icon || 'fa-bolt',
-                color: packageData.color || '#3b82f6',
-                features: packageData.features || ['ربح يومي', 'مهام يومية', 'دعم فني'],
-                status: 'active',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            
             const { data, error } = await supabaseClient
                 .from('packages')
-                .insert([newPackage])
+                .insert([{
+                    id: Date.now(),
+                    name: pkg.name,
+                    price: pkg.price,
+                    profit: pkg.profit || 2.5,
+                    category: pkg.category || 'standard',
+                    tasks: pkg.tasks || 5,
+                    duration: pkg.duration || 30,
+                    status: 'active',
+                    created_at: new Date().toISOString()
+                }])
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error creating package:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    async deletePackage(packageId) {
+    // حذف باقة
+    async deletePackage(id) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const { error } = await supabaseClient
-                .from('packages')
-                .delete()
-                .eq('id', packageId);
-            
-            if (error) throw error;
-            
+            await supabaseClient.from('packages').delete().eq('id', id);
             return { success: true };
-        } catch (error) {
-            console.error('Error deleting package:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    // ===== دوال المهام =====
+    // جلب جميع المهام
     async getAllTasks() {
+        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available', data: [] };
-            }
-            
-            const { data, error } = await supabaseClient
-                .from('tasks')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
+            const { data, error } = await supabaseClient.from('tasks').select('*');
             if (error) throw error;
-            
             return { success: true, data: data || [] };
-        } catch (error) {
-            console.error('Error fetching tasks:', error);
-            return { success: false, error: error.message, data: [] };
+        } catch (e) {
+            return { success: false, data: [] };
         }
     },
 
-    async createTask(taskData) {
+    // إنشاء مهمة
+    async createTask(task) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const newTask = {
-                id: taskData.id || Date.now(),
-                title: taskData.title,
-                description: taskData.description || '',
-                reward: parseFloat(taskData.reward),
-                type: taskData.type || 'daily',
-                status: 'active',
-                package_categories: taskData.packageCategories || taskData.package_categories || ['standard'],
-                difficulty: taskData.difficulty || 'easy',
-                time_required: parseInt(taskData.timeRequired || taskData.time_required || 5),
-                icon: taskData.icon || 'fa-tasks',
-                completions: 0,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            
             const { data, error } = await supabaseClient
                 .from('tasks')
-                .insert([newTask])
+                .insert([{
+                    id: Date.now(),
+                    title: task.title,
+                    description: task.description || '',
+                    reward: task.reward,
+                    package_categories: task.packageCategories || ['standard'],
+                    difficulty: task.difficulty || 'easy',
+                    time_required: task.timeRequired || 5,
+                    status: 'active',
+                    created_at: new Date().toISOString()
+                }])
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error creating task:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    async deleteTask(taskId) {
+    // حذف مهمة
+    async deleteTask(id) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const { error } = await supabaseClient
-                .from('tasks')
-                .delete()
-                .eq('id', taskId);
-            
-            if (error) throw error;
-            
+            await supabaseClient.from('tasks').delete().eq('id', id);
             return { success: true };
-        } catch (error) {
-            console.error('Error deleting task:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    // ===== دوال الطلبات المعلقة =====
+    // جلب الطلبات المعلقة
     async getPendingPackages() {
+        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available', data: [] };
-            }
-            
-            const { data, error } = await supabaseClient
-                .from('pending_packages')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
+            const { data, error } = await supabaseClient.from('pending_packages').select('*');
             if (error) throw error;
-            
             return { success: true, data: data || [] };
-        } catch (error) {
-            console.error('Error fetching pending packages:', error);
-            return { success: false, error: error.message, data: [] };
+        } catch (e) {
+            return { success: false, data: [] };
         }
     },
 
-    async createPendingPackage(pendingData) {
+    // إنشاء طلب معلق
+    async createPendingPackage(p) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const newPending = {
-                id: pendingData.id || Date.now(),
-                user_id: pendingData.user_id || pendingData.userId,
-                user_name: pendingData.user_name || pendingData.userName,
-                user_email: pendingData.user_email || pendingData.userEmail,
-                package_id: pendingData.package_id || pendingData.packageId,
-                package_name: pendingData.package_name || pendingData.packageName,
-                amount: parseFloat(pendingData.amount),
-                referred_by: pendingData.referred_by || pendingData.referredBy,
-                status: 'pending',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            
             const { data, error } = await supabaseClient
                 .from('pending_packages')
-                .insert([newPending])
+                .insert([{
+                    id: Date.now(),
+                    user_id: p.userId,
+                    user_name: p.userName,
+                    package_name: p.packageName,
+                    amount: p.amount,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                }])
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error creating pending package:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    async deletePendingPackage(pendingId) {
+    // حذف طلب معلق
+    async deletePendingPackage(id) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const { error } = await supabaseClient
-                .from('pending_packages')
-                .delete()
-                .eq('id', pendingId);
-            
-            if (error) throw error;
-            
+            await supabaseClient.from('pending_packages').delete().eq('id', id);
             return { success: true };
-        } catch (error) {
-            console.error('Error deleting pending package:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    // ===== دوال طلبات السحب =====
+    // جلب طلبات السحب
     async getWithdrawals() {
+        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available', data: [] };
-            }
-            
-            const { data, error } = await supabaseClient
-                .from('withdrawals')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
+            const { data, error } = await supabaseClient.from('withdrawals').select('*');
             if (error) throw error;
-            
             return { success: true, data: data || [] };
-        } catch (error) {
-            console.error('Error fetching withdrawals:', error);
-            return { success: false, error: error.message, data: [] };
+        } catch (e) {
+            return { success: false, data: [] };
         }
     },
 
-    async createWithdrawal(withdrawalData) {
+    // إنشاء طلب سحب
+    async createWithdrawal(w) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const fee = withdrawalData.fee || 
-                       (withdrawalData.network === 'TRC20' ? 5 : 
-                        withdrawalData.network === 'ERC20' ? 15 : 3);
-            
-            const newWithdrawal = {
-                id: withdrawalData.id || Date.now(),
-                user_id: withdrawalData.user_id || withdrawalData.userId,
-                user_name: withdrawalData.user_name || withdrawalData.userName,
-                amount: parseFloat(withdrawalData.amount),
-                wallet: withdrawalData.wallet,
-                network: withdrawalData.network || 'TRC20',
-                fee: fee,
-                total: parseFloat(withdrawalData.amount) + fee,
-                status: 'pending',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            };
-            
             const { data, error } = await supabaseClient
                 .from('withdrawals')
-                .insert([newWithdrawal])
+                .insert([{
+                    id: Date.now(),
+                    user_id: w.userId,
+                    user_name: w.userName,
+                    amount: w.amount,
+                    wallet: w.wallet,
+                    network: w.network || 'TRC20',
+                    fee: w.fee || 5,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                }])
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error creating withdrawal:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    async updateWithdrawal(withdrawalId, updates) {
+    // تحديث طلب سحب
+    async updateWithdrawal(id, updates) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
             const { data, error } = await supabaseClient
                 .from('withdrawals')
-                .update({
-                    ...updates,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', withdrawalId)
+                .update(updates)
+                .eq('id', id)
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error updating withdrawal:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    // ===== دوال المعاملات =====
+    // جلب المعاملات
     async getTransactions(userId = null) {
+        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available', data: [] };
-            }
-            
-            let query = supabaseClient
-                .from('transactions')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
-            if (userId) {
-                query = query.eq('user_id', userId);
-            }
-            
-            const { data, error } = await query.limit(500);
-            
+            let query = supabaseClient.from('transactions').select('*');
+            if (userId) query = query.eq('user_id', userId);
+            const { data, error } = await query;
             if (error) throw error;
-            
             return { success: true, data: data || [] };
-        } catch (error) {
-            console.error('Error fetching transactions:', error);
-            return { success: false, error: error.message, data: [] };
+        } catch (e) {
+            return { success: false, data: [] };
         }
     },
 
-    async createTransaction(transactionData) {
+    // إنشاء معاملة
+    async createTransaction(t) {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
-            
-            const newTransaction = {
-                id: transactionData.id || Date.now(),
-                user_id: transactionData.user_id || transactionData.userId,
-                type: transactionData.type,
-                amount: parseFloat(transactionData.amount),
-                description: transactionData.description || '',
-                status: transactionData.status || 'completed',
-                created_at: new Date().toISOString()
-            };
-            
             const { data, error } = await supabaseClient
                 .from('transactions')
-                .insert([newTransaction])
+                .insert([{
+                    id: Date.now(),
+                    user_id: t.userId,
+                    type: t.type,
+                    amount: t.amount,
+                    description: t.description || '',
+                    status: t.status || 'completed',
+                    created_at: new Date().toISOString()
+                }])
                 .select()
                 .single();
-            
             if (error) throw error;
-            
             return { success: true, data };
-        } catch (error) {
-            console.error('Error creating transaction:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     },
 
-    // ===== دوال الإحصائيات =====
+    // إحصائيات سريعة
     async getDashboardStats() {
+        if (!this.isAvailable()) return { success: false };
         try {
-            if (!this.isAvailable()) {
-                return { success: false, error: 'Supabase not available' };
-            }
+            const { count: users } = await supabaseClient.from('users').select('*', { count: 'exact', head: true });
+            const { count: packages } = await supabaseClient.from('packages').select('*', { count: 'exact', head: true });
+            const { count: tasks } = await supabaseClient.from('tasks').select('*', { count: 'exact', head: true });
+            const { count: pending } = await supabaseClient.from('pending_packages').select('*', { count: 'exact', head: true }).eq('status', 'pending');
             
-            // جلب عدد المستخدمين
-            const { count: usersCount, error: usersError } = await supabaseClient
-                .from('users')
-                .select('*', { count: 'exact', head: true });
-            
-            // جلب عدد الباقات
-            const { count: packagesCount, error: packagesError } = await supabaseClient
-                .from('packages')
-                .select('*', { count: 'exact', head: true });
-            
-            // جلب عدد المهام
-            const { count: tasksCount, error: tasksError } = await supabaseClient
-                .from('tasks')
-                .select('*', { count: 'exact', head: true });
-            
-            // جلب الطلبات المعلقة
-            const { count: pendingCount, error: pendingError } = await supabaseClient
-                .from('pending_packages')
-                .select('*', { count: 'exact', head: true })
-                .eq('status', 'pending');
-            
-            if (usersError || packagesError || tasksError || pendingError) {
-                throw new Error('Error fetching stats');
-            }
-            
-            return {
-                success: true,
-                data: {
-                    users: usersCount || 0,
-                    packages: packagesCount || 0,
-                    tasks: tasksCount || 0,
-                    pending: pendingCount || 0
-                }
+            return { 
+                success: true, 
+                data: { 
+                    users: users || 0, 
+                    packages: packages || 0, 
+                    tasks: tasks || 0, 
+                    pending: pending || 0 
+                } 
             };
-        } catch (error) {
-            console.error('Error fetching dashboard stats:', error);
-            return { success: false, error: error.message };
+        } catch (e) {
+            return { success: false };
         }
     }
 };
 
-// تصدير للاستخدام العام
+// تصدير للاستخدام
 if (typeof window !== 'undefined') {
     window.supabaseClient = supabaseClient;
     window.supabaseHelpers = supabaseHelpers;
     window.supabaseAvailable = supabaseAvailable;
-    
-    // اختبار بسيط
-    console.log('📦 Supabase Config Loaded');
-    console.log('🔌 Status:', supabaseAvailable ? 'Connected' : 'Disconnected');
-}
-
-// تصدير للاستخدام في وحدات ES
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { supabaseClient, supabaseHelpers, supabaseAvailable };
+    console.log('✅ Supabase Config جاهز');
 }
