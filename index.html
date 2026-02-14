@@ -1,74 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>Elite Investors - اختبار</title>
-</head>
-<body>
-    <h1>اختبار الأزرار</h1>
-    
-    <button onclick="testFunction()">زر الاختبار 1</button>
-    <button id="testBtn2">زر الاختبار 2</button>
-    <button onclick="openModal()">فتح نافذة</button>
-    
-    <div id="myModal" style="display:none; position:fixed; top:50%; left:50%; background:white; padding:20px; border:2px solid black;">
-        <p>هذه نافذة اختبار</p>
-        <button onclick="closeModal()">إغلاق</button>
-    </div>
-
-    <script>
-        console.log('1️⃣ المبدأ - الموقع يشتغل');
-        
-        // دالة الاختبار الأولى
-        function testFunction() {
-            alert('✅ الزر الأول يعمل!');
-            console.log('تم الضغط على الزر الأول');
-        }
-        
-        // دالة فتح النافذة
-        function openModal() {
-            console.log('محاولة فتح النافذة');
-            document.getElementById('myModal').style.display = 'block';
-        }
-        
-        // دالة إغلاق النافذة
-        function closeModal() {
-            console.log('محاولة إغلاق النافذة');
-            document.getElementById('myModal').style.display = 'none';
-        }
-        
-        // ربط الزر الثاني
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('2️⃣ الصفحة تحم
-
-
-// ربط الزر الثاني
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('2️⃣ الصفحة تحمّلت بالكامل');
-            
-            const btn2 = document.getElementById('testBtn2');
-            if (btn2) {
-                btn2.onclick = function() {
-                    alert('✅ الزر الثاني يعمل!');
-                    console.log('تم الضغط على الزر الثاني');
-                };
-                console.log('✅ تم ربط الزر الثاني');
-            } else {
-                console.error('❌ الزر الثاني غير موجود');
-            }
-        });
-
-        // دالة إضافية للاختبار
-        window.testGlobal = function() {
-            alert('🌍 الدالة الشاملة تعمل');
-        };
-
-        console.log('3️⃣ كل الدوال معرفة:', {
-            testFunction: typeof testFunction,
-            openModal: typeof openModal,
-            closeModal: typeof closeModal,
-            testGlobal: typeof testGlobal
-        });
-    </script>
-</body>
-</html>
