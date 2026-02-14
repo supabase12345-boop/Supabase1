@@ -6,20 +6,20 @@
     <script src="supabase.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة المتقدمة - Elite Investors</title>
+    <title>لوحة الإدارة - Elite Investors</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --admin-primary: #1e40af;
-            --admin-secondary: #3b82f6;
-            --admin-success: #059669;
-            --admin-warning: #d97706;
-            --admin-danger: #dc2626;
-            --admin-dark: #111827;
-            --admin-card: #1f2937;
-            --admin-text: #f3f4f6;
-            --admin-purple: #8b5cf6;
-            --admin-info: #0891b2;
+            --primary: #1e40af;
+            --secondary: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --dark: #111827;
+            --card: #1f2937;
+            --text: #f3f4f6;
+            --purple: #8b5cf6;
+            --muted: #9ca3af;
         }
         
         * {
@@ -30,8 +30,8 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background: var(--admin-dark);
-            color: var(--admin-text);
+            background: var(--dark);
+            color: var(--text);
         }
         
         .admin-container {
@@ -39,56 +39,56 @@
             min-height: 100vh;
         }
         
+        /* ===== الشريط الجانبي ===== */
         .sidebar {
-            width: 280px;
-            background: var(--admin-dark);
-            border-left: 4px solid var(--admin-primary);
+            width: 260px;
+            background: var(--dark);
+            border-left: 3px solid var(--primary);
             padding: 20px;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
         }
         
         .sidebar-header {
             text-align: center;
-            padding: 20px 0;
-            margin-bottom: 30px;
-            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+            padding: 15px 0;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(59,130,246,0.3);
         }
         
         .sidebar-header h2 {
-            color: var(--admin-secondary);
-            font-size: 1.5rem;
+            color: var(--secondary);
+            font-size: 1.3rem;
         }
         
         .sidebar-menu {
             list-style: none;
-            padding: 0;
         }
         
         .sidebar-menu li {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .sidebar-menu a {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
-            color: #9ca3af;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--muted);
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 8px;
             transition: all 0.3s;
             border: 1px solid transparent;
             cursor: pointer;
+            font-size: 14px;
         }
         
         .sidebar-menu a:hover,
         .sidebar-menu a.active {
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--admin-secondary);
-            border-color: var(--admin-secondary);
+            background: rgba(59,130,246,0.1);
+            color: var(--secondary);
+            border-color: var(--secondary);
         }
         
         .sidebar-menu i {
@@ -97,72 +97,59 @@
         }
         
         .sidebar-menu .badge {
-            background: var(--admin-danger);
+            background: var(--danger);
             color: white;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 10px;
-            font-size: 12px;
+            font-size: 11px;
             margin-right: auto;
         }
         
+        /* ===== المحتوى الرئيسي ===== */
         .main-content {
             flex: 1;
-            margin-right: 280px;
+            margin-right: 260px;
             padding: 20px;
         }
         
         .admin-header {
-            background: var(--admin-card);
-            padding: 20px 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            background: var(--card);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(59,130,246,0.3);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
+        /* ===== الإحصائيات ===== */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
         .stat-card {
-            background: var(--admin-card);
-            padding: 25px;
-            border-radius: 15px;
-            border-left: 5px solid var(--admin-primary);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--admin-secondary);
+            background: var(--card);
+            padding: 20px;
+            border-radius: 10px;
+            border-right: 4px solid var(--primary);
         }
         
         .stat-value {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 8px 0;
         }
         
+        /* ===== الجداول ===== */
         .admin-table {
-            background: var(--admin-card);
-            border-radius: 15px;
+            background: var(--card);
+            border-radius: 10px;
             overflow: hidden;
-            margin-top: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 15px;
         }
         
         .admin-table table {
@@ -171,95 +158,79 @@
         }
         
         .admin-table th {
-            background: rgba(59, 130, 246, 0.2);
-            padding: 15px;
+            background: rgba(59,130,246,0.15);
+            padding: 12px;
             text-align: right;
-            border-bottom: 2px solid var(--admin-secondary);
             font-weight: 600;
+            font-size: 13px;
         }
         
         .admin-table td {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
         }
         
         .admin-table tr:hover {
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(59,130,246,0.05);
         }
         
+        /* ===== الأزرار ===== */
         .btn {
-            padding: 8px 16px;
+            padding: 6px 12px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
-            margin: 0 5px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-        
-        .btn-sm {
-            padding: 6px 12px;
+            gap: 6px;
             font-size: 12px;
         }
         
-        .btn-primary { background: var(--admin-primary); color: white; }
-        .btn-success { background: var(--admin-success); color: white; }
-        .btn-warning { background: var(--admin-warning); color: white; }
-        .btn-danger { background: var(--admin-danger); color: white; }
-        .btn-info { background: var(--admin-info); color: white; }
-        .btn-purple { background: var(--admin-purple); color: white; }
+        .btn-sm { padding: 4px 8px; font-size: 11px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-purple { background: var(--purple); color: white; }
         
         .btn:hover {
             transform: translateY(-2px);
             opacity: 0.9;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
+        /* ===== النماذج ===== */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #9ca3af;
-            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--muted);
+            font-size: 13px;
         }
         
         .form-control {
             width: 100%;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 6px;
             color: white;
-            font-size: 15px;
-            transition: all 0.3s;
+            font-size: 13px;
         }
         
-        .form-control:focus {
-            outline: none;
-            border-color: var(--admin-secondary);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-        
+        /* ===== الأقسام ===== */
         .section {
             display: none;
         }
         
         .section.active {
             display: block;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.3s;
         }
         
         @keyframes fadeIn {
@@ -267,92 +238,42 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* ===== حالات المستخدم ===== */
         .status-badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: bold;
             display: inline-block;
         }
         
-        .status-active {
-            background: rgba(5, 150, 105, 0.2);
-            color: var(--admin-success);
-            border: 1px solid var(--admin-success);
-        }
+        .status-active { background: rgba(5,150,105,0.2); color: var(--success); border: 1px solid var(--success); }
+        .status-pending { background: rgba(217,119,6,0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .status-suspended { background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+        .status-banned { background: rgba(220,38,38,0.2); color: var(--danger); border: 1px solid var(--danger); }
         
-        .status-pending {
-            background: rgba(217, 119, 6, 0.2);
-            color: var(--admin-warning);
-            border: 1px solid var(--admin-warning);
-        }
-        
-        .status-suspended {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-            border: 1px solid #f59e0b;
-        }
-        
-        .status-banned {
-            background: rgba(220, 38, 38, 0.2);
-            color: #ef4444;
-            border: 1px solid #ef4444;
-        }
-        
-        .status-rejected {
-            background: rgba(220, 38, 38, 0.2);
-            color: var(--admin-danger);
-            border: 1px solid var(--admin-danger);
-        }
-        
+        /* ===== البحث ===== */
         .search-box {
-            background: var(--admin-card);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
+            background: var(--card);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 10px;
             flex-wrap: wrap;
         }
         
         .search-input {
             flex: 1;
-            min-width: 250px;
-            padding: 12px 18px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 10px;
+            min-width: 200px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 6px;
             color: white;
-            font-size: 15px;
         }
         
-        .sync-status {
-            position: fixed;
-            bottom: 20px;
-            left: 300px;
-            background: var(--admin-card);
-            padding: 10px 20px;
-            border-radius: 50px;
-            border: 1px solid var(--admin-primary);
-            font-size: 13px;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .sync-status.online {
-            border-color: var(--admin-success);
-            color: var(--admin-success);
-        }
-        
-        .sync-status.offline {
-            border-color: var(--admin-danger);
-            color: var(--admin-danger);
-        }
-        
+        /* ===== النوافذ المنبثقة ===== */
         .modal {
             display: none;
             position: fixed;
@@ -360,44 +281,38 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0,0,0,0.9);
             z-index: 2000;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            backdrop-filter: blur(5px);
         }
         
         .modal.active {
             display: flex;
-            animation: modalFadeIn 0.3s ease;
         }
         
         .modal-content {
-            background: var(--admin-card);
-            border-radius: 20px;
-            padding: 30px;
+            background: var(--card);
+            border-radius: 15px;
+            padding: 25px;
             width: 100%;
             max-width: 500px;
-            border: 2px solid var(--admin-primary);
+            border: 2px solid var(--primary);
             max-height: 90vh;
             overflow-y: auto;
         }
         
-        .modal-content.large {
-            max-width: 700px;
-        }
-        
         .loading {
             text-align: center;
-            padding: 40px;
-            color: #9ca3b8;
+            padding: 30px;
+            color: var(--muted);
         }
         
         .loading i {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--admin-secondary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
             animation: spin 1s linear infinite;
         }
         
@@ -405,61 +320,42 @@
             to { transform: rotate(360deg); }
         }
         
-        .badge {
-            background: var(--admin-primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
+        .sync-status {
+            position: fixed;
+            bottom: 15px;
+            left: 280px;
+            background: var(--card);
+            padding: 6px 15px;
+            border-radius: 30px;
+            border: 1px solid var(--primary);
             font-size: 12px;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 999;
         }
         
-        .badge.success { background: var(--admin-success); }
-        .badge.warning { background: var(--admin-warning); }
-        .badge.purple { background: var(--admin-purple); }
-        
-        .referral-code {
-            background: linear-gradient(45deg, var(--admin-purple), #7c3aed);
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            letter-spacing: 1px;
-            display: inline-block;
-            color: white;
-            font-weight: bold;
-        }
+        .sync-status.online { border-color: var(--success); color: var(--success); }
+        .sync-status.offline { border-color: var(--danger); color: var(--danger); }
         
         .admin-notification {
             position: fixed;
-            top: 100px;
+            top: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--admin-card);
+            background: var(--card);
             color: white;
-            padding: 18px 30px;
-            border-radius: 12px;
-            border-right: 6px solid var(--admin-success);
+            padding: 12px 25px;
+            border-radius: 8px;
+            border-right: 4px solid var(--success);
             z-index: 10000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: slideInDown 0.3s ease;
-            min-width: 350px;
-            text-align: center;
-            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 15px;
-            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
         
-        .admin-notification.error {
-            border-right-color: var(--admin-danger);
-        }
-        
-        @keyframes slideInDown {
-            from { transform: translate(-50%, -30px); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
+        .admin-notification.error { border-right-color: var(--danger); }
         
         @media (max-width: 768px) {
             .sidebar {
@@ -472,75 +368,93 @@
             }
             .sync-status {
                 left: 20px;
-                bottom: 80px;
+                bottom: 70px;
             }
+        }
+        
+        .referral-code {
+            background: linear-gradient(45deg, var(--purple), #7c3aed);
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .commission-badge {
+            background: var(--success);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 15px;
         }
     </style>
 </head>
 <body>
     <div class="sync-status online" id="syncStatus">
         <i class="fas fa-wifi" id="syncIcon"></i>
-        <span id="syncText">متصل بـ Supabase</span>
+        <span id="syncText">متصل</span>
     </div>
 
     <div class="admin-container">
         <!-- الشريط الجانبي -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h2><i class="fas fa-shield-alt"></i> لوحة الإدارة</h2>
-                <small>Elite Investors v2.0</small>
+                <h2><i class="fas fa-shield-alt"></i> الإدارة</h2>
             </div>
             
             <ul class="sidebar-menu">
-                <li><a href="#" class="active" onclick="showSection('dashboard'); return false;"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a></li>
-                <li><a href="#" onclick="showSection('users'); return false;"><i class="fas fa-users-cog"></i> إدارة المستخدمين <span id="usersCount" class="badge">0</span></a></li>
-                <li><a href="#" onclick="showSection('packages'); return false;"><i class="fas fa-crown"></i> إدارة الباقات <span id="packagesCount" class="badge">0</span></a></li>
-                <li><a href="#" onclick="showSection('pending'); return false;"><i class="fas fa-clock"></i> الطلبات المعلقة <span id="pendingCount" class="badge">0</span></a></li>
+                <li><a href="#" class="active" onclick="showSection('dashboard'); return false;"><i class="fas fa-tachometer-alt"></i> الرئيسية</a></li>
+                <li><a href="#" onclick="showSection('users'); return false;"><i class="fas fa-users"></i> المستخدمين <span id="usersCount" class="badge">0</span></a></li>
+                <li><a href="#" onclick="showSection('packages'); return false;"><i class="fas fa-crown"></i> الباقات <span id="packagesCount" class="badge">0</span></a></li>
+                <li><a href="#" onclick="showSection('pending'); return false;"><i class="fas fa-clock"></i> الطلبات <span id="pendingCount" class="badge">0</span></a></li>
                 <li><a href="#" onclick="showSection('subscriptions'); return false;"><i class="fas fa-shopping-cart"></i> الاشتراكات <span id="subscriptionsCount" class="badge">0</span></a></li>
-                <li><a href="#" onclick="showSection('withdrawals'); return false;"><i class="fas fa-money-bill-wave"></i> طلبات السحب <span id="withdrawalsCount" class="badge">0</span></a></li>
-                <li><a href="#" onclick="showSection('transactions'); return false;"><i class="fas fa-exchange-alt"></i> المعاملات</a></li>
+                <li><a href="#" onclick="showSection('withdrawals'); return false;"><i class="fas fa-money-bill-wave"></i> السحوبات <span id="withdrawalsCount" class="badge">0</span></a></li>
                 <li><a href="#" onclick="showSection('referrals'); return false;"><i class="fas fa-user-friends"></i> الإحالات</a></li>
-                <li><a href="#" onclick="showSection('tasks'); return false;"><i class="fas fa-tasks"></i> المهام</a></li>
-                <li><a href="#" onclick="showSection('reports'); return false;"><i class="fas fa-chart-bar"></i> التقارير</a></li>
-                <li><a href="#" onclick="showSection('settings'); return false;"><i class="fas fa-cog"></i> الإعدادات</a></li>
-                <li><a href="index.html" style="color: var(--admin-danger);"><i class="fas fa-sign-out-alt"></i> العودة للموقع</a></li>
+                <li><a href="#" onclick="showSection('transactions'); return false;"><i class="fas fa-exchange-alt"></i> المعاملات</a></li>
+                <li><a href="index.html"><i class="fas fa-sign-out-alt" style="color:var(--danger);"></i> العودة</a></li>
             </ul>
         </div>
         
         <!-- المحتوى الرئيسي -->
         <div class="main-content">
-            <!-- لوحة التحكم -->
+            <!-- الرئيسية -->
             <div id="dashboard-section" class="section active">
                 <div class="admin-header">
-                    <h2><i class="fas fa-tachometer-alt"></i> نظرة عامة</h2>
-                    <div>
-                        <span id="currentTime"></span>
-                        <button class="btn btn-sm btn-primary" onclick="refreshDashboard()"><i class="fas fa-sync-alt"></i> تحديث</button>
-                    </div>
+                    <h2><i class="fas fa-chart-pie"></i> نظرة عامة</h2>
+                    <button class="btn btn-sm btn-primary" onclick="refreshDashboard()"><i class="fas fa-sync-alt"></i> تحديث</button>
                 </div>
                 
                 <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-value" id="totalUsers">0</div><p>إجمالي المستخدمين</p></div>
-                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div><div class="stat-value" id="totalDeposits">0$</div><p>إجمالي الإيداعات</p></div>
-                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-user-friends"></i></div><div class="stat-value" id="totalReferrals">0</div><p>إجمالي الإحالات</p></div>
-                    <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-value" id="pendingRequests">0</div><p>بانتظار المراجعة</p></div>
+                    <div class="stat-card"><div>المستخدمين</div><div class="stat-value" id="totalUsers">0</div></div>
+                    <div class="stat-card"><div>المشتركين</div><div class="stat-value" id="totalSubscribers">0</div></div>
+                    <div class="stat-card"><div>الإيداعات</div><div class="stat-value" id="totalDeposits">0$</div></div>
+                    <div class="stat-card"><div>المسحوبات</div><div class="stat-value" id="totalWithdrawals">0$</div></div>
+                    <div class="stat-card"><div>طلبات معلقة</div><div class="stat-value" id="pendingTotal">0</div></div>
                 </div>
             </div>
             
             <!-- المستخدمين -->
             <div id="users-section" class="section">
                 <div class="admin-header">
-                    <h2><i class="fas fa-users-cog"></i> إدارة المستخدمين</h2>
+                    <h2><i class="fas fa-users"></i> المستخدمين</h2>
                     <div>
-                        <button class="btn btn-sm btn-success" onclick="showAddUserModal()"><i class="fas fa-user-plus"></i> إضافة</button>
-                        <button class="btn btn-sm btn-primary" onclick="loadUsers()"><i class="fas fa-sync-alt"></i> تحديث</button>
+                        <button class="btn btn-sm btn-success" onclick="showAddUserModal()"><i class="fas fa-plus"></i> إضافة</button>
+                        <button class="btn btn-sm btn-primary" onclick="loadUsers()"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
                 
                 <div class="search-box">
-                    <input type="text" class="search-input" id="userSearch" placeholder="بحث عن مستخدم..." onkeyup="searchUsers()">
+                    <input type="text" class="search-input" id="userSearch" placeholder="بحث..." onkeyup="searchUsers()">
                     <select class="search-input" id="userStatusFilter" onchange="filterUsers()">
-                        <option value="all">جميع المستخدمين</option>
+                        <option value="all">الكل</option>
                         <option value="active">نشط</option>
                         <option value="suspended">معلق</option>
                         <option value="banned">محظور</option>
@@ -549,8 +463,8 @@
                 
                 <div class="admin-table">
                     <table>
-                        <thead><tr><th>#</th><th>المستخدم</th><th>البريد</th><th>الهاتف</th><th>الرصيد</th><th>الباقة</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
-                        <tbody id="usersTable"><tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr></tbody>
+                        <thead><tr><th>#</th><th>المستخدم</th><th>البريد</th><th>الرصيد</th><th>الباقة</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+                        <tbody id="usersTable"></tbody>
                     </table>
                 </div>
             </div>
@@ -558,64 +472,74 @@
             <!-- الباقات -->
             <div id="packages-section" class="section">
                 <div class="admin-header">
-                    <h2><i class="fas fa-crown"></i> إدارة الباقات</h2>
-                    <button class="btn btn-sm btn-success" onclick="showAddPackageModal()"><i class="fas fa-plus-circle"></i> إضافة باقة</button>
+                    <h2><i class="fas fa-crown"></i> الباقات</h2>
+                    <button class="btn btn-sm btn-success" onclick="showAddPackageModal()"><i class="fas fa-plus"></i> إضافة</button>
                 </div>
                 
                 <div class="admin-table">
                     <table>
                         <thead><tr><th>الاسم</th><th>السعر</th><th>الربح</th><th>الفئة</th><th>المهام</th><th>المدة</th><th>المستخدمين</th><th>الإجراءات</th></tr></thead>
-                        <tbody id="packagesTable"><tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr></tbody>
+                        <tbody id="packagesTable"></tbody>
                     </table>
                 </div>
             </div>
             
-            <!-- الطلبات المعلقة (الأهم) -->
+            <!-- الطلبات المعلقة -->
             <div id="pending-section" class="section">
                 <div class="admin-header">
-                    <h2><i class="fas fa-clock"></i> الطلبات المعلقة</h2>
-                    <button class="btn btn-sm btn-primary" onclick="loadPending()"><i class="fas fa-sync-alt"></i> تحديث</button>
+                    <h2><i class="fas fa-clock"></i> الطلبات</h2>
+                    <button class="btn btn-sm btn-primary" onclick="loadPending()"><i class="fas fa-sync-alt"></i></button>
                 </div>
                 
                 <div class="admin-table">
                     <table>
-                        <thead><tr><th>المستخدم</th><th>الباقة</th><th>المبلغ</th><th>التاريخ</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
-                        <tbody id="pendingTable"><tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr></tbody>
+                        <thead><tr><th>المستخدم</th><th>الباقة</th><th>المبلغ</th><th>التاريخ</th><th>الإحالة</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+                        <tbody id="pendingTable"></tbody>
                     </table>
                 </div>
             </div>
             
             <!-- الاشتراكات -->
             <div id="subscriptions-section" class="section">
-                <div class="admin-header"><h2><i class="fas fa-shopping-cart"></i> الاشتراكات النشطة</h2></div>
+                <div class="admin-header">
+                    <h2><i class="fas fa-shopping-cart"></i> الاشتراكات</h2>
+                </div>
                 <div class="admin-table">
                     <table>
-                        <thead><tr><th>المستخدم</th><th>الباقة</th><th>المبلغ</th><th>تاريخ الاشتراك</th><th>الحالة</th></tr></thead>
-                        <tbody id="subscriptionsTable"><tr><td colspan="5" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr></tbody>
+                        <thead><tr><th>المستخدم</th><th>الباقة</th><th>المبلغ</th><th>تاريخ البدء</th><th>الحالة</th></tr></thead>
+                        <tbody id="subscriptionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- الإحالات -->
+            <div id="referrals-section" class="section">
+                <div class="admin-header">
+                    <h2><i class="fas fa-user-friends"></i> الإحالات</h2>
+                </div>
+                <div class="admin-table">
+                    <table>
+                        <thead><tr><th>المسوق</th><th>الكود</th><th>عدد الإحالات</th><th>النشطة</th><th>الأرباح</th><th>مستحق</th></tr></thead>
+                        <tbody id="referralsTable"></tbody>
                     </table>
                 </div>
             </div>
             
             <!-- باقي الأقسام مبسطة -->
-            <div id="withdrawals-section" class="section"><div class="admin-header"><h2>طلبات السحب</h2></div><div class="loading">قريباً...</div></div>
-            <div id="transactions-section" class="section"><div class="admin-header"><h2>المعاملات</h2></div><div class="loading">قريباً...</div></div>
-            <div id="referrals-section" class="section"><div class="admin-header"><h2>الإحالات</h2></div><div class="loading">قريباً...</div></div>
-            <div id="tasks-section" class="section"><div class="admin-header"><h2>المهام</h2></div><div class="loading">قريباً...</div></div>
-            <div id="reports-section" class="section"><div class="admin-header"><h2>التقارير</h2></div><div class="loading">قريباً...</div></div>
-            <div id="settings-section" class="section"><div class="admin-header"><h2>الإعدادات</h2></div><div class="loading">قريباً...</div></div>
+            <div id="withdrawals-section" class="section"><div class="admin-header"><h2>السحوبات</h2></div><div class="loading">قريباً</div></div>
+            <div id="transactions-section" class="section"><div class="admin-header"><h2>المعاملات</h2></div><div class="loading">قريباً</div></div>
         </div>
     </div>
 
     <!-- نافذة إضافة مستخدم -->
     <div class="modal" id="addUserModal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 20px;">➕ إضافة مستخدم جديد</h3>
-            <div class="form-group"><label>الاسم الكامل</label><input type="text" class="form-control" id="userName"></div>
+            <h3 style="margin-bottom:15px;">➕ مستخدم جديد</h3>
+            <div class="form-group"><label>الاسم</label><input type="text" class="form-control" id="userName"></div>
             <div class="form-group"><label>اسم المستخدم</label><input type="text" class="form-control" id="userUsername"></div>
-            <div class="form-group"><label>البريد الإلكتروني</label><input type="email" class="form-control" id="userEmail"></div>
-            <div class="form-group"><label>رقم الهاتف</label><input type="text" class="form-control" id="userPhone"></div>
-            <div class="form-group"><label>كلمة المرور</label><input type="password" class="form-control" id="userPassword"></div>
-            <div class="form-group"><label>الرصيد ($)</label><input type="number" class="form-control" id="userBalance" value="0"></div>
+            <div class="form-group"><label>البريد</label><input type="email" class="form-control" id="userEmail"></div>
+            <div class="form-group"><label>كلمة المرور</label><input type="password" class="form-control" id="userPassword" value="123456"></div>
+            <div class="form-group"><label>الرصيد</label><input type="number" class="form-control" id="userBalance" value="0"></div>
             <div class="form-group">
                 <label>الحالة</label>
                 <select class="form-control" id="userStatus">
@@ -624,71 +548,72 @@
                     <option value="banned">محظور</option>
                 </select>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <div style="display:flex; gap:10px;">
                 <button class="btn btn-danger" style="flex:1;" onclick="closeModal('addUserModal')">إلغاء</button>
-                <button class="btn btn-success" style="flex:2;" onclick="addUser()">إضافة المستخدم</button>
+                <button class="btn btn-success" style="flex:2;" onclick="addUser()">حفظ</button>
             </div>
         </div>
     </div>
-    
+
     <!-- نافذة إضافة باقة -->
     <div class="modal" id="addPackageModal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 20px;">➕ إضافة باقة جديدة</h3>
-            <div class="form-group"><label>اسم الباقة</label><input type="text" class="form-control" id="packageName"></div>
+            <h3 style="margin-bottom:15px;">➕ باقة جديدة</h3>
+            <div class="form-group"><label>الاسم</label><input type="text" class="form-control" id="packageName"></div>
             <div class="form-group"><label>السعر ($)</label><input type="number" class="form-control" id="packagePrice"></div>
-            <div class="form-group"><label>نسبة الربح (%)</label><input type="number" class="form-control" id="packageProfit" value="2.5"></div>
-            <div class="form-group"><label>الفئة</label>
+            <div class="form-group"><label>الربح (%)</label><input type="number" class="form-control" id="packageProfit" value="2.5"></div>
+            <div class="form-group">
+                <label>الفئة</label>
                 <select class="form-control" id="packageCategory">
                     <option value="standard">عادية</option>
                     <option value="premium">مميزة</option>
                     <option value="vip">VIP</option>
                 </select>
             </div>
-            <div class="form-group"><label>عدد المهام</label><input type="number" class="form-control" id="packageTasks" value="5"></div>
+            <div class="form-group"><label>المهام</label><input type="number" class="form-control" id="packageTasks" value="5"></div>
             <div class="form-group"><label>المدة (أيام)</label><input type="number" class="form-control" id="packageDuration" value="30"></div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <div style="display:flex; gap:10px;">
                 <button class="btn btn-danger" style="flex:1;" onclick="closeModal('addPackageModal')">إلغاء</button>
-                <button class="btn btn-success" style="flex:2;" onclick="addPackage()">إضافة الباقة</button>
+                <button class="btn btn-success" style="flex:2;" onclick="addPackage()">حفظ</button>
             </div>
         </div>
     </div>
-    
+
     <!-- نافذة معالجة الطلب -->
     <div class="modal" id="processModal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 20px;">⚙️ معالجة طلب الاشتراك</h3>
-            <div id="modalRequestInfo" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px;"></div>
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <button class="btn btn-danger" style="flex:1;" onclick="rejectRequest()"><i class="fas fa-times"></i> رفض</button>
-                <button class="btn btn-success" style="flex:2;" onclick="approveRequest()"><i class="fas fa-check"></i> قبول وتفعيل</button>
+            <h3 style="margin-bottom:15px;">⚙️ معالجة الطلب</h3>
+            <div id="processInfo" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; margin-bottom:15px;"></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-danger" style="flex:1;" onclick="rejectRequest()">رفض</button>
+                <button class="btn btn-success" style="flex:2;" onclick="approveRequest()">قبول</button>
             </div>
-            <button class="btn btn-sm" style="width:100%;" onclick="closeModal('processModal')">إلغاء</button>
+            <button class="btn btn-sm" style="width:100%; margin-top:10px;" onclick="closeModal('processModal')">إلغاء</button>
         </div>
     </div>
-    
-    <!-- نافذة تعديل حالة المستخدم -->
+
+    <!-- نافذة حالة المستخدم -->
     <div class="modal" id="statusModal">
         <div class="modal-content">
-            <h3 style="margin-bottom: 20px;">🔄 تغيير حالة المستخدم</h3>
-            <div id="statusUserInfo" style="margin-bottom: 15px;"></div>
+            <h3 style="margin-bottom:15px;">🔄 تغيير الحالة</h3>
+            <div id="statusUserInfo" style="margin-bottom:15px;"></div>
             <div class="form-group">
-                <label>الحالة الجديدة</label>
-                <select class="form-control" id="newUserStatus">
+                <label>الحالة</label>
+                <select class="form-control" id="newStatus">
                     <option value="active">🟢 نشط</option>
                     <option value="suspended">🟠 معلق</option>
                     <option value="banned">🔴 محظور</option>
                 </select>
             </div>
-            <div class="form-group"><label>سبب التغيير</label><textarea class="form-control" id="statusReason" rows="2"></textarea></div>
-            <div style="display: flex; gap: 10px;">
+            <div class="form-group"><label>السبب</label><textarea class="form-control" id="statusReason" rows="2"></textarea></div>
+            <div style="display:flex; gap:10px;">
                 <button class="btn btn-danger" style="flex:1;" onclick="closeModal('statusModal')">إلغاء</button>
-                <button class="btn btn-warning" style="flex:2;" onclick="updateUserStatus()">تحديث الحالة</button>
+                <button class="btn btn-warning" style="flex:2;" onclick="updateUserStatus()">تحديث</button>
             </div>
         </div>
     </div>
 
+    <!-- الإشعار -->
     <div class="admin-notification" id="notification" style="display:none;"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -703,18 +628,16 @@
         let currentUserId = null;
         let supabaseAvailable = false;
 
-        // ========== التحقق من Supabase ==========
-        function checkSupabase() {
+        // ========== التحقق من الاتصال ==========
+        function checkConnection() {
             supabaseAvailable = !!(window.supabaseClient && window.supabaseHelpers);
             const status = document.getElementById('syncStatus');
-            if (status) {
-                status.className = supabaseAvailable ? 'sync-status online' : 'sync-status offline';
-                document.getElementById('syncIcon').className = supabaseAvailable ? 'fas fa-wifi' : 'fas fa-exclamation-triangle';
-                document.getElementById('syncText').textContent = supabaseAvailable ? 'متصل بـ Supabase' : 'تخزين محلي';
-            }
+            status.className = supabaseAvailable ? 'sync-status online' : 'sync-status offline';
+            document.getElementById('syncIcon').className = supabaseAvailable ? 'fas fa-wifi' : 'fas fa-exclamation-triangle';
+            document.getElementById('syncText').textContent = supabaseAvailable ? 'Supabase' : 'محلي';
         }
 
-        // ========== التنقل بين الأقسام ==========
+        // ========== التنقل ==========
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
@@ -727,51 +650,46 @@
             );
             if (link) link.classList.add('active');
             
-            // تحميل البيانات حسب القسم
             if (sectionId === 'users') loadUsers();
             else if (sectionId === 'packages') loadPackages();
             else if (sectionId === 'pending') loadPending();
             else if (sectionId === 'subscriptions') loadSubscriptions();
-            else if (sectionId === 'dashboard') updateDashboardStats();
+            else if (sectionId === 'referrals') loadReferrals();
+            else if (sectionId === 'dashboard') updateStats();
         }
 
-        // ========== تحديث إحصائيات لوحة التحكم ==========
-        function updateDashboardStats() {
-            document.getElementById('totalUsers').textContent = adminData.users.length;
-            document.getElementById('totalDeposits').textContent = '0$';
-            document.getElementById('totalReferrals').textContent = '0';
-            document.getElementById('pendingRequests').textContent = adminData.pending.length;
+        // ========== الإحصائيات ==========
+        function updateStats() {
+            const users = adminData.users || [];
+            const subscribers = users.filter(u => u.package).length;
+            const pending = adminData.pending.length;
             
-            document.getElementById('usersCount').textContent = adminData.users.length;
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalSubscribers').textContent = subscribers;
+            document.getElementById('pendingTotal').textContent = pending;
+            
+            document.getElementById('usersCount').textContent = users.length;
             document.getElementById('packagesCount').textContent = adminData.packages.length;
-            document.getElementById('pendingCount').textContent = adminData.pending.length;
-            document.getElementById('subscriptionsCount').textContent = adminData.users.filter(u => u.package).length;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('subscriptionsCount').textContent = subscribers;
         }
 
-        // ========== تحميل المستخدمين ==========
+        // ========== المستخدمين ==========
         async function loadUsers() {
             const tbody = document.getElementById('usersTable');
-            tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="loading"><i class="fas fa-spinner fa-spin"></i></td></tr>';
             
             let users = [];
             if (supabaseAvailable) {
-                try {
-                    const result = await window.supabaseHelpers.getAllUsers();
-                    if (result.success) users = result.data;
-                } catch (e) { console.log('⚠️ فشل جلب المستخدمين'); }
+                try { const r = await window.supabaseHelpers.getAllUsers(); if (r.success) users = r.data; } catch (e) {}
             }
             if (!users.length) users = JSON.parse(localStorage.getItem('elite_users')) || [];
             
             adminData.users = users;
-            updateDashboardStats();
-            
-            if (!users.length) {
-                tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-users"></i><p>لا يوجد مستخدمين</p></td></tr>';
-                return;
-            }
+            updateStats();
             
             let html = '';
-            users.forEach((u, i) => {
+            users.slice(0, 50).forEach((u, i) => {
                 let statusClass = u.status === 'suspended' ? 'status-suspended' : u.status === 'banned' ? 'status-banned' : 'status-active';
                 let statusIcon = u.status === 'suspended' ? '🟠' : u.status === 'banned' ? '🔴' : '🟢';
                 
@@ -779,7 +697,6 @@
                     <td>${i+1}</td>
                     <td><strong>${u.name || '?'}</strong><br><small>@${u.username || ''}</small></td>
                     <td>${u.email || ''}</td>
-                    <td>${u.phone || ''}</td>
                     <td>${(u.balance || 0).toFixed(2)}$</td>
                     <td>${u.package ? u.package.name : '—'}</td>
                     <td><span class="status-badge ${statusClass}">${statusIcon} ${u.status || 'active'}</span></td>
@@ -792,27 +709,19 @@
             tbody.innerHTML = html;
         }
 
-        // ========== تحميل الباقات ==========
+        // ========== الباقات ==========
         async function loadPackages() {
             const tbody = document.getElementById('packagesTable');
-            tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i></td></tr>';
             
             let packages = [];
             if (supabaseAvailable) {
-                try {
-                    const result = await window.supabaseHelpers.getAllPackages();
-                    if (result.success) packages = result.data;
-                } catch (e) { console.log('⚠️ فشل جلب الباقات'); }
+                try { const r = await window.supabaseHelpers.getAllPackages(); if (r.success) packages = r.data; } catch (e) {}
             }
             if (!packages.length && window.sharedData) packages = await window.sharedData.getAllPackages();
             
             adminData.packages = packages;
-            updateDashboardStats();
-            
-            if (!packages.length) {
-                tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-box-open"></i><p>لا توجد باقات</p></td></tr>';
-                return;
-            }
+            updateStats();
             
             let html = '';
             packages.forEach(p => {
@@ -823,7 +732,7 @@
                     <td>${p.profit_percentage || p.profit || 2.5}%</td>
                     <td><span class="badge">${p.category || 'standard'}</span></td>
                     <td>${p.tasks_count || p.tasks || 5}</td>
-                    <td>${p.duration || 30} يوم</td>
+                    <td>${p.duration || 30}</td>
                     <td>${usersCount}</td>
                     <td><button class="btn btn-sm btn-danger" onclick="deletePackage(${p.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>`;
@@ -831,65 +740,43 @@
             tbody.innerHTML = html;
         }
 
-        // ========== تحميل الطلبات المعلقة (الأهم) ==========
+        // ========== الطلبات المعلقة ==========
         async function loadPending() {
             const tbody = document.getElementById('pendingTable');
-            tbody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="loading"><i class="fas fa-spinner fa-spin"></i></td></tr>';
             
-            let pending = [];
-            
-            // محاولة جلب الطلبات من Supabase
-            if (supabaseAvailable) {
-                try {
-                    const result = await window.supabaseHelpers.getPendingPackages?.();
-                    if (result?.success) pending = result.data;
-                } catch (e) { console.log('⚠️ فشل جلب الطلبات من Supabase'); }
-            }
-            
-            // استخدام التخزين المحلي
-            if (!pending.length) pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
-            
+            let pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
             adminData.pending = pending;
-            updateDashboardStats();
+            updateStats();
             
             if (!pending.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fas fa-check-circle" style="color:var(--admin-success);"></i><p>لا توجد طلبات معلقة</p></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">لا توجد طلبات</td></tr>';
                 return;
             }
             
             let html = '';
             pending.forEach((req, i) => {
-                const date = req.created_at || req.date || new Date().toISOString();
-                const formattedDate = new Date(date).toLocaleString('ar-SA');
-                
                 html += `<tr>
-                    <td><strong>${req.user_name || req.userName || 'مستخدم'}</strong><br><small>${req.user_email || ''}</small></td>
-                    <td>${req.package_name || req.packageName || 'باقة'}</td>
+                    <td><strong>${req.userName || req.user_name || '?'}</strong><br><small>${req.userEmail || ''}</small></td>
+                    <td>${req.packageName || req.package_name}</td>
                     <td><strong>${(req.amount || 0).toFixed(2)}$</strong></td>
-                    <td>${formattedDate}</td>
+                    <td>${new Date(req.created_at || req.date || Date.now()).toLocaleDateString('ar-SA')}</td>
+                    <td>${req.referredBy ? '🎁' : '—'}</td>
                     <td><span class="status-badge status-pending">⏳ معلق</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-success" onclick="showProcessModal(${i})"><i class="fas fa-check"></i> معالجة</button>
-                    </td>
+                    <td><button class="btn btn-sm btn-success" onclick="showProcessModal(${i})">معالجة</button></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
         }
 
-        // ========== تحميل الاشتراكات ==========
+        // ========== الاشتراكات ==========
         function loadSubscriptions() {
-            const tbody = document.getElementById('subscriptionsTable');
             const subs = adminData.users.filter(u => u.package).map(u => ({
                 name: u.name,
                 package: u.package.name,
                 amount: u.package.amount,
-                date: u.package.purchaseDate || new Date().toISOString()
+                date: u.package.purchaseDate
             }));
-            
-            if (!subs.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="loading"><i class="fas fa-box-open"></i><p>لا توجد اشتراكات</p></td></tr>';
-                return;
-            }
             
             let html = '';
             subs.forEach(s => {
@@ -897,196 +784,57 @@
                     <td>${s.name}</td>
                     <td>${s.package}</td>
                     <td>${s.amount}$</td>
-                    <td>${new Date(s.date).toLocaleDateString('ar-SA')}</td>
+                    <td>${s.date ? new Date(s.date).toLocaleDateString('ar-SA') : '—'}</td>
                     <td><span class="status-badge status-active">✅ نشط</span></td>
                 </tr>`;
             });
-            tbody.innerHTML = html;
+            document.getElementById('subscriptionsTable').innerHTML = html || '<tr><td colspan="5" class="loading">لا توجد اشتراكات</td></tr>';
         }
 
-        // ========== دوال المستخدمين ==========
-        function searchUsers() {
-            const search = document.getElementById('userSearch').value.toLowerCase();
-            const rows = document.querySelectorAll('#usersTable tr');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(search) ? '' : 'none';
-            });
-        }
-
-        function filterUsers() {
-            const filter = document.getElementById('userStatusFilter').value;
-            const rows = document.querySelectorAll('#usersTable tr');
-            rows.forEach(row => {
-                if (filter === 'all') {
-                    row.style.display = '';
-                } else {
-                    const statusCell = row.querySelector('td:nth-child(7) span');
-                    if (statusCell) {
-                        const status = statusCell.textContent.includes('نشط') ? 'active' : 
-                                      statusCell.textContent.includes('معلق') ? 'suspended' : 'banned';
-                        row.style.display = status === filter ? '' : 'none';
+        // ========== الإحالات ==========
+        function loadReferrals() {
+            const users = adminData.users;
+            const referrals = [];
+            
+            users.forEach(u => {
+                if (u.referralCode) {
+                    const referred = users.filter(r => r.referredBy === u.referralCode);
+                    if (referred.length) {
+                        referrals.push({
+                            name: u.name,
+                            code: u.referralCode,
+                            count: referred.length,
+                            active: referred.filter(r => r.package).length,
+                            earnings: u.referralEarnings || 0,
+                            pending: referred.filter(r => r.package && !r.referralRewardPaid).length * 50
+                        });
                     }
                 }
             });
+            
+            let html = '';
+            referrals.forEach(r => {
+                html += `<tr>
+                    <td>${r.name}</td>
+                    <td><span class="referral-code">${r.code}</span></td>
+                    <td>${r.count}</td>
+                    <td>${r.active}</td>
+                    <td>${r.earnings}$</td>
+                    <td>${r.pending}$</td>
+                </tr>`;
+            });
+            document.getElementById('referralsTable').innerHTML = html || '<tr><td colspan="6" class="loading">لا توجد إحالات</td></tr>';
         }
 
-        function showStatusModal(userId) {
-            currentUserId = userId;
-            const user = adminData.users.find(u => u.id === userId);
-            if (!user) return;
-            
-            document.getElementById('statusUserInfo').innerHTML = `
-                <p><strong>المستخدم:</strong> ${user.name}</p>
-                <p><strong>البريد:</strong> ${user.email}</p>
-                <p><strong>الحالة الحالية:</strong> <span class="status-badge ${user.status === 'suspended' ? 'status-suspended' : user.status === 'banned' ? 'status-banned' : 'status-active'}">${user.status || 'active'}</span></p>
-            `;
-            document.getElementById('newUserStatus').value = user.status || 'active';
-            document.getElementById('statusReason').value = '';
-            document.getElementById('statusModal').classList.add('active');
-        }
-
-        function updateUserStatus() {
-            const newStatus = document.getElementById('newUserStatus').value;
-            const reason = document.getElementById('statusReason').value;
-            
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const index = users.findIndex(u => u.id === currentUserId);
-            if (index !== -1) {
-                users[index].status = newStatus;
-                users[index].statusReason = reason;
-                users[index].statusUpdatedAt = new Date().toISOString();
-                localStorage.setItem('elite_users', JSON.stringify(users));
-                
-                // تحديث current_user إذا كان موجوداً
-                const currentUser = JSON.parse(localStorage.getItem('current_user'));
-                if (currentUser && currentUser.id === currentUserId) {
-                    currentUser.status = newStatus;
-                    localStorage.setItem('current_user', JSON.stringify(currentUser));
-                }
-            }
-            
-            closeModal('statusModal');
-            loadUsers();
-            showNotification(`✅ تم تغيير حالة المستخدم إلى ${newStatus}`);
-        }
-
-        function deleteUser(id) {
-            if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
-            
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const newUsers = users.filter(u => u.id !== id);
-            localStorage.setItem('elite_users', JSON.stringify(newUsers));
-            
-            // حذف من current_user إذا كان هو نفسه
-            const currentUser = JSON.parse(localStorage.getItem('current_user'));
-            if (currentUser && currentUser.id === id) {
-                localStorage.removeItem('current_user');
-            }
-            
-            loadUsers();
-            showNotification('✅ تم حذف المستخدم');
-        }
-
-        // ========== دوال الباقات ==========
-        function addPackage() {
-            const name = document.getElementById('packageName').value.trim();
-            const price = parseFloat(document.getElementById('packagePrice').value);
-            
-            if (!name || !price) {
-                showNotification('❌ يرجى ملء جميع الحقول', 'error');
-                return;
-            }
-            
-            const newPackage = {
-                id: Date.now(),
-                name: name,
-                price: price,
-                profit: parseFloat(document.getElementById('packageProfit').value) || 2.5,
-                category: document.getElementById('packageCategory').value,
-                tasks: parseInt(document.getElementById('packageTasks').value) || 5,
-                duration: parseInt(document.getElementById('packageDuration').value) || 30,
-                status: 'active'
-            };
-            
-            if (window.sharedData) {
-                window.sharedData.addPackage(newPackage);
-            } else {
-                const packages = JSON.parse(localStorage.getItem('website_packages')) || [];
-                packages.push(newPackage);
-                localStorage.setItem('website_packages', JSON.stringify(packages));
-            }
-            
-            closeModal('addPackageModal');
-            loadPackages();
-            showNotification('✅ تم إضافة الباقة بنجاح');
-        }
-
-        function deletePackage(id) {
-            if (!confirm('هل أنت متأكد من حذف هذه الباقة؟')) return;
-            
-            if (window.sharedData) {
-                window.sharedData.deletePackage(id);
-            } else {
-                const packages = JSON.parse(localStorage.getItem('website_packages')) || [];
-                const newPackages = packages.filter(p => p.id !== id);
-                localStorage.setItem('website_packages', JSON.stringify(newPackages));
-            }
-            
-            loadPackages();
-            showNotification('✅ تم حذف الباقة');
-        }
-
-        // ========== دوال المستخدمين الجدد ==========
-        function addUser() {
-            const name = document.getElementById('userName').value.trim();
-            const username = document.getElementById('userUsername').value.trim();
-            const email = document.getElementById('userEmail').value.trim();
-            const phone = document.getElementById('userPhone').value.trim();
-            const password = document.getElementById('userPassword').value;
-            const balance = parseFloat(document.getElementById('userBalance').value) || 0;
-            const status = document.getElementById('userStatus').value;
-            
-            if (!name || !username || !email || !password) {
-                showNotification('❌ يرجى ملء جميع الحقول المطلوبة', 'error');
-                return;
-            }
-            
-            const newUser = {
-                id: Date.now(),
-                name: name,
-                username: username,
-                email: email,
-                phone: phone,
-                password: password,
-                balance: balance,
-                status: status,
-                joinedDate: new Date().toISOString(),
-                package: null,
-                referralCode: 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase()
-            };
-            
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            users.push(newUser);
-            localStorage.setItem('elite_users', JSON.stringify(users));
-            
-            closeModal('addUserModal');
-            loadUsers();
-            showNotification('✅ تم إضافة المستخدم بنجاح');
-        }
-
-        // ========== دوال معالجة الطلبات (المهمة) ==========
+        // ========== معالجة الطلبات ==========
         function showProcessModal(index) {
             currentRequestId = index;
             const req = adminData.pending[index];
-            if (!req) return;
-            
-            document.getElementById('modalRequestInfo').innerHTML = `
-                <p><strong>👤 المستخدم:</strong> ${req.user_name || req.userName}</p>
-                <p><strong>📦 الباقة:</strong> ${req.package_name || req.packageName}</p>
-                <p><strong>💰 المبلغ:</strong> ${(req.amount || 0).toFixed(2)}$</p>
-                <p><strong>📅 التاريخ:</strong> ${new Date(req.created_at || req.date || Date.now()).toLocaleString('ar-SA')}</p>
-                ${req.referred_by ? '<p><span class="badge purple">🎁 يوجد كود إحالة</span></p>' : ''}
+            document.getElementById('processInfo').innerHTML = `
+                <p><strong>المستخدم:</strong> ${req.userName || req.user_name}</p>
+                <p><strong>الباقة:</strong> ${req.packageName || req.package_name}</p>
+                <p><strong>المبلغ:</strong> ${(req.amount || 0).toFixed(2)}$</p>
+                ${req.referredBy ? '<p><span class="badge">🎁 يوجد كود إحالة</span></p>' : ''}
             `;
             document.getElementById('processModal').classList.add('active');
         }
@@ -1095,59 +843,45 @@
             const req = adminData.pending[currentRequestId];
             if (!req) return;
             
-            // 1. حذف الطلب من قائمة المعلقة
+            // حذف الطلب
             const pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
             const newPending = pending.filter((_, i) => i !== currentRequestId);
             localStorage.setItem('pending_packages', JSON.stringify(newPending));
             
-            // 2. تحديث المستخدم - إضافة الباقة له
+            // تحديث المستخدم
             const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const userIndex = users.findIndex(u => u.id === (req.user_id || req.userId));
+            const userIndex = users.findIndex(u => u.id === (req.userId || req.user_id));
             
             if (userIndex !== -1) {
-                // إضافة الباقة للمستخدم
                 users[userIndex].package = {
-                    id: req.package_id || Date.now(),
-                    name: req.package_name || req.packageName,
+                    id: req.packageId || Date.now(),
+                    name: req.packageName || req.package_name,
                     amount: req.amount,
                     purchaseDate: new Date().toISOString(),
                     status: 'نشط'
                 };
-                users[userIndex].pending_package = null;
+                users[userIndex].pendingPackage = null;
                 
                 localStorage.setItem('elite_users', JSON.stringify(users));
                 
-                // تحديث current_user إذا كان هو نفسه
+                // تحديث current_user
                 const currentUser = JSON.parse(localStorage.getItem('current_user'));
-                if (currentUser && currentUser.id === (req.user_id || req.userId)) {
+                if (currentUser && currentUser.id === (req.userId || req.user_id)) {
                     currentUser.package = users[userIndex].package;
-                    currentUser.pending_package = null;
                     localStorage.setItem('current_user', JSON.stringify(currentUser));
                 }
                 
-                // 3. معالجة مكافأة الإحالة إذا وجدت
-                if (req.referred_by && window.sharedData) {
-                    window.sharedData.processReferralRewardsOnApproval(req.user_id || req.userId, req.amount);
+                // معالجة الإحالة
+                if (req.referredBy && window.sharedData) {
+                    window.sharedData.processReferralRewardsOnApproval(req.userId || req.user_id, req.amount);
                 }
-                
-                // 4. تسجيل معاملة
-                const transactions = JSON.parse(localStorage.getItem(`user_transactions_${req.user_id || req.userId}`)) || [];
-                transactions.unshift({
-                    id: Date.now(),
-                    type: 'اشتراك',
-                    amount: req.amount,
-                    description: `تفعيل باقة ${req.package_name}`,
-                    date: new Date().toLocaleString('ar-SA'),
-                    status: 'مكتمل'
-                });
-                localStorage.setItem(`user_transactions_${req.user_id || req.userId}`, JSON.stringify(transactions));
             }
             
             closeModal('processModal');
-            loadPending(); // تحديث قائمة الطلبات
-            loadUsers(); // تحديث المستخدمين
-            loadSubscriptions(); // تحديث الاشتراكات
-            showNotification('✅ تم قبول الطلب وتفعيل الباقة بنجاح');
+            loadPending();
+            loadUsers();
+            loadSubscriptions();
+            showNotification('✅ تم قبول الطلب');
         }
 
         function rejectRequest() {
@@ -1160,26 +894,133 @@
             showNotification('❌ تم رفض الطلب', 'error');
         }
 
-        // ========== دوال التحديث ==========
-        function refreshDashboard() { 
-            loadUsers(); 
-            loadPackages(); 
-            loadPending(); 
-            showNotification('✅ تم تحديث البيانات'); 
+        // ========== حالة المستخدم ==========
+        function showStatusModal(id) {
+            currentUserId = id;
+            const user = adminData.users.find(u => u.id === id);
+            document.getElementById('statusUserInfo').innerHTML = `
+                <p><strong>المستخدم:</strong> ${user.name}</p>
+                <p><strong>الحالة:</strong> <span class="status-badge status-${user.status}">${user.status}</span></p>
+            `;
+            document.getElementById('newStatus').value = user.status || 'active';
+            document.getElementById('statusModal').classList.add('active');
+        }
+
+        function updateUserStatus() {
+            const newStatus = document.getElementById('newStatus').value;
+            const reason = document.getElementById('statusReason').value;
+            
+            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            const index = users.findIndex(u => u.id === currentUserId);
+            if (index !== -1) {
+                users[index].status = newStatus;
+                users[index].statusReason = reason;
+                localStorage.setItem('elite_users', JSON.stringify(users));
+                
+                const currentUser = JSON.parse(localStorage.getItem('current_user'));
+                if (currentUser && currentUser.id === currentUserId) {
+                    currentUser.status = newStatus;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                }
+            }
+            
+            closeModal('statusModal');
+            loadUsers();
+            showNotification('✅ تم تحديث الحالة');
+        }
+
+        // ========== إضافة مستخدم ==========
+        function addUser() {
+            const newUser = {
+                id: Date.now(),
+                name: document.getElementById('userName').value,
+                username: document.getElementById('userUsername').value,
+                email: document.getElementById('userEmail').value,
+                password: document.getElementById('userPassword').value,
+                balance: parseFloat(document.getElementById('userBalance').value) || 0,
+                status: document.getElementById('userStatus').value,
+                joinedDate: new Date().toISOString(),
+                referralCode: 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase()
+            };
+            
+            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            users.push(newUser);
+            localStorage.setItem('elite_users', JSON.stringify(users));
+            
+            closeModal('addUserModal');
+            loadUsers();
+            showNotification('✅ تمت الإضافة');
+        }
+
+        // ========== إضافة باقة ==========
+        function addPackage() {
+            const newPackage = {
+                id: Date.now(),
+                name: document.getElementById('packageName').value,
+                price: parseFloat(document.getElementById('packagePrice').value),
+                profit: parseFloat(document.getElementById('packageProfit').value) || 2.5,
+                category: document.getElementById('packageCategory').value,
+                tasks: parseInt(document.getElementById('packageTasks').value) || 5,
+                duration: parseInt(document.getElementById('packageDuration').value) || 30
+            };
+            
+            if (window.sharedData) {
+                window.sharedData.addPackage(newPackage);
+            } else {
+                const packages = JSON.parse(localStorage.getItem('website_packages')) || [];
+                packages.push(newPackage);
+                localStorage.setItem('website_packages', JSON.stringify(packages));
+            }
+            
+            closeModal('addPackageModal');
+            loadPackages();
+            showNotification('✅ تمت الإضافة');
+        }
+
+        // ========== حذف ==========
+        function deleteUser(id) {
+            if (!confirm('حذف المستخدم؟')) return;
+            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            const newUsers = users.filter(u => u.id !== id);
+            localStorage.setItem('elite_users', JSON.stringify(newUsers));
+            loadUsers();
+            showNotification('✅ تم الحذف');
+        }
+
+        function deletePackage(id) {
+            if (!confirm('حذف الباقة؟')) return;
+            if (window.sharedData) window.sharedData.deletePackage(id);
+            loadPackages();
+            showNotification('✅ تم الحذف');
+        }
+
+        // ========== بحث وتصفية ==========
+        function searchUsers() {
+            const search = document.getElementById('userSearch').value.toLowerCase();
+            document.querySelectorAll('#usersTable tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
+            });
+        }
+
+        function filterUsers() {
+            const filter = document.getElementById('userStatusFilter').value;
+            document.querySelectorAll('#usersTable tr').forEach(row => {
+                if (filter === 'all') { row.style.display = ''; return; }
+                const statusSpan = row.querySelector('td:nth-child(6) span');
+                if (statusSpan) {
+                    const status = statusSpan.textContent.includes('نشط') ? 'active' : 
+                                  statusSpan.textContent.includes('معلق') ? 'suspended' : 'banned';
+                    row.style.display = status === filter ? '' : 'none';
+                }
+            });
         }
 
         // ========== دوال مساعدة ==========
+        function refreshDashboard() { loadUsers(); loadPackages(); loadPending(); showNotification('✅ تم التحديث'); }
         function showAddUserModal() { document.getElementById('addUserModal').classList.add('active'); }
         function showAddPackageModal() { document.getElementById('addPackageModal').classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         
-        function closeModal(id) { 
-            document.getElementById(id).classList.remove('active'); 
-        }
-
-        function updateTime() {
-            document.getElementById('currentTime').textContent = new Date().toLocaleString('ar-SA');
-        }
-
         function showNotification(msg, type = 'success') {
             const n = document.getElementById('notification');
             n.innerHTML = `${type === 'success' ? '✅' : '❌'} ${msg}`;
@@ -1190,18 +1031,13 @@
 
         // ========== التهيئة ==========
         async function init() {
-            checkSupabase();
-            
-            // تحميل جميع البيانات
+            checkConnection();
             await loadUsers();
             await loadPackages();
             await loadPending();
             loadSubscriptions();
-            
-            updateDashboardStats();
-            updateTime();
-            setInterval(updateTime, 1000);
-            
+            loadReferrals();
+            updateStats();
             console.log('✅ لوحة الإدارة جاهزة');
         }
 
