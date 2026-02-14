@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Elite Investors - اختبار متقدم</title>
+</head>
+<body>
+    <h1>اختبار الأزرار المتقدم</h1>
+    
+    <button onclick="testFunction()">زر الاختبار 1</button>
+    <button id="testBtn2">زر الاختبار 2</button>
+    <button onclick="openModal()">فتح نافذة</button>
+    <button onclick="testConsole()">اختبار Console</button>
+    
+    <div id="myModal" style="display:none; position:fixed; top:50%; left:50%; background:white; padding:20px; border:2px solid black; z-index:9999;">
+        <p>هذه نافذة اختبار</p>
+        <button onclick="closeModal()">إغلاق</button>
+    </div>
+
+    <div id="debugInfo" style="margin-top:20px; padding:10px; background:#f0f0f0; direction:ltr;"></div>
+
+    <script>
+        // ===== كشف الأخطاء =====
+        window.onerror = function(msg, url, line) {
+            const errorMsg = '❌ خطأ: ' + msg + ' في السطر ' + line;
+            console.error(errorMsg);
+            document.getElementById('debugInfo').innerHTML += '<div style="color:red">' + errorMsg + '</div>';
+            return true;
+        };
+
+        // ===== تسجيل كل شيء =====
+        console.log('1️⃣ بداية الكود');
+        document.getElementById('debugInfo').innerHTML += '<div>✅ بداية الكود</div>';
+
+        // دالة الاختبار الأولى
+        function testFunction() {
+            console.log('✅ تم الضغط على الزر الأول');
+            alert('✅ الزر الأول يعمل!');
+        }
+
+        // دالة فتح النافذة
+        function openModal() {
+            console.log('محاولة فتح النافذة');
+            const modal = document.getElementById('myModal');
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('✅ تم فتح النافذة');
+            } else {
+                console.error('❌ النافذة غير موجودة');
+            }
+        }
+
+        // دالة إغلاق النافذة
+        function closeModal() {
+            console.log('محاولة إغلاق النافذة');
+            const modal = document.getElementById('myModal');
+            if (modal) {
+                modal.style.display = 'none';
+                console.log('✅ تم إغلاق النافذة');
+            }
+        }
+
+        // دالة اختبار الـ Console
+        function testConsole() {
+            console.log('📢 اختبار Console');
+            console.log('الدوال المتاحة:', {
+                testFunction: typeof testFunction,
+                openModal: typeof openModal,
+                closeModal: typeof closeModal
+            });
+            alert('تم تسجيل المعلومات في Console (F12)');
+        }
+
+        // ربط الزر الثاني بعد تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('2️⃣ الصفحة تحمّلت بالكامل');
+            document.getElementById('debugInfo').innerHTML += '<div>✅ الصفحة تحمّلت</div>';
+            
+            const btn2 = document.getElementById('testBtn2');
+            if (btn2) {
+                console.log('✅ تم العثور على الزر الثاني');
+                btn2.onclick = function() {
+                    console.log('👆 تم الضغط على الزر الثاني');
+                    alert('✅ الزر الثاني يعمل!');
+                };
+            } else {
+                console.error('❌ الزر الثاني غير موجود');
+                document.getElementById('debugInfo').innerHTML += '<div style="color:red">❌ الزر الثاني غير موجود</div>';
+            }
+        });
+
+        // تحقق إضافي
+        console.log('3️⃣ نهاية الكود');
+        document.getElementById('debugInfo').innerHTML += '<div>✅ نهاية الكود</div>';
+    </script>
+</body>
+</html>
