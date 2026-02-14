@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Elite Investors | لوحة الإدارة</title>
+    <title>Elite Investors | لوحة الإدارة المتقدمة</title>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +13,8 @@
     
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- إعدادات Supabase -->
+    <script src="supabase-config.js"></script>
     
     <style>
         /* ===== المتغيرات والأساسيات ===== */
@@ -836,6 +838,10 @@
                     <i class="fas fa-crown"></i> الباقات
                     <span id="packagesCount" class="badge">0</span>
                 </a></li>
+                <li><a href="#" onclick="showSection('tasks'); return false;">
+                    <i class="fas fa-tasks"></i> المهام
+                    <span id="tasksCount" class="badge">0</span>
+                </a></li>
                 <li><a href="#" onclick="showSection('pending'); return false;">
                     <i class="fas fa-clock"></i> الطلبات المعلقة
                     <span id="pendingCount" class="badge">0</span>
@@ -888,19 +894,19 @@
                         <div class="stat-label">المشتركين</div>
                     </div>
                     <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                        <div class="stat-value" id="totalTasks">0</div>
+                        <div class="stat-label">إجمالي المهام</div>
+                    </div>
+                    <div class="stat-card">
                         <div class="stat-icon"><i class="fas fa-clock"></i></div>
                         <div class="stat-value" id="totalPending">0</div>
                         <div class="stat-label">طلبات معلقة</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
-                        <div class="stat-value" id="totalDeposits">0$</div>
-                        <div class="stat-label">إجمالي الإيداعات</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                        <div class="stat-value" id="totalWithdrawals">0$</div>
-                        <div class="stat-label">إجمالي المسحوبات</div>
+                        <div class="stat-value" id="totalWithdrawals">0</div>
+                        <div class="stat-label">طلبات سحب معلقة</div>
                     </div>
                 </div>
             </div>
@@ -975,6 +981,47 @@
                         </thead>
                         <tbody id="packagesTable">
                             <tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i><br>جاري التحميل...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- قسم المهام (الجديد) -->
+            <div id="tasks-section" class="section">
+                <div class="admin-header">
+                    <h2><i class="fas fa-tasks"></i> إدارة المهام</h2>
+                    <button class="btn btn-success btn-sm" onclick="showAddTaskModal()">
+                        <i class="fas fa-plus"></i> إضافة مهمة
+                    </button>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" class="search-input" id="taskSearch" placeholder="🔍 بحث عن مهمة..." onkeyup="searchTasks()">
+                    <select class="search-input" id="taskCategoryFilter" onchange="filterTasks()">
+                        <option value="all">جميع الفئات</option>
+                        <option value="standard">🥈 فضية</option>
+                        <option value="premium">🥇 ذهبية</option>
+                        <option value="vip">💎 ماسية</option>
+                    </select>
+                </div>
+
+                <div class="admin-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>العنوان</th>
+                                <th>الوصف</th>
+                                <th>المكافأة</th>
+                                <th>الفئة</th>
+                                <th>الصعوبة</th>
+                                <th>الوقت</th>
+                                <th>الإنجازات</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasksTable">
+                            <tr><td colspan="9" class="loading"><i class="fas fa-spinner fa-spin"></i><br>جاري التحميل...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1207,6 +1254,141 @@
         </div>
     </div>
 
+    <!-- نافذة إضافة مهمة (جديدة) -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-tasks"></i> إضافة مهمة جديدة</h2>
+                <button class="close-btn" onclick="closeModal('addTaskModal')"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="form-group">
+                <label>عنوان المهمة</label>
+                <input type="text" class="form-control" id="taskTitle" placeholder="مثال: مشاهدة فيديو تعليمي">
+            </div>
+            <div class="form-group">
+                <label>وصف المهمة</label>
+                <textarea class="form-control" id="taskDescription" rows="3" placeholder="أدخل وصفاً تفصيلياً للمهمة"></textarea>
+            </div>
+            <div class="form-group">
+                <label>المكافأة ($)</label>
+                <input type="number" class="form-control" id="taskReward" value="2.5" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>الفئات المسموح بها</label>
+                <select class="form-control" id="taskPackageCategories" multiple size="3">
+                    <option value="standard" selected>🥈 فضية</option>
+                    <option value="premium" selected>🥇 ذهبية</option>
+                    <option value="vip" selected>💎 ماسية</option>
+                </select>
+                <small style="color: var(--text-muted);">اضغط Ctrl لتحديد أكثر من فئة</small>
+            </div>
+            <div class="form-group">
+                <label>مستوى الصعوبة</label>
+                <select class="form-control" id="taskDifficulty">
+                    <option value="easy">سهل</option>
+                    <option value="medium" selected>متوسط</option>
+                    <option value="hard">صعب</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>الوقت المطلوب (بالدقائق)</label>
+                <input type="number" class="form-control" id="taskTimeRequired" value="5" min="1">
+            </div>
+            <div class="form-group">
+                <label>نوع المهمة</label>
+                <select class="form-control" id="taskType">
+                    <option value="daily">يومية</option>
+                    <option value="weekly">أسبوعية</option>
+                    <option value="one-time">مرة واحدة</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>أيقونة المهمة (Font Awesome)</label>
+                <select class="form-control" id="taskIcon">
+                    <option value="fa-play">▶️ تشغيل</option>
+                    <option value="fa-share-alt" selected>🔄 مشاركة</option>
+                    <option value="fa-star">⭐ نجمة</option>
+                    <option value="fa-chart-line">📊 رسم بياني</option>
+                    <option value="fa-crown">👑 تاج</option>
+                    <option value="fa-video">📹 فيديو</option>
+                    <option value="fa-book">📚 كتاب</option>
+                    <option value="fa-users">👥 مستخدمين</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 25px;">
+                <button class="btn btn-danger" style="flex: 1;" onclick="closeModal('addTaskModal')">إلغاء</button>
+                <button class="btn btn-success" style="flex: 2;" onclick="addTask()">إضافة المهمة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل مهمة -->
+    <div class="modal" id="editTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> تعديل المهمة</h2>
+                <button class="close-btn" onclick="closeModal('editTaskModal')"><i class="fas fa-times"></i></button>
+            </div>
+
+            <input type="hidden" id="editTaskId">
+            
+            <div class="form-group">
+                <label>عنوان المهمة</label>
+                <input type="text" class="form-control" id="editTaskTitle">
+            </div>
+            <div class="form-group">
+                <label>وصف المهمة</label>
+                <textarea class="form-control" id="editTaskDescription" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>المكافأة ($)</label>
+                <input type="number" class="form-control" id="editTaskReward" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>الفئات المسموح بها</label>
+                <select class="form-control" id="editTaskPackageCategories" multiple size="3">
+                    <option value="standard">🥈 فضية</option>
+                    <option value="premium">🥇 ذهبية</option>
+                    <option value="vip">💎 ماسية</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>مستوى الصعوبة</label>
+                <select class="form-control" id="editTaskDifficulty">
+                    <option value="easy">سهل</option>
+                    <option value="medium">متوسط</option>
+                    <option value="hard">صعب</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>الوقت المطلوب (بالدقائق)</label>
+                <input type="number" class="form-control" id="editTaskTimeRequired" min="1">
+            </div>
+            <div class="form-group">
+                <label>نوع المهمة</label>
+                <select class="form-control" id="editTaskType">
+                    <option value="daily">يومية</option>
+                    <option value="weekly">أسبوعية</option>
+                    <option value="one-time">مرة واحدة</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>الحالة</label>
+                <select class="form-control" id="editTaskStatus">
+                    <option value="active">نشط</option>
+                    <option value="inactive">غير نشط</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 25px;">
+                <button class="btn btn-danger" style="flex: 1;" onclick="closeModal('editTaskModal')">إلغاء</button>
+                <button class="btn btn-warning" style="flex: 2;" onclick="updateTask()">تحديث المهمة</button>
+            </div>
+        </div>
+    </div>
+
     <!-- نافذة معالجة طلب اشتراك -->
     <div class="modal" id="processPendingModal">
         <div class="modal-content">
@@ -1290,6 +1472,20 @@
         </div>
     </div>
 
+    <!-- نافذة عرض تفاصيل المهمة -->
+    <div class="modal" id="viewTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> تفاصيل المهمة</h2>
+                <button class="close-btn" onclick="closeModal('viewTaskModal')"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div id="taskDetails" class="glass-effect" style="padding: 20px; border-radius: var(--radius-sm);">
+                <!-- تفاصيل المهمة ستظهر هنا -->
+            </div>
+        </div>
+    </div>
+
     <!-- حالة الاتصال -->
     <div class="sync-status online" id="syncStatus">
         <i class="fas fa-wifi" id="syncIcon"></i>
@@ -1304,6 +1500,7 @@
         let adminData = {
             users: [],
             packages: [],
+            tasks: [],
             pending: [],
             withdrawals: [],
             subscriptions: []
@@ -1311,6 +1508,7 @@
         let currentRequestId = null;
         let currentWithdrawalId = null;
         let currentUserId = null;
+        let currentTaskId = null;
         let supabaseAvailable = false;
 
         // ========== التحقق من الاتصال ==========
@@ -1320,6 +1518,8 @@
             status.className = supabaseAvailable ? 'sync-status online' : 'sync-status offline';
             document.getElementById('syncIcon').className = supabaseAvailable ? 'fas fa-wifi' : 'fas fa-exclamation-triangle';
             document.getElementById('syncText').textContent = supabaseAvailable ? 'متصل بـ Supabase' : 'تخزين محلي';
+            
+            console.log('📡 حالة الاتصال:', supabaseAvailable ? 'متصل' : 'غير متصل');
         }
 
         // ========== التنقل بين الأقسام ==========
@@ -1338,6 +1538,7 @@
             // تحميل البيانات حسب القسم
             if (sectionId === 'users') loadUsers();
             else if (sectionId === 'packages') loadPackages();
+            else if (sectionId === 'tasks') loadTasks();
             else if (sectionId === 'pending') loadPending();
             else if (sectionId === 'withdrawals') loadWithdrawals();
             else if (sectionId === 'subscriptions') loadSubscriptions();
@@ -1347,39 +1548,45 @@
         }
 
         // ========== تحديث إحصائيات لوحة التحكم ==========
-        function updateDashboardStats() {
-            const users = adminData.users || [];
-            const activeUsers = users.filter(u => u.status === 'active' || !u.status).length;
-            const subscribers = users.filter(u => u.package).length;
-            
-            document.getElementById('totalUsers').textContent = users.length;
-            document.getElementById('activeUsers').textContent = activeUsers;
-            document.getElementById('totalSubscribers').textContent = subscribers;
-            document.getElementById('totalPending').textContent = adminData.pending.length;
-            document.getElementById('totalDeposits').textContent = calculateTotalDeposits() + '$';
-            document.getElementById('totalWithdrawals').textContent = calculateTotalWithdrawals() + '$';
-            
-            document.getElementById('usersCount').textContent = users.length;
-            document.getElementById('packagesCount').textContent = adminData.packages.length;
-            document.getElementById('pendingCount').textContent = adminData.pending.length;
-            document.getElementById('withdrawalsCount').textContent = adminData.withdrawals.length;
-            document.getElementById('subscriptionsCount').textContent = subscribers;
-        }
+        async function updateDashboardStats() {
+            try {
+                let stats = {
+                    users: adminData.users.length,
+                    activeUsers: adminData.users.filter(u => u.status === 'active' || !u.status).length,
+                    subscribers: adminData.users.filter(u => u.package).length,
+                    tasks: adminData.tasks.length,
+                    pending: adminData.pending.length,
+                    withdrawals: adminData.withdrawals.filter(w => w.status === 'pending').length
+                };
 
-        function calculateTotalDeposits() {
-            let total = 0;
-            adminData.users.forEach(u => {
-                if (u.package) total += u.package.amount || 0;
-            });
-            return total.toFixed(2);
-        }
+                // محاولة جلب الإحصائيات من Supabase
+                if (supabaseAvailable) {
+                    try {
+                        const result = await window.supabaseHelpers.getDashboardStats();
+                        if (result.success) {
+                            stats = { ...stats, ...result.data };
+                        }
+                    } catch (e) {
+                        console.log('⚠️ فشل جلب الإحصائيات من Supabase');
+                    }
+                }
 
-        function calculateTotalWithdrawals() {
-            let total = 0;
-            adminData.withdrawals.forEach(w => {
-                if (w.status === 'completed') total += w.amount || 0;
-            });
-            return total.toFixed(2);
+                document.getElementById('totalUsers').textContent = stats.users;
+                document.getElementById('activeUsers').textContent = stats.activeUsers;
+                document.getElementById('totalSubscribers').textContent = stats.subscribers;
+                document.getElementById('totalTasks').textContent = stats.tasks;
+                document.getElementById('totalPending').textContent = stats.pending;
+                document.getElementById('totalWithdrawals').textContent = stats.withdrawals;
+                
+                document.getElementById('usersCount').textContent = stats.users;
+                document.getElementById('packagesCount').textContent = adminData.packages.length;
+                document.getElementById('tasksCount').textContent = stats.tasks;
+                document.getElementById('pendingCount').textContent = stats.pending;
+                document.getElementById('withdrawalsCount').textContent = stats.withdrawals;
+                document.getElementById('subscriptionsCount').textContent = stats.subscribers;
+            } catch (e) {
+                console.error('خطأ في تحديث الإحصائيات:', e);
+            }
         }
 
         // ========== تحميل المستخدمين ==========
@@ -1392,7 +1599,9 @@
                 try {
                     const result = await window.supabaseHelpers.getAllUsers();
                     if (result.success) users = result.data;
-                } catch (e) { console.log('⚠️ فشل جلب المستخدمين'); }
+                } catch (e) { 
+                    console.log('⚠️ فشل جلب المستخدمين من Supabase'); 
+                }
             }
             if (!users.length) users = JSON.parse(localStorage.getItem('elite_users')) || [];
             
@@ -1411,7 +1620,7 @@
                 
                 html += `<tr>
                     <td>${i+1}</td>
-                    <td><strong>${u.name || '?'}</strong><br><small>@${u.username || ''}</small></td>
+                    <td><strong>${u.name || u.full_name || '?'}</strong><br><small>@${u.username || ''}</small></td>
                     <td>${u.email || ''}</td>
                     <td>${u.phone || ''}</td>
                     <td><strong>${(u.balance || 0).toFixed(2)}$</strong></td>
@@ -1436,7 +1645,9 @@
                 try {
                     const result = await window.supabaseHelpers.getAllPackages();
                     if (result.success) packages = result.data;
-                } catch (e) { console.log('⚠️ فشل جلب الباقات'); }
+                } catch (e) { 
+                    console.log('⚠️ فشل جلب الباقات من Supabase'); 
+                }
             }
             if (!packages.length && window.sharedData) packages = await window.sharedData.getAllPackages();
             if (!packages.length) packages = JSON.parse(localStorage.getItem('website_packages')) || [];
@@ -1468,12 +1679,79 @@
             tbody.innerHTML = html;
         }
 
+        // ========== تحميل المهام (الجديدة) ==========
+        async function loadTasks() {
+            const tbody = document.getElementById('tasksTable');
+            tbody.innerHTML = '<tr><td colspan="9" class="loading"><i class="fas fa-spinner fa-spin"></i><br>جاري التحميل...</td></tr>';
+            
+            let tasks = [];
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getAllTasks();
+                    if (result.success) tasks = result.data;
+                } catch (e) { 
+                    console.log('⚠️ فشل جلب المهام من Supabase'); 
+                }
+            }
+            if (!tasks.length && window.sharedData) tasks = window.sharedData.getAllTasks();
+            if (!tasks.length) tasks = JSON.parse(localStorage.getItem('website_tasks')) || [];
+            
+            adminData.tasks = tasks;
+            updateDashboardStats();
+            
+            if (!tasks.length) {
+                tbody.innerHTML = '<tr><td colspan="9" class="loading"><i class="fas fa-tasks"></i><br>لا توجد مهام</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            tasks.forEach((task, i) => {
+                const categories = task.package_categories || task.packageCategories || [];
+                const categoriesText = categories.map(c => {
+                    if (c === 'standard') return '🥈';
+                    if (c === 'premium') return '🥇';
+                    if (c === 'vip') return '💎';
+                    return c;
+                }).join(' ');
+                
+                const difficultyText = task.difficulty === 'easy' ? 'سهل' : task.difficulty === 'medium' ? 'متوسط' : 'صعب';
+                const difficultyClass = task.difficulty === 'easy' ? 'status-active' : task.difficulty === 'medium' ? 'status-pending' : 'status-rejected';
+                
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td><strong>${task.title}</strong></td>
+                    <td>${task.description || '-'}</td>
+                    <td><strong>${task.reward}$</strong></td>
+                    <td>${categoriesText}</td>
+                    <td><span class="status-badge ${difficultyClass}">${difficultyText}</span></td>
+                    <td>${task.time_required || task.timeRequired || 5} د</td>
+                    <td>${task.completions || 0}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewTask(${task.id})" title="عرض"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-sm btn-warning" onclick="editTask(${task.id})" title="تعديل"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteTask(${task.id})" title="حذف"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
         // ========== تحميل الطلبات المعلقة ==========
         async function loadPending() {
             const tbody = document.getElementById('pendingTable');
             tbody.innerHTML = '<tr><td colspan="7" class="loading"><i class="fas fa-spinner fa-spin"></i><br>جاري التحميل...</td></tr>';
             
-            let pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
+            let pending = [];
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getPendingPackages();
+                    if (result.success) pending = result.data;
+                } catch (e) { 
+                    console.log('⚠️ فشل جلب الطلبات المعلقة من Supabase'); 
+                }
+            }
+            if (!pending.length) pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
+            
             adminData.pending = pending;
             updateDashboardStats();
             
@@ -1485,7 +1763,7 @@
             let html = '';
             pending.forEach((req, i) => {
                 html += `<tr>
-                    <td><strong>${req.userName || req.user_name || '?'}</strong><br><small>${req.userEmail || ''}</small></td>
+                    <td><strong>${req.userName || req.user_name || req.user?.name || '?'}</strong><br><small>${req.userEmail || req.user_email || ''}</small></td>
                     <td>${req.packageName || req.package_name}</td>
                     <td><strong>${(req.amount || 0).toFixed(2)}$</strong></td>
                     <td>${new Date(req.created_at || req.date || Date.now()).toLocaleString('ar-SA')}</td>
@@ -1507,20 +1785,30 @@
             tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner fa-spin"></i><br>جاري التحميل...</td></tr>';
             
             let withdrawals = [];
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getWithdrawals();
+                    if (result.success) withdrawals = result.data;
+                } catch (e) { 
+                    console.log('⚠️ فشل جلب طلبات السحب من Supabase'); 
+                }
+            }
             
-            // جمع طلبات السحب من جميع المستخدمين
-            adminData.users.forEach(user => {
-                const userWithdrawals = JSON.parse(localStorage.getItem(`user_withdrawals_${user.id}`)) || [];
-                userWithdrawals.forEach(w => {
-                    withdrawals.push({
-                        ...w,
-                        userName: user.name,
-                        userEmail: user.email
+            // إذا لم تنجح من Supabase، نجمع من التخزين المحلي
+            if (!withdrawals.length) {
+                adminData.users.forEach(user => {
+                    const userWithdrawals = JSON.parse(localStorage.getItem(`user_withdrawals_${user.id}`)) || [];
+                    userWithdrawals.forEach(w => {
+                        withdrawals.push({
+                            ...w,
+                            userName: user.name,
+                            userEmail: user.email
+                        });
                     });
                 });
-            });
+            }
             
-            withdrawals.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            withdrawals.sort((a, b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0));
             adminData.withdrawals = withdrawals;
             updateDashboardStats();
             
@@ -1531,16 +1819,18 @@
             
             let html = '';
             withdrawals.forEach((w, i) => {
-                const statusClass = w.status === 'completed' ? 'status-active' : w.status === 'rejected' ? 'status-rejected' : 'status-pending';
-                const statusText = w.status === 'completed' ? '✅ مكتمل' : w.status === 'rejected' ? '❌ مرفوض' : '⏳ معلق';
+                const statusClass = w.status === 'completed' || w.status === 'مكتمل' ? 'status-active' : 
+                                   w.status === 'rejected' || w.status === 'مرفوض' ? 'status-rejected' : 'status-pending';
+                const statusText = w.status === 'completed' || w.status === 'مكتمل' ? '✅ مكتمل' : 
+                                  w.status === 'rejected' || w.status === 'مرفوض' ? '❌ مرفوض' : '⏳ معلق';
                 
                 html += `<tr>
                     <td>#WD${w.id}</td>
-                    <td><strong>${w.userName}</strong><br><small>${w.userEmail}</small></td>
+                    <td><strong>${w.userName || w.user?.name || '?'}</strong><br><small>${w.userEmail || w.user?.email || ''}</small></td>
                     <td><strong>${(w.amount || 0).toFixed(2)}$</strong></td>
                     <td>${w.fee || 5}$</td>
                     <td><small style="font-family:monospace;">${w.wallet ? w.wallet.substring(0,15)+'...' : '—'}</small></td>
-                    <td>${new Date(w.date || w.created_at || Date.now()).toLocaleString('ar-SA')}</td>
+                    <td>${new Date(w.created_at || w.date || Date.now()).toLocaleString('ar-SA')}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                     <td>
                         ${w.status === 'pending' ? 
@@ -1585,16 +1875,17 @@
             const referrals = [];
             
             users.forEach(u => {
-                if (u.referralCode) {
-                    const referred = users.filter(r => r.referredBy === u.referralCode);
+                if (u.referralCode || u.referral_code) {
+                    const code = u.referralCode || u.referral_code;
+                    const referred = users.filter(r => r.referredBy === code || r.referred_by === code);
                     if (referred.length) {
                         const active = referred.filter(r => r.package).length;
-                        const earnings = u.referralEarnings || 0;
+                        const earnings = u.referralEarnings || u.referral_earnings || 0;
                         const pending = referred.filter(r => r.package && !r.referralRewardPaid).length * 50;
                         
                         referrals.push({
                             name: u.name,
-                            code: u.referralCode,
+                            code: code,
                             count: referred.length,
                             active: active,
                             earnings: earnings,
@@ -1619,34 +1910,283 @@
         }
 
         // ========== تحميل جميع المعاملات ==========
-        function loadAllTransactions() {
+        async function loadAllTransactions() {
             const tbody = document.getElementById('transactionsTable');
-            let allTransactions = [];
             
-            adminData.users.forEach(user => {
-                const userTrans = JSON.parse(localStorage.getItem(`user_transactions_${user.id}`)) || [];
-                userTrans.forEach(t => {
-                    allTransactions.push({
-                        ...t,
-                        userName: user.name
+            let allTransactions = [];
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getTransactions();
+                    if (result.success) allTransactions = result.data;
+                } catch (e) { 
+                    console.log('⚠️ فشل جلب المعاملات من Supabase'); 
+                }
+            }
+            
+            // إذا لم تنجح من Supabase، نجمع من التخزين المحلي
+            if (!allTransactions.length) {
+                adminData.users.forEach(user => {
+                    const userTrans = JSON.parse(localStorage.getItem(`user_transactions_${user.id}`)) || [];
+                    userTrans.forEach(t => {
+                        allTransactions.push({
+                            ...t,
+                            userName: user.name
+                        });
                     });
                 });
-            });
+            }
             
-            allTransactions.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            allTransactions.sort((a, b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0));
             
             let html = '';
             allTransactions.slice(0, 100).forEach(t => {
                 html += `<tr>
-                    <td>${t.userName || '—'}</td>
+                    <td>${t.userName || t.user?.name || '—'}</td>
                     <td>${t.type || '—'}</td>
                     <td>${t.description || ''}</td>
-                    <td style="color: ${t.type === 'سحب' ? 'var(--danger)' : 'var(--success)'};">${t.type === 'سحب' ? '-' : '+'}${(t.amount || 0).toFixed(2)}$</td>
-                    <td>${t.date || ''}</td>
+                    <td style="color: ${t.type === 'سحب' || t.type === 'withdrawal' ? 'var(--danger)' : 'var(--success)'};">${t.type === 'سحب' || t.type === 'withdrawal' ? '-' : '+'}${(t.amount || 0).toFixed(2)}$</td>
+                    <td>${t.created_at ? new Date(t.created_at).toLocaleString('ar-SA') : t.date || ''}</td>
                     <td><span class="status-badge status-active">${t.status || 'مكتمل'}</span></td>
                 </tr>`;
             });
             tbody.innerHTML = html || '<tr><td colspan="6" class="loading">لا توجد معاملات</td></tr>';
+        }
+
+        // ========== دوال المهام (الجديدة) ==========
+        function showAddTaskModal() {
+            document.getElementById('addTaskModal').classList.add('active');
+        }
+
+        async function addTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const reward = parseFloat(document.getElementById('taskReward').value);
+            const packageCategories = Array.from(document.getElementById('taskPackageCategories').selectedOptions).map(opt => opt.value);
+            const difficulty = document.getElementById('taskDifficulty').value;
+            const timeRequired = parseInt(document.getElementById('taskTimeRequired').value);
+            const type = document.getElementById('taskType').value;
+            const icon = document.getElementById('taskIcon').value;
+
+            if (!title) {
+                showNotification('❌ أدخل عنوان المهمة', 'error');
+                return;
+            }
+
+            if (packageCategories.length === 0) {
+                showNotification('❌ اختر فئة واحدة على الأقل', 'error');
+                return;
+            }
+
+            const taskData = {
+                title,
+                description,
+                reward,
+                packageCategories,
+                difficulty,
+                timeRequired,
+                type,
+                icon
+            };
+
+            let success = false;
+            
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.createTask(taskData);
+                    if (result.success) {
+                        success = true;
+                        showNotification('✅ تمت إضافة المهمة بنجاح');
+                    } else {
+                        showNotification('❌ فشل إضافة المهمة: ' + result.error, 'error');
+                    }
+                } catch (e) {
+                    console.error('خطأ في إضافة المهمة:', e);
+                }
+            }
+
+            // إذا فشل Supabase، استخدم التخزين المحلي
+            if (!success) {
+                if (window.sharedData) {
+                    window.sharedData.addTask(taskData);
+                    showNotification('✅ تمت إضافة المهمة (تخزين محلي)');
+                } else {
+                    const tasks = JSON.parse(localStorage.getItem('website_tasks')) || [];
+                    tasks.push({
+                        id: Date.now(),
+                        ...taskData,
+                        completions: 0,
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    });
+                    localStorage.setItem('website_tasks', JSON.stringify(tasks));
+                    showNotification('✅ تمت إضافة المهمة (تخزين محلي)');
+                }
+            }
+
+            closeModal('addTaskModal');
+            loadTasks();
+        }
+
+        async function viewTask(id) {
+            const task = adminData.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            const categories = (task.package_categories || task.packageCategories || []).map(c => {
+                if (c === 'standard') return '🥈 فضية';
+                if (c === 'premium') return '🥇 ذهبية';
+                if (c === 'vip') return '💎 ماسية';
+                return c;
+            }).join(', ');
+
+            const difficultyText = task.difficulty === 'easy' ? 'سهل' : task.difficulty === 'medium' ? 'متوسط' : 'صعب';
+            const typeText = task.type === 'daily' ? 'يومية' : task.type === 'weekly' ? 'أسبوعية' : 'مرة واحدة';
+
+            document.getElementById('taskDetails').innerHTML = `
+                <h3 style="margin-bottom: 20px; color: var(--primary);">${task.title}</h3>
+                <p style="margin-bottom: 15px;">${task.description || 'لا يوجد وصف'}</p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <div><strong>💰 المكافأة:</strong> ${task.reward}$</div>
+                    <div><strong>🎯 الفئات:</strong> ${categories}</div>
+                    <div><strong>📊 الصعوبة:</strong> ${difficultyText}</div>
+                    <div><strong>⏱️ الوقت:</strong> ${task.time_required || task.timeRequired || 5} دقائق</div>
+                    <div><strong>📋 النوع:</strong> ${typeText}</div>
+                    <div><strong>✅ الإنجازات:</strong> ${task.completions || 0}</div>
+                    <div><strong>📅 الإضافة:</strong> ${new Date(task.created_at || Date.now()).toLocaleDateString('ar-SA')}</div>
+                    <div><strong>🔄 الحالة:</strong> <span class="status-badge ${task.status === 'active' ? 'status-active' : 'status-pending'}">${task.status === 'active' ? 'نشط' : 'غير نشط'}</span></div>
+                </div>
+            `;
+            document.getElementById('viewTaskModal').classList.add('active');
+        }
+
+        async function editTask(id) {
+            const task = adminData.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            currentTaskId = id;
+
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTaskTitle').value = task.title || '';
+            document.getElementById('editTaskDescription').value = task.description || '';
+            document.getElementById('editTaskReward').value = task.reward || 0;
+
+            // تحديد الفئات
+            const categories = task.package_categories || task.packageCategories || [];
+            const options = document.getElementById('editTaskPackageCategories').options;
+            for (let opt of options) {
+                opt.selected = categories.includes(opt.value);
+            }
+
+            document.getElementById('editTaskDifficulty').value = task.difficulty || 'medium';
+            document.getElementById('editTaskTimeRequired').value = task.time_required || task.timeRequired || 5;
+            document.getElementById('editTaskType').value = task.type || 'daily';
+            document.getElementById('editTaskStatus').value = task.status || 'active';
+
+            document.getElementById('editTaskModal').classList.add('active');
+        }
+
+        async function updateTask() {
+            const id = parseInt(document.getElementById('editTaskId').value);
+            const title = document.getElementById('editTaskTitle').value.trim();
+            const description = document.getElementById('editTaskDescription').value.trim();
+            const reward = parseFloat(document.getElementById('editTaskReward').value);
+            const packageCategories = Array.from(document.getElementById('editTaskPackageCategories').selectedOptions).map(opt => opt.value);
+            const difficulty = document.getElementById('editTaskDifficulty').value;
+            const timeRequired = parseInt(document.getElementById('editTaskTimeRequired').value);
+            const type = document.getElementById('editTaskType').value;
+            const status = document.getElementById('editTaskStatus').value;
+
+            if (!title) {
+                showNotification('❌ أدخل عنوان المهمة', 'error');
+                return;
+            }
+
+            if (packageCategories.length === 0) {
+                showNotification('❌ اختر فئة واحدة على الأقل', 'error');
+                return;
+            }
+
+            const updates = {
+                title,
+                description,
+                reward,
+                package_categories: packageCategories,
+                difficulty,
+                time_required: timeRequired,
+                type,
+                status
+            };
+
+            let success = false;
+
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.updateTask(id, updates);
+                    if (result.success) {
+                        success = true;
+                        showNotification('✅ تم تحديث المهمة');
+                    }
+                } catch (e) {
+                    console.error('خطأ في تحديث المهمة:', e);
+                }
+            }
+
+            if (!success && window.sharedData) {
+                window.sharedData.updateTask(id, updates);
+                showNotification('✅ تم تحديث المهمة (تخزين محلي)');
+            }
+
+            closeModal('editTaskModal');
+            loadTasks();
+        }
+
+        async function deleteTask(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه المهمة؟')) return;
+
+            let success = false;
+
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.deleteTask(id);
+                    if (result.success) {
+                        success = true;
+                        showNotification('✅ تم حذف المهمة');
+                    }
+                } catch (e) {
+                    console.error('خطأ في حذف المهمة:', e);
+                }
+            }
+
+            if (!success && window.sharedData) {
+                window.sharedData.deleteTask(id);
+                showNotification('✅ تم حذف المهمة (تخزين محلي)');
+            }
+
+            loadTasks();
+        }
+
+        function searchTasks() {
+            const search = document.getElementById('taskSearch').value.toLowerCase();
+            document.querySelectorAll('#tasksTable tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(search) ? '' : 'none';
+            });
+        }
+
+        function filterTasks() {
+            const filter = document.getElementById('taskCategoryFilter').value;
+            document.querySelectorAll('#tasksTable tr').forEach(row => {
+                if (filter === 'all') {
+                    row.style.display = '';
+                    return;
+                }
+                const categoryCell = row.querySelector('td:nth-child(5)');
+                if (categoryCell) {
+                    const hasCategory = categoryCell.textContent.includes(
+                        filter === 'standard' ? '🥈' : filter === 'premium' ? '🥇' : '💎'
+                    );
+                    row.style.display = hasCategory ? '' : 'none';
+                }
+            });
         }
 
         // ========== معالجة طلبات الاشتراك ==========
@@ -1655,7 +2195,7 @@
             const req = adminData.pending[index];
             
             document.getElementById('pendingRequestInfo').innerHTML = `
-                <p><strong>👤 المستخدم:</strong> ${req.userName || req.user_name}</p>
+                <p><strong>👤 المستخدم:</strong> ${req.userName || req.user_name || req.user?.name}</p>
                 <p><strong>📦 الباقة:</strong> ${req.packageName || req.package_name}</p>
                 <p><strong>💰 المبلغ:</strong> ${(req.amount || 0).toFixed(2)}$</p>
                 <p><strong>📅 التاريخ:</strong> ${new Date(req.created_at || req.date || Date.now()).toLocaleString('ar-SA')}</p>
@@ -1664,57 +2204,79 @@
             document.getElementById('processPendingModal').classList.add('active');
         }
 
-        function approvePendingRequest() {
+        async function approvePendingRequest() {
             const req = adminData.pending[currentRequestId];
             if (!req) return;
-            
-            // 1. حذف الطلب من المعلقة
-            const pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
-            const newPending = pending.filter((_, i) => i !== currentRequestId);
-            localStorage.setItem('pending_packages', JSON.stringify(newPending));
-            
-            // 2. تحديث المستخدم
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const userIndex = users.findIndex(u => u.id === (req.userId || req.user_id));
-            
-            if (userIndex !== -1) {
-                users[userIndex].package = {
-                    id: req.packageId || Date.now(),
-                    name: req.packageName || req.package_name,
-                    amount: req.amount,
-                    purchaseDate: new Date().toISOString(),
-                    status: 'نشط'
-                };
-                users[userIndex].pendingPackage = null;
-                
-                localStorage.setItem('elite_users', JSON.stringify(users));
-                
-                // تحديث current_user إذا كان موجوداً
-                const currentUser = JSON.parse(localStorage.getItem('current_user'));
-                if (currentUser && currentUser.id === (req.userId || req.user_id)) {
-                    currentUser.package = users[userIndex].package;
-                    currentUser.pendingPackage = null;
-                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+
+            let success = false;
+
+            if (supabaseAvailable) {
+                try {
+                    // تحديث حالة الطلب في Supabase
+                    await window.supabaseHelpers.updatePendingPackage(req.id, { status: 'approved' });
+                    
+                    // تحديث المستخدم
+                    if (req.userId || req.user_id) {
+                        const userResult = await window.supabaseHelpers.getUserById(req.userId || req.user_id);
+                        if (userResult.success && userResult.data) {
+                            const user = userResult.data;
+                            user.package = {
+                                id: req.packageId || Date.now(),
+                                name: req.packageName || req.package_name,
+                                amount: req.amount,
+                                purchase_date: new Date().toISOString(),
+                                status: 'نشط'
+                            };
+                            await window.supabaseHelpers.updateUser(user.id, user);
+                        }
+                    }
+
+                    // حذف الطلب
+                    await window.supabaseHelpers.deletePendingPackage(req.id);
+                    success = true;
+                } catch (e) {
+                    console.error('خطأ في معالجة الطلب:', e);
                 }
-                
-                // 3. معالجة الإحالة
-                if (req.referredBy && window.sharedData) {
-                    window.sharedData.processReferralRewardsOnApproval(req.userId || req.user_id, req.amount);
-                }
-                
-                // 4. تسجيل معاملة
-                const transactions = JSON.parse(localStorage.getItem(`user_transactions_${req.userId || req.user_id}`)) || [];
-                transactions.unshift({
-                    id: Date.now(),
-                    type: 'اشتراك',
-                    amount: req.amount,
-                    description: `تفعيل باقة ${req.packageName}`,
-                    date: new Date().toLocaleString('ar-SA'),
-                    status: 'مكتمل'
-                });
-                localStorage.setItem(`user_transactions_${req.userId || req.user_id}`, JSON.stringify(transactions));
             }
-            
+
+            if (!success) {
+                // التخزين المحلي كاحتياطي
+                const pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
+                const newPending = pending.filter((_, i) => i !== currentRequestId);
+                localStorage.setItem('pending_packages', JSON.stringify(newPending));
+
+                const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                const userIndex = users.findIndex(u => u.id === (req.userId || req.user_id));
+
+                if (userIndex !== -1) {
+                    users[userIndex].package = {
+                        id: req.packageId || Date.now(),
+                        name: req.packageName || req.package_name,
+                        amount: req.amount,
+                        purchaseDate: new Date().toISOString(),
+                        status: 'نشط'
+                    };
+                    users[userIndex].pendingPackage = null;
+                    
+                    localStorage.setItem('elite_users', JSON.stringify(users));
+
+                    if (req.referredBy && window.sharedData) {
+                        window.sharedData.processReferralRewardsOnApproval(req.userId || req.user_id, req.amount);
+                    }
+
+                    const transactions = JSON.parse(localStorage.getItem(`user_transactions_${req.userId || req.user_id}`)) || [];
+                    transactions.unshift({
+                        id: Date.now(),
+                        type: 'اشتراك',
+                        amount: req.amount,
+                        description: `تفعيل باقة ${req.packageName}`,
+                        date: new Date().toLocaleString('ar-SA'),
+                        status: 'مكتمل'
+                    });
+                    localStorage.setItem(`user_transactions_${req.userId || req.user_id}`, JSON.stringify(transactions));
+                }
+            }
+
             closeModal('processPendingModal');
             loadPending();
             loadUsers();
@@ -1724,10 +2286,16 @@
         }
 
         function rejectPendingRequest() {
+            const req = adminData.pending[currentRequestId];
+            
+            if (supabaseAvailable && req.id) {
+                window.supabaseHelpers.updatePendingPackage(req.id, { status: 'rejected' }).catch(console.error);
+            }
+
             const pending = JSON.parse(localStorage.getItem('pending_packages')) || [];
             const newPending = pending.filter((_, i) => i !== currentRequestId);
             localStorage.setItem('pending_packages', JSON.stringify(newPending));
-            
+
             closeModal('processPendingModal');
             loadPending();
             showNotification('❌ تم رفض الطلب', 'error');
@@ -1737,27 +2305,48 @@
         function showWithdrawalModal(index) {
             currentWithdrawalId = index;
             const w = adminData.withdrawals[index];
-            
+
             document.getElementById('withdrawalRequestInfo').innerHTML = `
-                <p><strong>👤 المستخدم:</strong> ${w.userName}</p>
+                <p><strong>👤 المستخدم:</strong> ${w.userName || w.user?.name}</p>
                 <p><strong>💰 المبلغ:</strong> ${(w.amount || 0).toFixed(2)}$</p>
                 <p><strong>💳 المحفظة:</strong> <span style="font-family:monospace;">${w.wallet}</span></p>
                 <p><strong>🌐 الشبكة:</strong> ${w.network}</p>
-                <p><strong>📅 تاريخ الطلب:</strong> ${new Date(w.date || w.created_at).toLocaleString('ar-SA')}</p>
+                <p><strong>📅 تاريخ الطلب:</strong> ${new Date(w.created_at || w.date || Date.now()).toLocaleString('ar-SA')}</p>
             `;
             document.getElementById('processWithdrawalModal').classList.add('active');
         }
 
-        function approveWithdrawal() {
+        async function approveWithdrawal() {
             const w = adminData.withdrawals[currentWithdrawalId];
             const txHash = document.getElementById('transactionHash').value.trim();
-            
+
             if (!txHash) {
                 showNotification('❌ أدخل رقم المعاملة', 'error');
                 return;
             }
-            
-            // تحديث حالة طلب السحب
+
+            if (supabaseAvailable && w.id) {
+                try {
+                    await window.supabaseHelpers.updateWithdrawal(w.id, {
+                        status: 'completed',
+                        tx_hash: txHash,
+                        processed_at: new Date().toISOString()
+                    });
+
+                    if (w.userId) {
+                        const userResult = await window.supabaseHelpers.getUserById(w.userId);
+                        if (userResult.success && userResult.data) {
+                            const user = userResult.data;
+                            user.total_withdrawn = (user.total_withdrawn || 0) + (w.amount || 0);
+                            await window.supabaseHelpers.updateUser(w.userId, user);
+                        }
+                    }
+                } catch (e) {
+                    console.error('خطأ في تأكيد السحب:', e);
+                }
+            }
+
+            // التخزين المحلي كاحتياطي
             const userWithdrawals = JSON.parse(localStorage.getItem(`user_withdrawals_${w.userId}`)) || [];
             const wIndex = userWithdrawals.findIndex(w2 => w2.id === w.id);
             if (wIndex !== -1) {
@@ -1766,39 +2355,55 @@
                 userWithdrawals[wIndex].processedDate = new Date().toISOString();
                 localStorage.setItem(`user_withdrawals_${w.userId}`, JSON.stringify(userWithdrawals));
             }
-            
-            // تحديث total_withdrawn للمستخدم
+
             const users = JSON.parse(localStorage.getItem('elite_users')) || [];
             const userIndex = users.findIndex(u => u.id === w.userId);
             if (userIndex !== -1) {
                 users[userIndex].totalWithdrawn = (users[userIndex].totalWithdrawn || 0) + (w.amount || 0);
                 localStorage.setItem('elite_users', JSON.stringify(users));
             }
-            
+
             closeModal('processWithdrawalModal');
             loadWithdrawals();
             showNotification('✅ تم تأكيد إرسال المبلغ');
         }
 
-        function rejectWithdrawal() {
+        async function rejectWithdrawal() {
             const w = adminData.withdrawals[currentWithdrawalId];
-            
-            // إعادة المبلغ للمستخدم
+
+            if (supabaseAvailable && w.id) {
+                try {
+                    await window.supabaseHelpers.updateWithdrawal(w.id, { status: 'rejected' });
+
+                    // إعادة المبلغ للمستخدم
+                    if (w.userId) {
+                        const userResult = await window.supabaseHelpers.getUserById(w.userId);
+                        if (userResult.success && userResult.data) {
+                            const user = userResult.data;
+                            user.balance += (w.amount || 0) + (w.fee || 5);
+                            await window.supabaseHelpers.updateUser(w.userId, user);
+                        }
+                    }
+                } catch (e) {
+                    console.error('خطأ في رفض السحب:', e);
+                }
+            }
+
+            // التخزين المحلي كاحتياطي
             const users = JSON.parse(localStorage.getItem('elite_users')) || [];
             const userIndex = users.findIndex(u => u.id === w.userId);
             if (userIndex !== -1) {
                 users[userIndex].balance += (w.amount || 0) + (w.fee || 5);
                 localStorage.setItem('elite_users', JSON.stringify(users));
             }
-            
-            // تحديث حالة الطلب
+
             const userWithdrawals = JSON.parse(localStorage.getItem(`user_withdrawals_${w.userId}`)) || [];
             const wIndex = userWithdrawals.findIndex(w2 => w2.id === w.id);
             if (wIndex !== -1) {
                 userWithdrawals[wIndex].status = 'rejected';
                 localStorage.setItem(`user_withdrawals_${w.userId}`, JSON.stringify(userWithdrawals));
             }
-            
+
             closeModal('processWithdrawalModal');
             loadWithdrawals();
             loadUsers();
@@ -1814,7 +2419,7 @@
         function showUserStatusModal(userId) {
             currentUserId = userId;
             const user = adminData.users.find(u => u.id === userId);
-            
+
             document.getElementById('statusUserInfo').innerHTML = `
                 <p><strong>المستخدم:</strong> ${user.name}</p>
                 <p><strong>البريد:</strong> ${user.email}</p>
@@ -1824,10 +2429,22 @@
             document.getElementById('userStatusModal').classList.add('active');
         }
 
-        function updateUserStatus() {
+        async function updateUserStatus() {
             const newStatus = document.getElementById('newUserStatus').value;
             const reason = document.getElementById('statusReason').value;
-            
+
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.updateUser(currentUserId, {
+                        status: newStatus,
+                        status_reason: reason,
+                        status_updated_at: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.error('خطأ في تحديث حالة المستخدم:', e);
+                }
+            }
+
             const users = JSON.parse(localStorage.getItem('elite_users')) || [];
             const index = users.findIndex(u => u.id === currentUserId);
             if (index !== -1) {
@@ -1835,21 +2452,21 @@
                 users[index].statusReason = reason;
                 users[index].statusUpdatedAt = new Date().toISOString();
                 localStorage.setItem('elite_users', JSON.stringify(users));
-                
+
                 const currentUser = JSON.parse(localStorage.getItem('current_user'));
                 if (currentUser && currentUser.id === currentUserId) {
                     currentUser.status = newStatus;
                     localStorage.setItem('current_user', JSON.stringify(currentUser));
                 }
             }
-            
+
             closeModal('userStatusModal');
             loadUsers();
             showNotification(`✅ تم تغيير حالة المستخدم إلى ${newStatus}`);
         }
 
         // ========== إضافة مستخدم ==========
-        function addUser() {
+        async function addUser() {
             const newUser = {
                 id: Date.now(),
                 name: document.getElementById('userName').value,
@@ -1859,21 +2476,32 @@
                 password: document.getElementById('userPassword').value,
                 balance: parseFloat(document.getElementById('userBalance').value) || 0,
                 status: document.getElementById('userStatus').value,
-                joinedDate: new Date().toISOString(),
-                referralCode: 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase()
+                joined_date: new Date().toISOString(),
+                referral_code: 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase()
             };
-            
+
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.createUser(newUser);
+                    if (result.success) {
+                        showNotification('✅ تمت إضافة المستخدم إلى Supabase');
+                    }
+                } catch (e) {
+                    console.error('خطأ في إضافة المستخدم:', e);
+                }
+            }
+
             const users = JSON.parse(localStorage.getItem('elite_users')) || [];
             users.push(newUser);
             localStorage.setItem('elite_users', JSON.stringify(users));
-            
+
             closeModal('addUserModal');
             loadUsers();
             showNotification('✅ تمت إضافة المستخدم');
         }
 
         // ========== إضافة باقة ==========
-        function addPackage() {
+        async function addPackage() {
             const newPackage = {
                 id: Date.now(),
                 name: document.getElementById('packageName').value,
@@ -1881,9 +2509,21 @@
                 profit: parseFloat(document.getElementById('packageProfit').value) || 2.5,
                 category: document.getElementById('packageCategory').value,
                 tasks: parseInt(document.getElementById('packageTasks').value) || 5,
-                duration: parseInt(document.getElementById('packageDuration').value) || 30
+                duration: parseInt(document.getElementById('packageDuration').value) || 30,
+                status: 'active'
             };
-            
+
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.createPackage(newPackage);
+                    if (result.success) {
+                        showNotification('✅ تمت إضافة الباقة إلى Supabase');
+                    }
+                } catch (e) {
+                    console.error('خطأ في إضافة الباقة:', e);
+                }
+            }
+
             if (window.sharedData) {
                 window.sharedData.addPackage(newPackage);
             } else {
@@ -1891,27 +2531,44 @@
                 packages.push(newPackage);
                 localStorage.setItem('website_packages', JSON.stringify(packages));
             }
-            
+
             closeModal('addPackageModal');
             loadPackages();
             showNotification('✅ تمت إضافة الباقة');
         }
 
         // ========== حذف ==========
-        function deleteUser(id) {
+        async function deleteUser(id) {
             if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
-            
+
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.updateUser(id, { status: 'deleted' });
+                } catch (e) {
+                    console.error('خطأ في حذف المستخدم:', e);
+                }
+            }
+
             const users = JSON.parse(localStorage.getItem('elite_users')) || [];
             const newUsers = users.filter(u => u.id !== id);
             localStorage.setItem('elite_users', JSON.stringify(newUsers));
-            
+
             loadUsers();
             showNotification('✅ تم حذف المستخدم');
         }
 
-        function deletePackage(id) {
+        async function deletePackage(id) {
             if (!confirm('هل أنت متأكد من حذف هذه الباقة؟')) return;
-            
+
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.deletePackage(id);
+                    showNotification('✅ تم حذف الباقة من Supabase');
+                } catch (e) {
+                    console.error('خطأ في حذف الباقة:', e);
+                }
+            }
+
             if (window.sharedData) {
                 window.sharedData.deletePackage(id);
             } else {
@@ -1919,7 +2576,7 @@
                 const newPackages = packages.filter(p => p.id !== id);
                 localStorage.setItem('website_packages', JSON.stringify(newPackages));
             }
-            
+
             loadPackages();
             showNotification('✅ تم حذف الباقة');
         }
@@ -1953,6 +2610,7 @@
         function refreshDashboard() {
             loadUsers();
             loadPackages();
+            loadTasks();
             loadPending();
             loadWithdrawals();
             showNotification('✅ تم تحديث البيانات');
@@ -1973,15 +2631,35 @@
         // ========== التهيئة ==========
         async function init() {
             checkConnection();
+            
+            // محاولة تهيئة Supabase
+            if (!window.supabaseHelpers) {
+                console.warn('⚠️ Supabase غير متوفر، سيتم استخدام التخزين المحلي');
+            }
+
+            // تحميل shared-data إذا كان موجوداً
+            if (window.sharedData) {
+                console.log('📦 تم تحميل shared-data');
+            }
+
             await loadUsers();
             await loadPackages();
+            await loadTasks();
             await loadPending();
             await loadWithdrawals();
             loadSubscriptions();
             loadReferrals();
             loadAllTransactions();
             updateDashboardStats();
+
             console.log('✅ لوحة الإدارة جاهزة');
+            console.log('📊 الإحصائيات:', {
+                users: adminData.users.length,
+                packages: adminData.packages.length,
+                tasks: adminData.tasks.length,
+                pending: adminData.pending.length,
+                withdrawals: adminData.withdrawals.length
+            });
         }
 
         document.addEventListener('DOMContentLoaded', init);
