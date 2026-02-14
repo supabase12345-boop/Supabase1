@@ -1,399 +1,625 @@
 // ===================================
 // ملف: supabase-config.js
-// الوصف: إعدادات Supabase - نسخة مبسطة للهاتف
-// الإصدار: 1.0.0
+// الوصف: إعدادات الاتصال بـ Supabase
+// الإصدار: 3.0.0
 // ===================================
 
-// معلومات الاتصال بـ Supabase
 const SUPABASE_URL = 'https://tmksysprwgsbdmavlshm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRta3N5c3Byd2dzYmRtYXZsc2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwMTI3NjgsImV4cCI6MjA4NjU4ODc2OH0.-qHz5jtEkTK8S1RseWB5cLmLFfv9vPyTcGkc_D6ru80';
 
-// إنشاء عميل Supabase
+// تهيئة عميل Supabase
 let supabaseClient = null;
-let supabaseAvailable = false;
 
-// محاولة الاتصال
 try {
     if (typeof window !== 'undefined' && window.supabase) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        supabaseAvailable = true;
-        console.log('✅ Supabase متصل');
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: false
+            },
+            realtime: {
+                params: {
+                    eventsPerSecond: 10
+                }
+            }
+        });
+        console.log('✅ تم تهيئة عميل Supabase');
     } else {
-        console.log('⚠️ مكتبة Supabase غير موجودة');
+        console.warn('⚠️ مكتبة Supabase غير متوفرة');
     }
-} catch (e) {
-    console.log('❌ خطأ في الاتصال:', e);
+} catch (error) {
+    console.error('❌ فشل تهيئة Supabase:', error);
 }
 
-// دوال بسيطة للتعامل مع Supabase
+// ========== دوال مساعدة للتعامل مع Supabase ==========
 const supabaseHelpers = {
-    // التحقق من الاتصال
-    isAvailable() {
-        return supabaseAvailable && supabaseClient !== null;
-    },
-
-    // جلب جميع المستخدمين
+    // ===== دوال المستخدمين =====
     async getAllUsers() {
-        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            const { data, error } = await supabaseClient.from('users').select('*');
-            if (error) throw error;
-            return { success: true, data: data || [] };
-        } catch (e) {
-            return { success: false, data: [] };
-        }
-    },
-
-    // جلب مستخدم بواسطة ID
-    async getUserById(id) {
-        if (!this.isAvailable()) return { success: false };
-        try {
-            const { data, error } = await supabaseClient.from('users').select('*').eq('id', id).single();
-            if (error) throw error;
-            return { success: true, data };
-        } catch (e) {
-            return { success: false };
-        }
-    },
-
-    // تسجيل الدخول
-    async loginUser(username, password) {
-        if (!this.isAvailable()) return { success: false };
-        try {
-            // بالبريد
-            let { data, error } = await supabaseClient
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
                 .from('users')
                 .select('*')
-                .eq('email', username)
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            return { success: true, data: data || [] };
+        } catch (error) {
+            console.error('خطأ في جلب المستخدمين:', error);
+            return { success: false, error: error.message, data: [] };
+        }
+    },
+
+    async getUserById(userId) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', userId)
+                .maybeSingle();
+            
+            if (error) throw error;
+            
+            return { success: true, data };
+        } catch (error) {
+            console.error('خطأ في جلب المستخدم:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async createUser(userData) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('users')
+                .insert([{
+                    ...userData,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }])
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            return { success: true, data };
+        } catch (error) {
+            console.error('خطأ في إنشاء المستخدم:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updateUser(userId, updates) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('users')
+                .update({
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', userId)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            return { success: true, data };
+        } catch (error) {
+            console.error('خطأ في تحديث المستخدم:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async loginUser(username, password) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('*')
+                .or(`username.eq.${username},email.eq.${username}`)
                 .eq('password', password)
                 .maybeSingle();
             
-            // بالاسم
-            if (!data) {
-                const res = await supabaseClient
-                    .from('users')
-                    .select('*')
-                    .eq('username', username)
-                    .eq('password', password)
-                    .maybeSingle();
-                data = res.data;
-            }
+            if (error) throw error;
             
-            return { success: !!data, data };
-        } catch (e) {
-            return { success: false };
-        }
-    },
-
-    // إنشاء مستخدم
-    async createUser(user) {
-        if (!this.isAvailable()) return { success: false };
-        try {
-            const { data, error } = await supabaseClient
-                .from('users')
-                .insert([{
-                    id: Date.now(),
-                    name: user.name,
-                    username: user.username,
-                    email: user.email,
-                    phone: user.phone || '',
-                    password: user.password,
-                    balance: 0,
-                    status: 'active',
-                    created_at: new Date().toISOString()
-                }])
-                .select()
-                .single();
-            if (error) throw error;
             return { success: true, data };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في تسجيل الدخول:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // تحديث مستخدم
-    async updateUser(id, updates) {
-        if (!this.isAvailable()) return { success: false };
-        try {
-            const { data, error } = await supabaseClient
-                .from('users')
-                .update(updates)
-                .eq('id', id)
-                .select()
-                .single();
-            if (error) throw error;
-            return { success: true, data };
-        } catch (e) {
-            return { success: false };
-        }
-    },
-
-    // جلب جميع الباقات
+    // ===== دوال الباقات =====
     async getAllPackages() {
-        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            const { data, error } = await supabaseClient.from('packages').select('*');
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('packages')
+                .select('*')
+                .order('price', { ascending: true });
+            
             if (error) throw error;
+            
             return { success: true, data: data || [] };
-        } catch (e) {
-            return { success: false, data: [] };
+        } catch (error) {
+            console.error('خطأ في جلب الباقات:', error);
+            return { success: false, error: error.message, data: [] };
         }
     },
 
-    // إنشاء باقة
-    async createPackage(pkg) {
-        if (!this.isAvailable()) return { success: false };
+    async createPackage(packageData) {
         try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
             const { data, error } = await supabaseClient
                 .from('packages')
                 .insert([{
-                    id: Date.now(),
-                    name: pkg.name,
-                    price: pkg.price,
-                    profit: pkg.profit || 2.5,
-                    category: pkg.category || 'standard',
-                    tasks: pkg.tasks || 5,
-                    duration: pkg.duration || 30,
-                    status: 'active',
-                    created_at: new Date().toISOString()
+                    ...packageData,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 }])
                 .select()
                 .single();
+            
             if (error) throw error;
+            
             return { success: true, data };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في إنشاء الباقة:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // حذف باقة
-    async deletePackage(id) {
-        if (!this.isAvailable()) return { success: false };
+    async updatePackage(packageId, updates) {
         try {
-            await supabaseClient.from('packages').delete().eq('id', id);
-            return { success: true };
-        } catch (e) {
-            return { success: false };
-        }
-    },
-
-    // جلب جميع المهام
-    async getAllTasks() {
-        if (!this.isAvailable()) return { success: false, data: [] };
-        try {
-            const { data, error } = await supabaseClient.from('tasks').select('*');
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('packages')
+                .update({
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', packageId)
+                .select()
+                .single();
+            
             if (error) throw error;
-            return { success: true, data: data || [] };
-        } catch (e) {
-            return { success: false, data: [] };
+            
+            return { success: true, data };
+        } catch (error) {
+            console.error('خطأ في تحديث الباقة:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // إنشاء مهمة
-    async createTask(task) {
-        if (!this.isAvailable()) return { success: false };
+    async deletePackage(packageId) {
         try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { error } = await supabaseClient
+                .from('packages')
+                .delete()
+                .eq('id', packageId);
+            
+            if (error) throw error;
+            
+            return { success: true };
+        } catch (error) {
+            console.error('خطأ في حذف الباقة:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // ===== دوال المهام (الجديدة) =====
+    async getAllTasks() {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('tasks')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            return { success: true, data: data || [] };
+        } catch (error) {
+            console.error('خطأ في جلب المهام:', error);
+            return { success: false, error: error.message, data: [] };
+        }
+    },
+
+    async getTasksByPackage(packageCategory) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('tasks')
+                .select('*')
+                .contains('package_categories', [packageCategory])
+                .eq('status', 'active')
+                .order('reward', { ascending: false });
+            
+            if (error) throw error;
+            
+            return { success: true, data: data || [] };
+        } catch (error) {
+            console.error('خطأ في جلب مهام الباقة:', error);
+            return { success: false, error: error.message, data: [] };
+        }
+    },
+
+    async createTask(taskData) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
             const { data, error } = await supabaseClient
                 .from('tasks')
                 .insert([{
-                    id: Date.now(),
-                    title: task.title,
-                    description: task.description || '',
-                    reward: task.reward,
-                    package_categories: task.packageCategories || ['standard'],
-                    difficulty: task.difficulty || 'easy',
-                    time_required: task.timeRequired || 5,
+                    title: taskData.title,
+                    description: taskData.description,
+                    reward: parseFloat(taskData.reward),
+                    type: taskData.type || 'daily',
                     status: 'active',
-                    created_at: new Date().toISOString()
+                    package_categories: taskData.packageCategories || ['standard'],
+                    difficulty: taskData.difficulty || 'easy',
+                    time_required: parseInt(taskData.timeRequired) || 2,
+                    icon: taskData.icon || 'fa-tasks',
+                    completions: 0,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 }])
                 .select()
                 .single();
+            
             if (error) throw error;
+            
             return { success: true, data };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في إنشاء المهمة:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // حذف مهمة
-    async deleteTask(id) {
-        if (!this.isAvailable()) return { success: false };
+    async updateTask(taskId, updates) {
         try {
-            await supabaseClient.from('tasks').delete().eq('id', id);
-            return { success: true };
-        } catch (e) {
-            return { success: false };
-        }
-    },
-
-    // جلب الطلبات المعلقة
-    async getPendingPackages() {
-        if (!this.isAvailable()) return { success: false, data: [] };
-        try {
-            const { data, error } = await supabaseClient.from('pending_packages').select('*');
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('tasks')
+                .update({
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', taskId)
+                .select()
+                .single();
+            
             if (error) throw error;
-            return { success: true, data: data || [] };
-        } catch (e) {
-            return { success: false, data: [] };
+            
+            return { success: true, data };
+        } catch (error) {
+            console.error('خطأ في تحديث المهمة:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // إنشاء طلب معلق
-    async createPendingPackage(p) {
-        if (!this.isAvailable()) return { success: false };
+    async deleteTask(taskId) {
         try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { error } = await supabaseClient
+                .from('tasks')
+                .delete()
+                .eq('id', taskId);
+            
+            if (error) throw error;
+            
+            return { success: true };
+        } catch (error) {
+            console.error('خطأ في حذف المهمة:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async incrementTaskCompletion(taskId) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            // أولاً جلب المهمة لمعرفة العدد الحالي
+            const { data: task, error: fetchError } = await supabaseClient
+                .from('tasks')
+                .select('completions')
+                .eq('id', taskId)
+                .single();
+            
+            if (fetchError) throw fetchError;
+            
+            const currentCompletions = task?.completions || 0;
+            
+            // تحديث العدد
+            const { data, error } = await supabaseClient
+                .from('tasks')
+                .update({
+                    completions: currentCompletions + 1,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', taskId)
+                .select()
+                .single();
+            
+            if (error) throw error;
+            
+            return { success: true, data };
+        } catch (error) {
+            console.error('خطأ في زيادة إنجاز المهمة:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // ===== دوال الطلبات المعلقة =====
+    async getPendingPackages() {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('pending_packages')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            return { success: true, data: data || [] };
+        } catch (error) {
+            console.error('خطأ في جلب الطلبات المعلقة:', error);
+            return { success: false, error: error.message, data: [] };
+        }
+    },
+
+    async createPendingPackage(pendingData) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
             const { data, error } = await supabaseClient
                 .from('pending_packages')
                 .insert([{
-                    id: Date.now(),
-                    user_id: p.userId,
-                    user_name: p.userName,
-                    package_name: p.packageName,
-                    amount: p.amount,
-                    status: 'pending',
-                    created_at: new Date().toISOString()
+                    ...pendingData,
+                    created_at: new Date().toISOString(),
+                    status: 'pending'
                 }])
                 .select()
                 .single();
+            
             if (error) throw error;
+            
             return { success: true, data };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في إنشاء طلب معلق:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // حذف طلب معلق
-    async deletePendingPackage(id) {
-        if (!this.isAvailable()) return { success: false };
+    async updatePendingPackage(pendingId, updates) {
         try {
-            await supabaseClient.from('pending_packages').delete().eq('id', id);
-            return { success: true };
-        } catch (e) {
-            return { success: false };
-        }
-    },
-
-    // جلب طلبات السحب
-    async getWithdrawals() {
-        if (!this.isAvailable()) return { success: false, data: [] };
-        try {
-            const { data, error } = await supabaseClient.from('withdrawals').select('*');
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('pending_packages')
+                .update(updates)
+                .eq('id', pendingId)
+                .select()
+                .single();
+            
             if (error) throw error;
-            return { success: true, data: data || [] };
-        } catch (e) {
-            return { success: false, data: [] };
+            
+            return { success: true, data };
+        } catch (error) {
+            console.error('خطأ في تحديث الطلب المعلق:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // إنشاء طلب سحب
-    async createWithdrawal(w) {
-        if (!this.isAvailable()) return { success: false };
+    async deletePendingPackage(pendingId) {
         try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { error } = await supabaseClient
+                .from('pending_packages')
+                .delete()
+                .eq('id', pendingId);
+            
+            if (error) throw error;
+            
+            return { success: true };
+        } catch (error) {
+            console.error('خطأ في حذف الطلب المعلق:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // ===== دوال طلبات السحب =====
+    async getWithdrawals() {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            const { data, error } = await supabaseClient
+                .from('withdrawals')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            return { success: true, data: data || [] };
+        } catch (error) {
+            console.error('خطأ في جلب طلبات السحب:', error);
+            return { success: false, error: error.message, data: [] };
+        }
+    },
+
+    async createWithdrawal(withdrawalData) {
+        try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
             const { data, error } = await supabaseClient
                 .from('withdrawals')
                 .insert([{
-                    id: Date.now(),
-                    user_id: w.userId,
-                    user_name: w.userName,
-                    amount: w.amount,
-                    wallet: w.wallet,
-                    network: w.network || 'TRC20',
-                    fee: w.fee || 5,
-                    status: 'pending',
-                    created_at: new Date().toISOString()
+                    ...withdrawalData,
+                    created_at: new Date().toISOString(),
+                    status: 'pending'
                 }])
                 .select()
                 .single();
+            
             if (error) throw error;
+            
             return { success: true, data };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في إنشاء طلب سحب:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // تحديث طلب سحب
-    async updateWithdrawal(id, updates) {
-        if (!this.isAvailable()) return { success: false };
+    async updateWithdrawal(withdrawalId, updates) {
         try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
             const { data, error } = await supabaseClient
                 .from('withdrawals')
-                .update(updates)
-                .eq('id', id)
+                .update({
+                    ...updates,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', withdrawalId)
                 .select()
                 .single();
+            
             if (error) throw error;
+            
             return { success: true, data };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في تحديث طلب السحب:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // جلب المعاملات
+    // ===== دوال المعاملات =====
     async getTransactions(userId = null) {
-        if (!this.isAvailable()) return { success: false, data: [] };
         try {
-            let query = supabaseClient.from('transactions').select('*');
-            if (userId) query = query.eq('user_id', userId);
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
+            let query = supabaseClient
+                .from('transactions')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (userId) {
+                query = query.eq('user_id', userId);
+            }
+            
             const { data, error } = await query;
+            
             if (error) throw error;
+            
             return { success: true, data: data || [] };
-        } catch (e) {
-            return { success: false, data: [] };
+        } catch (error) {
+            console.error('خطأ في جلب المعاملات:', error);
+            return { success: false, error: error.message, data: [] };
         }
     },
 
-    // إنشاء معاملة
-    async createTransaction(t) {
-        if (!this.isAvailable()) return { success: false };
+    async createTransaction(transactionData) {
         try {
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
+            
             const { data, error } = await supabaseClient
                 .from('transactions')
                 .insert([{
-                    id: Date.now(),
-                    user_id: t.userId,
-                    type: t.type,
-                    amount: t.amount,
-                    description: t.description || '',
-                    status: t.status || 'completed',
+                    ...transactionData,
                     created_at: new Date().toISOString()
                 }])
                 .select()
                 .single();
+            
             if (error) throw error;
+            
             return { success: true, data };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في إنشاء معاملة:', error);
+            return { success: false, error: error.message };
         }
     },
 
-    // إحصائيات سريعة
+    // ===== دوال الإحصائيات =====
     async getDashboardStats() {
-        if (!this.isAvailable()) return { success: false };
         try {
-            const { count: users } = await supabaseClient.from('users').select('*', { count: 'exact', head: true });
-            const { count: packages } = await supabaseClient.from('packages').select('*', { count: 'exact', head: true });
-            const { count: tasks } = await supabaseClient.from('tasks').select('*', { count: 'exact', head: true });
-            const { count: pending } = await supabaseClient.from('pending_packages').select('*', { count: 'exact', head: true }).eq('status', 'pending');
+            if (!supabaseClient) throw new Error('Supabase غير مهيأ');
             
-            return { 
-                success: true, 
-                data: { 
-                    users: users || 0, 
-                    packages: packages || 0, 
-                    tasks: tasks || 0, 
-                    pending: pending || 0 
-                } 
+            // جلب عدد المستخدمين
+            const { count: usersCount, error: usersError } = await supabaseClient
+                .from('users')
+                .select('*', { count: 'exact', head: true });
+            
+            // جلب عدد الباقات
+            const { count: packagesCount, error: packagesError } = await supabaseClient
+                .from('packages')
+                .select('*', { count: 'exact', head: true });
+            
+            // جلب عدد المهام
+            const { count: tasksCount, error: tasksError } = await supabaseClient
+                .from('tasks')
+                .select('*', { count: 'exact', head: true });
+            
+            // جلب الطلبات المعلقة
+            const { count: pendingCount, error: pendingError } = await supabaseClient
+                .from('pending_packages')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pending');
+            
+            // جلب طلبات السحب المعلقة
+            const { count: withdrawalsCount, error: withdrawalsError } = await supabaseClient
+                .from('withdrawals')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pending');
+            
+            if (usersError || packagesError || tasksError || pendingError || withdrawalsError) {
+                throw new Error('خطأ في جلب الإحصائيات');
+            }
+            
+            return {
+                success: true,
+                data: {
+                    users: usersCount || 0,
+                    packages: packagesCount || 0,
+                    tasks: tasksCount || 0,
+                    pending: pendingCount || 0,
+                    withdrawals: withdrawalsCount || 0
+                }
             };
-        } catch (e) {
-            return { success: false };
+        } catch (error) {
+            console.error('خطأ في جلب إحصائيات لوحة التحكم:', error);
+            return { success: false, error: error.message };
         }
     }
 };
 
-// تصدير للاستخدام
+// تصدير للاستخدام العام
 if (typeof window !== 'undefined') {
     window.supabaseClient = supabaseClient;
     window.supabaseHelpers = supabaseHelpers;
-    window.supabaseAvailable = supabaseAvailable;
-    console.log('✅ Supabase Config جاهز');
+}
+
+// تصدير للاستخدام في وحدات ES
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { supabaseClient, supabaseHelpers };
 }
