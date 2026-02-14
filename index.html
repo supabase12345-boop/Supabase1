@@ -1,22 +1,37 @@
 <!DOCTYPE html>
-
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<script src="shared-data.js"></script>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Elite Investors - منصة الاستثمار الذكي</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-<style>
-        /* ========== الأساسيات ========== */
+    <!-- منع التخزين المؤقت -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- تحميل مكتبة Supabase أولاً -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- ملفات المشروع - بالترتيب الصحيح -->
+    <script src="supabase.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="app.js"></script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Investors - منصة الاستثمار الذكي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
         :root {
             --primary: #7c3aed;
+            --primary-dark: #6d28d9;
             --secondary: #06b6d4;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
             --dark: #0f172a;
-            --light: #f8fafc;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
             --purple: #8b5cf6;
             --info: #0891b2;
         }
@@ -30,7 +45,7 @@
         
         body {
             background: var(--dark);
-            color: white;
+            color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
             min-height: 100vh;
@@ -38,7 +53,6 @@
             flex-direction: column;
         }
         
-        /* ========== الشريط العلوي ========== */
         .navbar {
             background: rgba(15, 23, 42, 0.98);
             backdrop-filter: blur(10px);
@@ -60,6 +74,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            cursor: pointer;
         }
         
         .logo i {
@@ -73,9 +88,8 @@
             -webkit-text-fill-color: transparent;
         }
         
-        /* ========== أزرار تسجيل الدخول ========== */
         .login-btn {
-            background: linear-gradient(135deg, var(--primary), #6d28d9);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             padding: 12px 28px;
@@ -124,7 +138,7 @@
             position: absolute;
             top: 70px;
             left: 25px;
-            background: var(--dark);
+            background: var(--dark-light);
             border-radius: 15px;
             padding: 20px;
             min-width: 250px;
@@ -149,10 +163,11 @@
             align-items: center;
             gap: 12px;
             padding: 12px 15px;
-            color: white;
+            color: var(--text);
             text-decoration: none;
             border-radius: 10px;
             transition: all 0.3s;
+            cursor: pointer;
         }
         
         .user-dropdown a:hover {
@@ -160,7 +175,6 @@
             color: var(--primary);
         }
         
-        /* ========== محتوى الصفحة ========== */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -169,7 +183,6 @@
             flex: 1;
         }
         
-        /* ========== قسم البطل ========== */
         .hero {
             text-align: center;
             padding: 60px 20px;
@@ -178,16 +191,6 @@
             margin-bottom: 40px;
             position: relative;
             overflow: hidden;
-        }
-        
-        .hero::before {
-            content: '🚀';
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            font-size: 120px;
-            opacity: 0.1;
-            transform: rotate(15deg);
         }
         
         .hero h1 {
@@ -200,12 +203,11 @@
         
         .hero p {
             font-size: 1.2rem;
-            color: #cbd5e1;
+            color: var(--text-muted);
             max-width: 600px;
             margin: 0 auto 30px;
         }
         
-        /* ========== إحصائيات المنصة ========== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -236,11 +238,10 @@
         }
         
         .stat-label {
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 15px;
         }
         
-        /* ========== مميزات المنصة ========== */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -269,11 +270,10 @@
         }
         
         .feature-item p {
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 14px;
         }
         
-        /* ========== نظام الإحالة في الصفحة الرئيسية ========== */
         .referral-banner {
             background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(124,58,237,0.2));
             border-radius: 25px;
@@ -282,28 +282,6 @@
             border: 2px solid var(--purple);
             position: relative;
             overflow: hidden;
-        }
-        
-        .referral-banner::before {
-            content: '🎁';
-            position: absolute;
-            bottom: -20px;
-            left: -20px;
-            font-size: 120px;
-            opacity: 0.1;
-            transform: rotate(-15deg);
-        }
-        
-        .referral-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .referral-title i {
-            font-size: 2.5rem;
-            color: var(--purple);
         }
         
         .referral-rewards {
@@ -345,17 +323,6 @@
             color: var(--success);
         }
         
-        .reward-label {
-            color: #cbd5e1;
-            font-size: 16px;
-        }
-        
-        .reward-desc {
-            margin-top: 10px;
-            color: #94a3b8;
-            font-size: 13px;
-        }
-        
         .referral-code-input {
             display: flex;
             gap: 15px;
@@ -376,12 +343,6 @@
             font-weight: bold;
         }
         
-        .referral-code-field:focus {
-            outline: none;
-            background: rgba(139,92,246,0.1);
-        }
-        
-        /* ========== الباقات ========== */
         .section-title {
             text-align: center;
             margin-bottom: 40px;
@@ -393,11 +354,6 @@
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-        
-        .section-title p {
-            color: #94a3b8;
-            font-size: 16px;
         }
         
         .packages-grid {
@@ -460,11 +416,6 @@
             color: var(--success);
         }
         
-        .package-price small {
-            font-size: 1rem;
-            color: #94a3b8;
-        }
-        
         .package-features {
             list-style: none;
             margin: 25px 0;
@@ -500,7 +451,7 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #6d28d9);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             box-shadow: 0 4px 15px rgba(124,58,237,0.3);
         }
@@ -508,6 +459,11 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(124,58,237,0.5);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
         }
         
         .btn-glow {
@@ -521,7 +477,12 @@
             box-shadow: 0 10px 30px rgba(124,58,237,0.6);
         }
         
-        /* ========== نافذة تسجيل الدخول ========== */
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+        
         .modal {
             display: none;
             position: fixed;
@@ -548,7 +509,7 @@
         }
         
         .auth-modal {
-            background: var(--dark);
+            background: var(--dark-light);
             border-radius: 25px;
             padding: 35px;
             width: 100%;
@@ -573,7 +534,7 @@
             padding: 14px;
             background: none;
             border: none;
-            color: #94a3b8;
+            color: var(--text-muted);
             cursor: pointer;
             border-radius: 12px;
             font-weight: bold;
@@ -619,7 +580,7 @@
         .submit-btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, var(--primary), #6d28d9);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             border-radius: 12px;
@@ -665,9 +626,8 @@
             margin-right: 8px;
         }
         
-        /* ========== نافذة الدفع ========== */
         .payment-modal {
-            background: var(--dark);
+            background: var(--dark-light);
             border-radius: 25px;
             padding: 35px;
             width: 100%;
@@ -716,7 +676,6 @@
             margin-bottom: 15px;
         }
         
-        /* ========== التذييل ========== */
         .site-footer {
             background: rgba(15,23,42,0.98);
             padding: 60px 20px 30px;
@@ -746,7 +705,7 @@
         }
         
         .footer-section p, .footer-section ul {
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 14px;
         }
         
@@ -755,14 +714,11 @@
             padding: 0;
         }
         
-        .footer-section ul li {
-            margin-bottom: 12px;
-        }
-        
         .footer-section ul li a {
-            color: #94a3b8;
+            color: var(--text-muted);
             text-decoration: none;
             transition: color 0.3s;
+            cursor: pointer;
         }
         
         .footer-section ul li a:hover {
@@ -783,7 +739,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
+            color: var(--text-muted);
             transition: all 0.3s;
             font-size: 20px;
         }
@@ -802,7 +758,6 @@
             font-size: 14px;
         }
         
-        /* ========== تحميل ========== */
         .loading-spinner {
             display: inline-block;
             width: 30px;
@@ -817,7 +772,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* ========== الإشعارات ========== */
         .notification {
             position: fixed;
             top: 100px;
@@ -842,72 +796,32 @@
             background: var(--warning);
         }
         
-        .notification.info {
-            background: var(--info);
-        }
-        
         @keyframes slideInLeft {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
         
-        /* ========== التجاوب ========== */
         @media (max-width: 1024px) {
-            .stats-grid {
+            .stats-grid, .features-grid, .packages-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .packages-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
             .footer-content {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
         
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .stats-grid {
+            .hero h1 { font-size: 2.2rem; }
+            .stats-grid, .features-grid, .packages-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .packages-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .footer-content {
                 grid-template-columns: 1fr;
             }
-            
-            .referral-rewards {
-                gap: 20px;
-            }
-            
-            .reward-card {
-                padding: 20px;
-                min-width: 150px;
-            }
-            
-            .reward-amount {
-                font-size: 2.2rem;
-            }
-            
-            .referral-code-input {
-                flex-direction: column;
-            }
-            
+            .referral-rewards { gap: 20px; }
+            .reward-card { padding: 20px; min-width: 150px; }
+            .reward-amount { font-size: 2.2rem; }
+            .referral-code-input { flex-direction: column; }
             .notification {
                 right: 10px;
                 left: 10px;
@@ -916,1062 +830,957 @@
         }
         
         @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-            }
-            
-            .section-title h2 {
-                font-size: 1.8rem;
-            }
-            
-            .package-price {
-                font-size: 2.5rem;
-            }
-            
-            .auth-modal {
-                padding: 25px;
-            }
-            
-            .payment-modal {
-                padding: 25px;
-            }
+            .hero h1 { font-size: 1.8rem; }
+            .hero p { font-size: 1rem; }
+            .section-title h2 { font-size: 1.8rem; }
+            .package-price { font-size: 2.5rem; }
+            .auth-modal, .payment-modal { padding: 25px; }
         }
         
-        /* ========== تنسيقات إضافية ========== */
         .text-success { color: var(--success); }
         .text-warning { color: var(--warning); }
         .text-danger { color: var(--danger); }
-        .text-purple { color: var(--purple); }
-        .text-muted { color: #94a3b8; }
-        
-        .mt-3 { margin-top: 15px; }
-        .mt-4 { margin-top: 20px; }
-        .mt-5 { margin-top: 25px; }
-        .mb-3 { margin-bottom: 15px; }
-        .mb-4 { margin-bottom: 20px; }
-        .mb-5 { margin-bottom: 25px; }
-        
+        .text-muted { color: var(--text-muted); }
         .text-center { text-align: center; }
-        
         .w-100 { width: 100%; }
-        
+        .mt-3 { margin-top: 15px; }
+        .mb-3 { margin-bottom: 15px; }
         .d-flex { display: flex; }
         .align-center { align-items: center; }
         .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
         .gap-2 { gap: 10px; }
         .gap-3 { gap: 15px; }
-        .gap-4 { gap: 20px; }
-        
         .flex-wrap { flex-wrap: wrap; }
-        
-        .border-bottom {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
-<!-- ========== الشريط العلوي ========== -->
-<nav class="navbar">
-<div class="logo">
-<i class="fas fa-chart-line"></i>
-<span>Elite Investors</span>
-</div>
-<!-- زر تسجيل الدخول -->
-<button class="login-btn" id="loginBtn">
-<i class="fas fa-sign-in-alt"></i>
-            دخول / تسجيل
+    <!-- ========== الشريط العلوي ========== -->
+    <nav class="navbar">
+        <div class="logo" onclick="window.location.href='index.html'">
+            <i class="fas fa-chart-line"></i>
+            <span>Elite Investors</span>
+        </div>
+        
+        <!-- زر تسجيل الدخول -->
+        <button class="login-btn" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i> دخول / تسجيل
         </button>
-<!-- قائمة المستخدم -->
-<div class="user-menu" id="userMenu">
-<div class="user-avatar" id="userAvatar">
-<!-- الحرف الأول من اسم المستخدم -->
-</div>
-<div class="user-dropdown" id="userDropdown">
-<div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
-<strong id="dropdownName" style="font-size: 18px;"></strong><br/>
-<small id="dropdownEmail" style="color: #94a3b8;"></small>
-<div id="dropdownPackage" style="margin-top: 10px;"></div>
-</div>
-<a href="#" onclick="goToDashboard()">
-<i class="fas fa-tachometer-alt"></i> لوحة التحكم
+        
+        <!-- قائمة المستخدم -->
+        <div class="user-menu" id="userMenu">
+            <div class="user-avatar" id="userAvatar">م</div>
+            <div class="user-dropdown" id="userDropdown">
+                <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+                    <strong id="dropdownName" style="font-size: 18px;"></strong><br>
+                    <small id="dropdownEmail" style="color: var(--text-muted);"></small>
+                    <div id="dropdownPackage" style="margin-top: 10px;"></div>
+                </div>
+                <a onclick="goToDashboard()">
+                    <i class="fas fa-tachometer-alt"></i> لوحة التحكم
                 </a>
-<a href="#" onclick="showReferralCode()">
-<i class="fas fa-user-friends"></i> كود الإحالة
+                <a onclick="showReferralCode()">
+                    <i class="fas fa-user-friends"></i> كود الإحالة
                 </a>
-<a href="#" onclick="goToPackages()">
-<i class="fas fa-crown"></i> شراء باقة
+                <a onclick="goToPackages()">
+                    <i class="fas fa-crown"></i> شراء باقة
                 </a>
-<a href="#" onclick="logout()">
-<i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                <a onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
                 </a>
-</div>
-</div>
-</nav>
-<!-- ========== نافذة تسجيل الدخول ========== -->
-<div class="modal" id="authModal">
-<div class="auth-modal">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-<h2 style="color: var(--primary);">
-<i class="fas fa-user-circle"></i> مرحباً بك
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== نافذة تسجيل الدخول ========== -->
+    <div class="modal" id="authModal">
+        <div class="auth-modal">
+            <div class="d-flex justify-between align-center mb-4">
+                <h2 style="color: var(--primary);">
+                    <i class="fas fa-user-circle"></i> مرحباً بك
                 </h2>
-<button onclick="closeAuthModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;">
-<i class="fas fa-times"></i>
-</button>
-</div>
-<div class="tabs">
-<button class="tab active" onclick="showTab('login')">تسجيل الدخول</button>
-<button class="tab" onclick="showTab('register')">إنشاء حساب جديد</button>
-</div>
-<!-- نموذج تسجيل الدخول -->
-<form class="auth-form" id="loginForm">
-<div class="form-group">
-<label>👤 اسم المستخدم أو البريد الإلكتروني</label>
-<input class="form-control" id="loginUsername" placeholder="أدخل اسم المستخدم أو البريد" required="" type="text"/>
-</div>
-<div class="form-group">
-<label>🔑 كلمة المرور</label>
-<input class="form-control" id="loginPassword" placeholder="أدخل كلمة المرور" required="" type="password"/>
-</div>
-<button class="submit-btn" type="submit">
-<i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                <button style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;" onclick="closeAuthModal()">
+                    <i class="fas fa-times"></i>
                 </button>
-<p style="text-align: center; margin-top: 20px; color: #94a3b8;">
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showAuthTab('login')">تسجيل الدخول</button>
+                <button class="tab" onclick="showAuthTab('register')">إنشاء حساب جديد</button>
+            </div>
+            
+            <!-- نموذج تسجيل الدخول -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>👤 اسم المستخدم أو البريد الإلكتروني</label>
+                    <input type="text" class="form-control" id="loginUsername" placeholder="أدخل اسم المستخدم أو البريد" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔑 كلمة المرور</label>
+                    <input type="password" class="form-control" id="loginPassword" placeholder="أدخل كلمة المرور" required>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </button>
+                
+                <p class="text-center mt-3 text-muted">
                     ليس لديك حساب؟ 
-                    <a href="#" onclick="showTab('register')" style="color: var(--primary); text-decoration: none;">إنشاء حساب جديد</a>
-</p>
-</form>
-<!-- نموذج إنشاء حساب -->
-<form class="auth-form" id="registerForm" style="display: none;">
-<div class="form-group">
-<label>
-<span class="required-badge">*</span>
+                    <a href="#" onclick="showAuthTab('register')" style="color: var(--primary); text-decoration: none;">إنشاء حساب جديد</a>
+                </p>
+            </form>
+            
+            <!-- نموذج إنشاء حساب -->
+            <form id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label>
+                        <span class="required-badge">*</span>
                         👤 الاسم الكامل
                     </label>
-<input class="form-control" id="registerName" placeholder="أدخل اسمك الكامل" required="" type="text"/>
-</div>
-<div class="form-group">
-<label>
-<span class="required-badge">*</span>
+                    <input type="text" class="form-control" id="registerName" placeholder="أدخل اسمك الكامل" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <span class="required-badge">*</span>
                         🆔 اسم المستخدم
                     </label>
-<input class="form-control" id="registerUsername" placeholder="اختر اسم مستخدم فريد" required="" type="text"/>
-<small style="color: #94a3b8;">يجب أن يكون فريداً ولا يحتوي على مسافات</small>
-</div>
-<div class="form-group">
-<label>
-<span class="required-badge">*</span>
+                    <input type="text" class="form-control" id="registerUsername" placeholder="اختر اسم مستخدم فريد" required>
+                    <small class="text-muted">يجب أن يكون فريداً ولا يحتوي على مسافات</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <span class="required-badge">*</span>
                         📧 البريد الإلكتروني
                     </label>
-<input class="form-control" id="registerEmail" placeholder="أدخل بريدك الإلكتروني" required="" type="email"/>
-</div>
-<div class="form-group">
-<label>
-<span class="required-badge">*</span>
+                    <input type="email" class="form-control" id="registerEmail" placeholder="أدخل بريدك الإلكتروني" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <span class="required-badge">*</span>
                         📱 رقم الهاتف
                     </label>
-<input class="form-control" id="registerPhone" placeholder="أدخل رقم هاتفك" required="" type="tel"/>
-</div>
-<div class="form-group">
-<label>
-<span class="required-badge">*</span>
+                    <input type="tel" class="form-control" id="registerPhone" placeholder="أدخل رقم هاتفك" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <span class="required-badge">*</span>
                         🔐 كلمة المرور
                     </label>
-<input class="form-control" id="registerPassword" placeholder="اختر كلمة مرور قوية" required="" type="password"/>
-<small style="color: #94a3b8;">يجب أن تكون 6 أحرف على الأقل</small>
-</div>
-<div class="form-group">
-<label>
-<span class="required-badge">*</span>
+                    <input type="password" class="form-control" id="registerPassword" placeholder="اختر كلمة مرور قوية" required>
+                    <small class="text-muted">يجب أن تكون 6 أحرف على الأقل</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <span class="required-badge">*</span>
                         ✅ تأكيد كلمة المرور
                     </label>
-<input class="form-control" id="registerConfirmPassword" placeholder="أعد إدخال كلمة المرور" required="" type="password"/>
-</div>
-<!-- قسم كود الإحالة - محدث -->
-<div class="form-group">
-<label>
-<span class="optional-badge">اختياري</span>
+                    <input type="password" class="form-control" id="registerConfirmPassword" placeholder="أعد إدخال كلمة المرور" required>
+                </div>
+                
+                <!-- قسم كود الإحالة -->
+                <div class="form-group">
+                    <label>
+                        <span class="optional-badge">اختياري</span>
                         🎁 كود الإحالة
                     </label>
-<input autocomplete="off" class="form-control" id="registerReferral" placeholder="أدخل كود الإحالة إن وجد" type="text"/>
-<div style="background: rgba(139,92,246,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(139,92,246,0.3);">
-<div style="display: flex; align-items: center; gap: 10px; color: var(--purple);">
-<i class="fas fa-gift" style="font-size: 20px;"></i>
-<strong style="font-size: 15px;">مكافآت الإحالة:</strong>
-</div>
-<div style="display: flex; justify-content: space-around; margin-top: 15px;">
-<div style="text-align: center;">
-<span style="font-size: 24px; font-weight: bold; color: var(--purple);">50$</span>
-<p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">لك - صاحب الكود</p>
-</div>
-<div style="width: 1px; height: 40px; background: rgba(255,255,255,0.2);"></div>
-<div style="text-align: center;">
-<span style="font-size: 24px; font-weight: bold; color: var(--success);">20$</span>
-<p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">لك - عند الاشتراك</p>
-</div>
-</div>
-<p style="color: #cbd5e1; font-size: 13px; margin-top: 15px; text-align: center;">
-<i class="fas fa-info-circle"></i>
-                            باستخدام كود إحالة، تحصل على <strong style="color: var(--success);">20$</strong> فور تفعيل أول باقة، وصاحب الكود يحصل على <strong style="color: var(--purple);">50$</strong>!
+                    <input type="text" class="form-control" id="registerReferral" placeholder="أدخل كود الإحالة إن وجد">
+                    <div style="background: rgba(139,92,246,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(139,92,246,0.3);">
+                        <div class="d-flex align-center gap-2" style="color: var(--purple);">
+                            <i class="fas fa-gift" style="font-size: 20px;"></i>
+                            <strong>مكافآت الإحالة:</strong>
+                        </div>
+                        <div class="d-flex justify-center gap-4 mt-3">
+                            <div class="text-center">
+                                <span style="font-size: 24px; font-weight: bold; color: var(--purple);">50$</span>
+                                <p class="text-muted" style="font-size: 13px;">لك - صاحب الكود</p>
+                            </div>
+                            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.2);"></div>
+                            <div class="text-center">
+                                <span style="font-size: 24px; font-weight: bold; color: var(--success);">20$</span>
+                                <p class="text-muted" style="font-size: 13px;">لك - عند الاشتراك</p>
+                            </div>
+                        </div>
+                        <p class="text-center text-muted mt-3" style="font-size: 13px;">
+                            <i class="fas fa-info-circle"></i>
+                            باستخدام كود إحالة، تحصل على <strong style="color: var(--success);">20$</strong> فور تفعيل أول باقة
                         </p>
-</div>
-</div>
-<button class="submit-btn" type="submit">
-<i class="fas fa-user-plus"></i> إنشاء حساب جديد
-                </button>
-<p style="text-align: center; margin-top: 20px; color: #94a3b8;">
-                    لديك حساب بالفعل؟ 
-                    <a href="#" onclick="showTab('login')" style="color: var(--primary); text-decoration: none;">تسجيل الدخول</a>
-</p>
-</form>
-</div>
-</div>
-<!-- ========== نافذة الدفع ========== -->
-<div class="modal" id="paymentModal">
-<div class="payment-modal">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-<h2 style="color: var(--success);">
-<i class="fas fa-money-bill-wave"></i> إتمام الدفع
-                </h2>
-<button onclick="closePaymentModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;">
-<i class="fas fa-times"></i>
-</button>
-</div>
-<!-- ملخص الباقة -->
-<div class="package-summary">
-<h3 id="selectedPackageName" style="color: var(--primary); margin-bottom: 15px; text-align: center;"></h3>
-<div style="display: flex; justify-content: space-between; align-items: center;">
-<span style="color: #94a3b8;">مبلغ الاستثمار:</span>
-<span id="selectedPackagePrice" style="font-size: 28px; font-weight: bold; color: var(--success);"></span>
-</div>
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-<span style="color: #94a3b8;">الربح اليومي:</span>
-<span id="selectedPackageDaily" style="font-size: 20px; color: var(--warning);"></span>
-</div>
-</div>
-<!-- معلومات الدفع - شبكة TRC20 فقط -->
-<div class="network-info">
-<div class="network-badge">
-<i class="fas fa-network-wired"></i> TRC20 فقط
+                    </div>
                 </div>
-<p style="color: #cbd5e1; margin-bottom: 20px;">
-<i class="fas fa-check-circle" style="color: var(--success);"></i>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+                </button>
+                
+                <p class="text-center mt-3 text-muted">
+                    لديك حساب بالفعل؟ 
+                    <a href="#" onclick="showAuthTab('login')" style="color: var(--primary); text-decoration: none;">تسجيل الدخول</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== نافذة الدفع ========== -->
+    <div class="modal" id="paymentModal">
+        <div class="payment-modal">
+            <div class="d-flex justify-between align-center mb-4">
+                <h2 style="color: var(--success);">
+                    <i class="fas fa-money-bill-wave"></i> إتمام الدفع
+                </h2>
+                <button style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- ملخص الباقة -->
+            <div class="package-summary">
+                <h3 id="selectedPackageName" style="color: var(--primary); margin-bottom: 15px; text-align: center;"></h3>
+                <div class="d-flex justify-between align-center">
+                    <span class="text-muted">مبلغ الاستثمار:</span>
+                    <span style="font-size: 28px; font-weight: bold; color: var(--success);" id="selectedPackagePrice"></span>
+                </div>
+                <div class="d-flex justify-between align-center mt-2">
+                    <span class="text-muted">الربح اليومي:</span>
+                    <span style="font-size: 20px; color: var(--warning);" id="selectedPackageDaily"></span>
+                </div>
+            </div>
+            
+            <!-- معلومات الدفع - شبكة TRC20 فقط -->
+            <div class="network-info">
+                <div class="network-badge">
+                    <i class="fas fa-network-wired"></i> TRC20 فقط
+                </div>
+                <p class="mb-4">
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
                     شبكة TRC20 هي الشبكة الوحيدة المدعومة للدفع
                 </p>
-<div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px;">
-<p style="text-align: center; color: #94a3b8; margin-bottom: 15px;">
-<i class="fas fa-wallet"></i>
+                
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px;">
+                    <p class="text-center text-muted mb-3">
+                        <i class="fas fa-wallet"></i>
                         أرسل USDT (TRC20) إلى هذا العنوان:
                     </p>
-<div class="wallet-address-box" id="walletAddress">
+                    <div class="wallet-address-box" id="walletAddress">
                         Tymk60K9JvCqS7Fqy6BpWpZp8hLpVHw7D
                     </div>
-<button class="btn btn-primary" onclick="copyWalletAddress()" style="width: 100%; margin-top: 10px;">
-<i class="fas fa-copy"></i> نسخ العنوان
+                    <button onclick="copyWalletAddress()" class="btn btn-primary w-100 mt-2">
+                        <i class="fas fa-copy"></i> نسخ العنوان
                     </button>
-</div>
-</div>
-<!-- رفع إثبات التحويل (اختياري) -->
-<div style="margin: 25px 0;">
-<h4 style="color: #cbd5e1; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-<i class="fas fa-camera"></i>
+                </div>
+            </div>
+            
+            <!-- رفع إثبات التحويل (اختياري) -->
+            <div style="margin: 25px 0;">
+                <h4 class="mb-3 d-flex align-center gap-2">
+                    <i class="fas fa-camera"></i>
                     إثبات التحويل (اختياري)
                 </h4>
-<div id="uploadContainer" style="background: rgba(255,255,255,0.03); border: 2px dashed rgba(124,58,237,0.3); border-radius: 15px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s;">
-<i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
-<p style="color: #94a3b8; margin-bottom: 10px;">
-<strong>اسحب وأفلت الصورة هنا</strong><br/>
+                
+                <div style="background: rgba(255,255,255,0.03); border: 2px dashed rgba(124,58,237,0.3); border-radius: 15px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s;" id="uploadContainer">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+                    <p class="text-muted mb-2">
+                        <strong>اسحب وأفلت الصورة هنا</strong><br>
                         أو انقر لاختيار صورة
                     </p>
-<span style="display: inline-block; background: var(--primary); color: white; padding: 10px 25px; border-radius: 50px; font-size: 14px; margin-top: 10px;">
-<i class="fas fa-folder-open"></i> اختر صورة
+                    <span style="display: inline-block; background: var(--primary); color: white; padding: 10px 25px; border-radius: 50px; font-size: 14px;">
+                        <i class="fas fa-folder-open"></i> اختر صورة
                     </span>
-<input accept="image/*" id="fileInput" onchange="handleImageUpload(event)" style="display: none;" type="file"/>
-</div>
-<div id="uploadPreview" style="display: none; margin-top: 20px;">
-<img id="previewImage" style="max-width: 100%; max-height: 200px; border-radius: 10px; border: 2px solid var(--primary);"/>
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-<span id="fileName" style="color: #94a3b8;"></span>
-<span onclick="removeImage()" style="color: var(--danger); cursor: pointer;">
-<i class="fas fa-trash"></i> حذف
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div id="uploadPreview" style="display: none; margin-top: 20px;">
+                    <img id="previewImage" style="max-width: 100%; max-height: 200px; border-radius: 10px; border: 2px solid var(--primary);">
+                    <div class="d-flex justify-between align-center mt-2">
+                        <span id="fileName" class="text-muted"></span>
+                        <span onclick="removeImage()" style="color: var(--danger); cursor: pointer;">
+                            <i class="fas fa-trash"></i> حذف
                         </span>
-</div>
-</div>
-<small style="color: #94a3b8; display: block; margin-top: 15px; text-align: center;">
-<i class="fas fa-info-circle"></i>
-                    رفع الصورة يساعد في معالجة طلبك بشكل أسرع (خلال ساعة واحدة)
+                    </div>
+                </div>
+                
+                <small class="text-muted d-block text-center mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    رفع الصورة يساعد في معالجة طلبك بشكل أسرع
                 </small>
-</div>
-<!-- كود الإحالة للمستخدم المسجل -->
-<div id="referralCodeSection" style="display: none; background: rgba(139,92,246,0.1); padding: 20px; border-radius: 15px; margin: 25px 0; border: 1px solid var(--purple);">
-<h4 style="color: var(--purple); margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-<i class="fas fa-gift"></i>
+            </div>
+            
+            <!-- كود الإحالة للمستخدم المسجل -->
+            <div id="referralCodeSection" style="display: none; background: rgba(139,92,246,0.1); padding: 20px; border-radius: 15px; margin: 25px 0; border: 1px solid var(--purple);">
+                <h4 class="d-flex align-center gap-2 mb-2" style="color: var(--purple);">
+                    <i class="fas fa-gift"></i>
                     كود الإحالة الخاص بك
                 </h4>
-<p style="color: #cbd5e1; margin-bottom: 15px;">
+                <p class="text-muted mb-3">
                     شارك كودك مع أصدقائك واربح 50$ عن كل صديق
                 </p>
-<div style="display: flex; gap: 10px;">
-<input class="form-control" id="userReferralCodeDisplay" readonly="" style="text-align: center; font-size: 18px; letter-spacing: 2px; font-weight: bold; color: var(--purple);" type="text"/>
-<button class="btn btn-sm" onclick="copyUserReferralCode()" style="background: var(--purple); color: white; padding: 0 20px;">
-<i class="fas fa-copy"></i>
-</button>
-</div>
-</div>
-<!-- أزرار الإجراءات -->
-<div style="display: flex; gap: 15px; margin-top: 30px;">
-<button class="btn" onclick="closePaymentModal()" style="flex: 1; background: var(--danger);">
-<i class="fas fa-times"></i> إلغاء
+                <div class="d-flex gap-2">
+                    <input type="text" id="userReferralCodeDisplay" class="form-control" readonly style="text-align: center; font-size: 18px; font-weight: bold; color: var(--purple);">
+                    <button class="btn btn-sm" style="background: var(--purple); color: white;" onclick="copyUserReferralCode()">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- أزرار الإجراءات -->
+            <div class="d-flex gap-3 mt-4">
+                <button class="btn" style="flex: 1; background: var(--danger);" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i> إلغاء
                 </button>
-<button class="btn" onclick="submitPayment()" style="flex: 2; background: var(--success);">
-<i class="fas fa-check-circle"></i> تأكيد الدفع
+                <button class="btn" style="flex: 2; background: var(--success);" onclick="submitPayment()">
+                    <i class="fas fa-check-circle"></i> تأكيد الدفع
                 </button>
-</div>
-</div>
-</div>
-<!-- ========== الإشعار ========== -->
-<div class="notification" id="notification"></div>
-<!-- ========== محتوى الصفحة الرئيسية ========== -->
-<div class="container">
-<!-- قسم البطل -->
-<section class="hero">
-<h1>استثمر بذكاء واربح يومياً</h1>
-<p>انضم إلى المنصة الاستثمارية الأسرع نمواً وابدأ رحلتك نحو النجاح المالي مع Elite Investors</p>
-<button class="btn btn-glow" onclick="openAuthModal()" style="width: auto; padding: 16px 48px;">
-<i class="fas fa-rocket"></i>
-                ابدأ الآن
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== الإشعار ========== -->
+    <div class="notification" id="notification"></div>
+
+    <!-- ========== محتوى الصفحة الرئيسية ========== -->
+    <div class="container">
+        <!-- قسم البطل -->
+        <section class="hero">
+            <h1>استثمر بذكاء واربح يومياً</h1>
+            <p>انضم إلى المنصة الاستثمارية الأسرع نمواً وابدأ رحلتك نحو النجاح المالي مع Elite Investors</p>
+            <button class="btn btn-glow" onclick="openAuthModal()" style="width: auto; padding: 16px 48px;">
+                <i class="fas fa-rocket"></i> ابدأ الآن
             </button>
-</section>
-<!-- إحصائيات المنصة -->
-<section>
-<div class="stats-grid">
-<div class="stat-item">
-<div class="stat-number">50,000+</div>
-<div class="stat-label">مستثمر ناجح</div>
-</div>
-<div class="stat-item">
-<div class="stat-number">$25M+</div>
-<div class="stat-label">أرباح تم توزيعها</div>
-</div>
-<div class="stat-item">
-<div class="stat-number">99%</div>
-<div class="stat-label">معدل رضا العملاء</div>
-</div>
-<div class="stat-item">
-<div class="stat-number">24/7</div>
-<div class="stat-label">دعم فني متاح</div>
-</div>
-</div>
-</section>
-<!-- مميزات المنصة -->
-<section>
-<div class="features-grid">
-<div class="feature-item">
-<i class="fas fa-shield-alt"></i>
-<h4>أمان تام</h4>
-<p>نظام حماية متقدم وأمان للبيانات والاستثمارات</p>
-</div>
-<div class="feature-item">
-<i class="fas fa-chart-line"></i>
-<h4>أرباح مضمونة</h4>
-<p>تحويل يومي مباشر للأرباح إلى محفظتك الشخصية</p>
-</div>
-<div class="feature-item">
-<i class="fas fa-headset"></i>
-<h4>دعم فني</h4>
-<p>فريق دعم متاح على مدار الساعة لمساعدتك</p>
-</div>
-<div class="feature-item">
-<i class="fas fa-bolt"></i>
-<h4>سرعة التنفيذ</h4>
-<p>معاملات سريعة وتفعيل فوري للباقات</p>
-</div>
-</div>
-</section>
-<!-- ========== نظام الإحالة المتقدم في الصفحة الرئيسية ========== -->
-<section class="referral-banner">
-<div class="referral-title">
-<i class="fas fa-user-friends"></i>
-<h2 style="font-size: 2rem; color: white;">نظام الإحالة - اربح مع أصدقائك</h2>
-</div>
-<p style="color: #cbd5e1; text-align: center; margin-bottom: 30px; font-size: 18px;">
+        </section>
+        
+        <!-- إحصائيات المنصة -->
+        <section>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="statUsers">0</div>
+                    <div class="stat-label">مستثمر ناجح</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statDeposits">$0</div>
+                    <div class="stat-label">أرباح تم توزيعها</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statSatisfaction">99%</div>
+                    <div class="stat-label">معدل رضا العملاء</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statSupport">24/7</div>
+                    <div class="stat-label">دعم فني متاح</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- مميزات المنصة -->
+        <section>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>أمان تام</h4>
+                    <p>نظام حماية متقدم وأمان للبيانات والاستثمارات</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>أرباح مضمونة</h4>
+                    <p>تحويل يومي مباشر للأرباح إلى محفظتك الشخصية</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-headset"></i>
+                    <h4>دعم فني</h4>
+                    <p>فريق دعم متاح على مدار الساعة لمساعدتك</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-bolt"></i>
+                    <h4>سرعة التنفيذ</h4>
+                    <p>معاملات سريعة وتفعيل فوري للباقات</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- نظام الإحالة -->
+        <section class="referral-banner">
+            <div class="referral-title">
+                <i class="fas fa-user-friends"></i>
+                <h2 style="font-size: 2rem; color: white;">نظام الإحالة - اربح مع أصدقائك</h2>
+            </div>
+            
+            <p class="text-center mb-4" style="color: #cbd5e1; font-size: 18px;">
                 ادعو أصدقائك للانضمام إلى Elite Investors واربح مكافآت فورية عند اشتراكهم
             </p>
-<div class="referral-rewards">
-<div class="reward-card referrer">
-<div class="reward-amount">50$</div>
-<div class="reward-label">لك - صاحب الكود</div>
-<div class="reward-desc">عند اشتراك كل صديق</div>
-</div>
-<div class="reward-card referee">
-<div class="reward-amount">20$</div>
-<div class="reward-label">لصديقك - المشترك</div>
-<div class="reward-desc">هدية فورية عند تفعيل الباقة</div>
-</div>
-</div>
-<div id="referralActionSection">
-<!-- للمستخدمين غير المسجلين -->
-<div id="nonUserReferral" style="text-align: center;">
-<p style="color: #cbd5e1; margin-bottom: 20px;">
-<i class="fas fa-lock"></i>
+            
+            <div class="referral-rewards">
+                <div class="reward-card referrer">
+                    <div class="reward-amount">50$</div>
+                    <div class="reward-label">لك - صاحب الكود</div>
+                    <div class="reward-desc">عند اشتراك كل صديق</div>
+                </div>
+                <div class="reward-card referee">
+                    <div class="reward-amount">20$</div>
+                    <div class="reward-label">لصديقك - المشترك</div>
+                    <div class="reward-desc">هدية فورية عند تفعيل الباقة</div>
+                </div>
+            </div>
+            
+            <div id="referralActionSection">
+                <!-- للمستخدمين غير المسجلين -->
+                <div id="nonUserReferral" style="text-align: center;">
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-lock"></i>
                         سجل الدخول أو أنشئ حساب للحصول على كود الإحالة الخاص بك
                     </p>
-<div style="display: flex; gap: 15px; justify-content: center;">
-<button class="btn btn-primary" onclick="openAuthModal()">
-<i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    <div class="d-flex gap-3 justify-center">
+                        <button class="btn btn-primary" onclick="openAuthModal()">
+                            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
                         </button>
-<button class="btn" onclick="openAuthModal(); showTab('register')" style="background: var(--purple); color: white;">
-<i class="fas fa-user-plus"></i> إنشاء حساب
+                        <button class="btn" style="background: var(--purple); color: white;" onclick="openAuthModal(); showAuthTab('register')">
+                            <i class="fas fa-user-plus"></i> إنشاء حساب
                         </button>
-</div>
-</div>
-<!-- للمستخدمين المسجلين (سيتم عرضه عبر JS) -->
-<div id="userReferralCode" style="display: none;">
-<!-- سيتم تعبئته بالجافاسكريبت -->
-</div>
-</div>
-<!-- صندوق إدخال كود الإحالة للتسجيل -->
-<div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
-<h4 style="color: white; text-align: center; margin-bottom: 20px;">
-<i class="fas fa-gift" style="color: var(--warning);"></i>
+                    </div>
+                </div>
+                
+                <!-- للمستخدمين المسجلين -->
+                <div id="userReferralCode" style="display: none;"></div>
+            </div>
+            
+            <!-- صندوق إدخال كود الإحالة -->
+            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
+                <h4 class="text-center mb-3" style="color: white;">
+                    <i class="fas fa-gift" style="color: var(--warning);"></i>
                     لديك كود إحالة؟ أدخله هنا
                 </h4>
-<div class="referral-code-input">
-<input class="referral-code-field" id="quickReferralCode" placeholder="أدخل كود الإحالة" type="text"/>
-<button class="btn btn-primary" onclick="applyReferralCode()" style="width: auto; padding: 0 40px;">
-<i class="fas fa-check"></i> تطبيق
+                <div class="referral-code-input">
+                    <input type="text" class="referral-code-field" id="quickReferralCode" placeholder="أدخل كود الإحالة">
+                    <button class="btn btn-primary" onclick="applyReferralCode()" style="width: auto; padding: 0 40px;">
+                        <i class="fas fa-check"></i> تطبيق
                     </button>
-</div>
-</div>
-</section>
-<!-- الباقات -->
-<section id="packages">
-<div class="section-title">
-<h2>باقات الاستثمار</h2>
-<p>اختر الباقة المناسبة لك وابدأ رحلة الربح اليومي</p>
-</div>
-<div class="packages-grid" id="packagesGrid">
-<!-- سيتم ملؤه بالجافاسكريبت -->
-<div style="text-align: center; grid-column: 1/-1; padding: 50px;">
-<div class="loading-spinner"></div>
-<p style="color: #94a3b8; margin-top: 20px;">جاري تحميل الباقات...</p>
-</div>
-</div>
-</section>
-<!-- كيف تبدأ -->
-<section style="margin-top: 80px;">
-<div class="section-title">
-<h2>كيف تبدأ؟</h2>
-<p>ثلاث خطوات بسيطة لبداية استثمارك</p>
-</div>
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
-<div style="text-align: center;">
-<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
+                </div>
+            </div>
+        </section>
+        
+        <!-- الباقات -->
+        <section id="packages">
+            <div class="section-title">
+                <h2>باقات الاستثمار</h2>
+                <p>اختر الباقة المناسبة لك وابدأ رحلة الربح اليومي</p>
+            </div>
+            <div class="packages-grid" id="packagesGrid">
+                <div class="text-center" style="grid-column: 1/-1; padding: 50px;">
+                    <div class="loading-spinner"></div>
+                    <p class="text-muted mt-3">جاري تحميل الباقات...</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- كيف تبدأ -->
+        <section style="margin-top: 80px;">
+            <div class="section-title">
+                <h2>كيف تبدأ؟</h2>
+                <p>ثلاث خطوات بسيطة لبداية استثمارك</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
                         1
                     </div>
-<h4 style="margin-bottom: 10px;">إنشاء حساب</h4>
-<p style="color: #94a3b8;">سجل حساب مجاني في دقيقة واحدة</p>
-</div>
-<div style="text-align: center;">
-<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
+                    <h4 class="mb-2">إنشاء حساب</h4>
+                    <p class="text-muted">سجل حساب مجاني في دقيقة واحدة</p>
+                </div>
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
                         2
                     </div>
-<h4 style="margin-bottom: 10px;">اختيار الباقة</h4>
-<p style="color: #94a3b8;">اشترك في إحدى باقاتنا الاستثمارية</p>
-</div>
-<div style="text-align: center;">
-<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
+                    <h4 class="mb-2">اختيار الباقة</h4>
+                    <p class="text-muted">اشترك في إحدى باقاتنا الاستثمارية</p>
+                </div>
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
                         3
                     </div>
-<h4 style="margin-bottom: 10px;">ابدأ الربح</h4>
-<p style="color: #94a3b8;">احصل على أرباحك اليومية فوراً</p>
-</div>
-</div>
-</section>
-</div>
-<!-- ========== التذييل ========== -->
-<footer class="site-footer">
-<div class="footer-container">
-<div class="footer-content">
-<!-- نبذة عن المنصة -->
-<div class="footer-section">
-<h4><i class="fas fa-info-circle"></i> عن المنصة</h4>
-<p>Elite Investors منصة استثمارية رقمية توفر فرصة حقيقية للربح اليومي من خلال باقات استثمارية متنوعة وآمنة.</p>
-<div class="social-links">
-<a href="#"><i class="fab fa-telegram"></i></a>
-<a href="#"><i class="fab fa-whatsapp"></i></a>
-<a href="#"><i class="fab fa-twitter"></i></a>
-<a href="#"><i class="fab fa-instagram"></i></a>
-</div>
-</div>
-<!-- روابط سريعة -->
-<div class="footer-section">
-<h4><i class="fas fa-link"></i> روابط سريعة</h4>
-<ul>
-<li><a href="#" onclick="openAuthModal()">تسجيل الدخول</a></li>
-<li><a href="#" onclick="openAuthModal(); showTab('register')">إنشاء حساب</a></li>
-<li><a href="#packages">الباقات</a></li>
-<li><a href="#" onclick="showNotification('سيتم إضافة الشروط قريباً', 'info')">الشروط والأحكام</a></li>
-<li><a href="#" onclick="showNotification('سيتم إضافة سياسة الخصوصية قريباً', 'info')">سياسة الخصوصية</a></li>
-</ul>
-</div>
-<!-- طرق الدفع -->
-<div class="footer-section">
-<h4><i class="fas fa-credit-card"></i> طرق الدفع</h4>
-<ul>
-<li><i class="fas fa-coins"></i> USDT (TRC20)</li>
-<li><i class="fab fa-bitcoin"></i> Bitcoin</li>
-<li><i class="fab fa-ethereum"></i> Ethereum</li>
-<li><i class="fas fa-bolt"></i> تحويل فوري</li>
-</ul>
-</div>
-<!-- معلومات التواصل -->
-<div class="footer-section">
-<h4><i class="fas fa-headset"></i> الدعم الفني</h4>
-<ul>
-<li><i class="fas fa-clock"></i> متاح 24/7</li>
-<li><i class="fas fa-envelope"></i> support@elite-investors.com</li>
-<li><i class="fas fa-globe"></i> www.elite-investors.com</li>
-</ul>
-</div>
-</div>
-<div class="copyright">
-<p>© 2025 Elite Investors. جميع الحقوق محفوظة.</p>
-<p style="margin-top: 10px;">هذا الموقع مخصص للاستثمار الآمن والمربح. يخضع استخدامك للموقع لشروط الاستخدام.</p>
-</div>
-</div>
-</footer>
-<script>
-        // ==================== نظام الصفحة الرئيسية المتكامل ====================
-        
-        // ---------- المتغيرات العامة ----------
-        let users = [];
+                    <h4 class="mb-2">ابدأ الربح</h4>
+                    <p class="text-muted">احصل على أرباحك اليومية فوراً</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ========== التذييل ========== -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-info-circle"></i> عن المنصة</h4>
+                    <p>Elite Investors منصة استثمارية رقمية توفر فرصة حقيقية للربح اليومي من خلال باقات استثمارية متنوعة وآمنة.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4><i class="fas fa-link"></i> روابط سريعة</h4>
+                    <ul>
+                        <li><a onclick="openAuthModal()">تسجيل الدخول</a></li>
+                        <li><a onclick="openAuthModal(); showAuthTab('register')">إنشاء حساب</a></li>
+                        <li><a href="#packages">الباقات</a></li>
+                        <li><a onclick="showNotification('سيتم إضافة الشروط قريباً', 'info')">الشروط والأحكام</a></li>
+                        <li><a onclick="showNotification('سيتم إضافة سياسة الخصوصية قريباً', 'info')">سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4><i class="fas fa-credit-card"></i> طرق الدفع</h4>
+                    <ul>
+                        <li><i class="fas fa-coins"></i> USDT (TRC20)</li>
+                        <li><i class="fab fa-bitcoin"></i> Bitcoin</li>
+                        <li><i class="fab fa-ethereum"></i> Ethereum</li>
+                        <li><i class="fas fa-bolt"></i> تحويل فوري</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4><i class="fas fa-headset"></i> الدعم الفني</h4>
+                    <ul>
+                        <li><i class="fas fa-clock"></i> متاح 24/7</li>
+                        <li><i class="fas fa-envelope"></i> support@elite-investors.com</li>
+                        <li><i class="fas fa-globe"></i> www.elite-investors.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>© 2025 Elite Investors. جميع الحقوق محفوظة.</p>
+                <p style="margin-top: 10px;">هذا الموقع مخصص للاستثمار الآمن والمربح.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ========== متغيرات عامة ==========
         let currentUser = null;
         let selectedPackage = null;
         let selectedImage = null;
-        let urlReferralCode = null;
-        
-        // عنوان المحفظة الثابت
         const WALLET_ADDRESS = 'Tymk60K9JvCqS7Fqy6BpWpZp8hLpVHw7D';
 
-        // ---------- تهيئة الصفحة ----------
-        function initIndexPage() {
+        // ========== التحقق من تحميل المكتبات ==========
+        console.log('🔍 فتح التطبيق...');
+        console.log('✅ Supabase Client:', !!window.supabaseClient);
+        console.log('✅ Supabase Helpers:', !!window.supabaseHelpers);
+        console.log('✅ Shared Data:', !!window.sharedData);
+
+        // ========== تهيئة الصفحة ==========
+        async function initIndexPage() {
             console.log('🚀 بدء تشغيل الصفحة الرئيسية...');
             
-            // تحميل البيانات
-            loadUsers();
-            loadPackages();
-            checkCurrentUser();
+            // التحقق من المستخدم الحالي
+            await checkCurrentUser();
             
-            // التحقق من وجود كود إحالة في الرابط
+            // تحميل الباقات
+            await loadPackages();
+            
+            // تحميل إحصائيات المنصة
+            await loadPlatformStats();
+            
+            // التحقق من كود الإحالة في الرابط
             checkUrlReferral();
             
-            // مستمعي الأحداث
+            // إعداد مستمعي الأحداث
             setupEventListeners();
-            
-            // تحديث دوري للبيانات
-            setInterval(() => {
-                loadPackages();
-            }, 30000);
         }
 
-        // ---------- تحميل المستخدمين ----------
-        function loadUsers() {
-            users = JSON.parse(localStorage.getItem('elite_users')) || [];
-        }
-
-        // ---------- التحقق من المستخدم الحالي ----------
-        function checkCurrentUser() {
+        // ========== التحقق من المستخدم الحالي ==========
+        async function checkCurrentUser() {
             const savedUser = localStorage.getItem('current_user');
             if (savedUser) {
-                currentUser = JSON.parse(savedUser);
+                try {
+                    const parsedUser = JSON.parse(savedUser);
+                    
+                    // محاولة جلب المستخدم من Supabase
+                    if (window.supabaseHelpers) {
+                        const result = await window.supabaseHelpers.getUserById(parsedUser.id);
+                        if (result.success && result.data) {
+                            currentUser = result.data;
+                            
+                            // التحقق من حالة المستخدم
+                            if (currentUser.status === 'banned' || currentUser.status === 'suspended') {
+                                localStorage.removeItem('current_user');
+                                showNotification('❌ حسابك غير نشط', 'error');
+                                return;
+                            }
+                            
+                            updateUIForLoggedInUser();
+                            return;
+                        }
+                    }
+                    
+                    // استخدام التخزين المحلي كاحتياطي
+                    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                    const user = users.find(u => u.id === parsedUser.id);
+                    
+                    if (user) {
+                        if (user.status === 'banned' || user.status === 'suspended') {
+                            localStorage.removeItem('current_user');
+                            showNotification('❌ حسابك غير نشط', 'error');
+                            return;
+                        }
+                        
+                        currentUser = user;
+                        updateUIForLoggedInUser();
+                    } else {
+                        localStorage.removeItem('current_user');
+                    }
+                } catch (e) {
+                    console.error('خطأ في التحقق من المستخدم:', e);
+                    localStorage.removeItem('current_user');
+                }
+            }
+        }
+
+        // ========== تحميل الباقات ==========
+        async function loadPackages() {
+            const packagesGrid = document.getElementById('packagesGrid');
+            
+            try {
+                let packages = [];
                 
-                // تحديث بيانات المستخدم من القائمة الرئيسية
-                const updatedUser = users.find(u => u.id === currentUser.id);
-                if (updatedUser) {
-                    currentUser = updatedUser;
-                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                // محاولة جلب الباقات من Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.getAllPackages();
+                    if (result.success && result.data && result.data.length > 0) {
+                        packages = result.data;
+                    }
                 }
                 
-                updateUIForLoggedInUser();
-            }
-        }
-
-        // ---------- تحديث واجهة المستخدم للمستخدم المسجل ----------
-        function updateUIForLoggedInUser() {
-            if (!currentUser) return;
-            
-            // إخفاء زر تسجيل الدخول وإظهار قائمة المستخدم
-            document.getElementById('loginBtn').style.display = 'none';
-            document.getElementById('userMenu').classList.add('active');
-            
-            // تحديث معلومات المستخدم في القائمة
-            document.getElementById('userAvatar').textContent = currentUser.name?.charAt(0).toUpperCase() || 'م';
-            document.getElementById('dropdownName').textContent = currentUser.name || 'مستخدم';
-            document.getElementById('dropdownEmail').textContent = currentUser.email || '';
-            
-            // عرض الباقة في القائمة
-            const dropdownPackage = document.getElementById('dropdownPackage');
-            if (currentUser.package) {
-                dropdownPackage.innerHTML = `<span class="badge" style="background: var(--primary);">${currentUser.package.name}</span>`;
-            } else {
-                dropdownPackage.innerHTML = `<span style="color: #94a3b8;">لا توجد باقة</span>`;
-            }
-            
-            // تحديث قسم الإحالة
-            updateReferralSectionForUser();
-        }
-
-        // ---------- تحديث قسم الإحالة للمستخدم المسجل ----------
-        function updateReferralSectionForUser() {
-            if (!currentUser) return;
-            
-            // إنشاء كود إحالة إذا لم يكن موجوداً
-            if (!currentUser.referralCode) {
-                currentUser.referralCode = window.sharedData.generateReferralCode(currentUser.username || currentUser.email);
-                saveUserData();
-            }
-            
-            // إخفاء قسم المستخدمين غير المسجلين
-            document.getElementById('nonUserReferral').style.display = 'none';
-            
-            // عرض قسم المستخدمين المسجلين
-            const userReferralDiv = document.getElementById('userReferralCode');
-            userReferralDiv.style.display = 'block';
-            
-            // إنشاء رابط الإحالة
-            const referralLink = window.location.origin + window.location.pathname + '?ref=' + currentUser.referralCode;
-            
-            userReferralDiv.innerHTML = `
-                <div style="text-align: center;">
-                    <h4 style="color: var(--purple); margin-bottom: 15px;">
-                        <i class="fas fa-gift"></i> كود الإحالة الخاص بك
-                    </h4>
-                    <div style="display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
-                        <div style="background: rgba(139,92,246,0.2); padding: 15px 30px; border-radius: 50px; border: 2px solid var(--purple);">
-                            <span style="font-size: 24px; font-weight: bold; letter-spacing: 3px; color: var(--purple);">${currentUser.referralCode}</span>
+                // استخدام التخزين المحلي كاحتياطي
+                if (packages.length === 0 && window.sharedData) {
+                    packages = await window.sharedData.getAllPackages();
+                }
+                
+                console.log('📦 الباقات المحملة:', packages.length);
+                
+                if (!packages || packages.length === 0) {
+                    packagesGrid.innerHTML = `
+                        <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
+                            <i class="fas fa-box-open" style="font-size: 60px; color: #4b5563; margin-bottom: 20px;"></i>
+                            <h3 style="color: #94a3b8;">لا توجد باقات متاحة حالياً</h3>
+                            <p style="color: #94a3b8; margin-top: 20px;">يرجى المحاولة لاحقاً</p>
                         </div>
-                        <button class="btn btn-sm" style="background: var(--purple); color: white;" onclick="copyText('${currentUser.referralCode}')">
-                            <i class="fas fa-copy"></i> نسخ
-                        </button>
-                    </div>
-                    <div style="margin-top: 15px;">
-                        <small style="color: #94a3b8;">شارك هذا الكود مع أصدقائك واربح 50$ عن كل مشترك</small>
-                    </div>
-                    <div style="margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
-                        <p style="color: #94a3b8; margin-bottom: 5px;">رابط الإحالة المباشر:</p>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="text" class="form-control" value="${referralLink}" readonly style="font-size: 13px; background: rgba(0,0,0,0.3);">
-                            <button class="btn btn-sm" style="background: var(--success);" onclick="copyText('${referralLink}')">
-                                <i class="fas fa-copy"></i>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                packages.forEach(pkg => {
+                    const dailyProfit = (pkg.price * (pkg.profit_percentage || pkg.profit || 2.5) / 100).toFixed(2);
+                    const badgeClass = pkg.category === 'vip' ? 'vip' : pkg.category === 'premium' ? 'premium' : '';
+                    const badgeText = pkg.category === 'vip' ? '💎 VIP' : pkg.category === 'premium' ? '🥇 مميزة' : '🥈 عادية';
+                    
+                    html += `
+                        <div class="package-card" data-package-id="${pkg.id}">
+                            <div class="package-badge ${badgeClass}">${badgeText}</div>
+                            <div class="package-header">
+                                <h3 class="package-title">${pkg.name}</h3>
+                                <div class="package-price">
+                                    ${pkg.price}$ <small>USDT</small>
+                                </div>
+                            </div>
+                            ${pkg.description ? `<p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">${pkg.description}</p>` : ''}
+                            <ul class="package-features">
+                                <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>${dailyProfit}$</strong></li>
+                                <li><i class="fas fa-check-circle"></i> ${pkg.tasks_count || pkg.tasks || 5} مهمات يومية</li>
+                                <li><i class="fas fa-check-circle"></i> مدة الباقة: ${pkg.duration || 30} يوم</li>
+                                <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
+                                <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
+                            </ul>
+                            <button class="btn btn-glow" onclick="selectPackage('${pkg.id}')">
+                                <i class="fas fa-bolt"></i> اشترك الآن
                             </button>
                         </div>
+                    `;
+                });
+                
+                packagesGrid.innerHTML = html;
+                
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الباقات:', error);
+                packagesGrid.innerHTML = `
+                    <div style="text-align: center; grid-column: 1/-1; padding: 60px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 60px; color: #ef4444; margin-bottom: 20px;"></i>
+                        <h3 style="color: #ef4444;">حدث خطأ في تحميل الباقات</h3>
+                        <p style="color: #94a3b8; margin-top: 10px;">${error.message}</p>
+                        <button class="btn btn-primary mt-4" onclick="location.reload()">
+                            <i class="fas fa-redo"></i> إعادة تحميل
+                        </button>
                     </div>
-                </div>
-            `;
-            
-            // تحديث نافذة الدفع إذا كانت مفتوحة
-            if (document.getElementById('paymentModal').classList.contains('active')) {
-                showReferralCodeInPayment();
+                `;
             }
         }
 
-        // ---------- إظهار كود الإحالة في نافذة الدفع ----------
-        function showReferralCodeInPayment() {
-            if (!currentUser || !currentUser.referralCode) return;
-            
-            const referralSection = document.getElementById('referralCodeSection');
-            const codeDisplay = document.getElementById('userReferralCodeDisplay');
-            
-            if (referralSection && codeDisplay) {
-                referralSection.style.display = 'block';
-                codeDisplay.value = currentUser.referralCode;
+        // ========== تحميل إحصائيات المنصة ==========
+        async function loadPlatformStats() {
+            try {
+                let stats = null;
+                
+                // محاولة جلب الإحصائيات من Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.getDashboardStats();
+                    if (result.success && result.data) {
+                        stats = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!stats && window.sharedData) {
+                    stats = await window.sharedData.getDashboardStats();
+                }
+                
+                if (stats) {
+                    document.getElementById('statUsers').textContent = stats.totalUsers || '0';
+                    
+                    const deposits = stats.totalDeposits || 0;
+                    if (deposits >= 1000000) {
+                        document.getElementById('statDeposits').textContent = `$${(deposits/1000000).toFixed(1)}M+`;
+                    } else if (deposits >= 1000) {
+                        document.getElementById('statDeposits').textContent = `$${(deposits/1000).toFixed(1)}K+`;
+                    } else {
+                        document.getElementById('statDeposits').textContent = `$${deposits}+`;
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الإحصائيات:', error);
             }
         }
 
-        // ---------- نسخ كود الإحالة من نافذة الدفع ----------
-        function copyUserReferralCode() {
-            const code = document.getElementById('userReferralCodeDisplay')?.value;
-            if (code) {
-                copyText(code);
-            }
-        }
-
-        // ---------- نسخ نص إلى الحافظة ----------
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('✅ تم النسخ إلى الحافظة', 'success');
-            }).catch(() => {
-                showNotification('❌ حدث خطأ في النسخ', 'error');
-            });
-        }
-
-        // ---------- التحقق من وجود كود إحالة في الرابط ----------
+        // ========== التحقق من كود الإحالة ==========
         function checkUrlReferral() {
             const urlParams = new URLSearchParams(window.location.search);
-            urlReferralCode = urlParams.get('ref');
+            const refCode = urlParams.get('ref');
             
-            if (urlReferralCode) {
-                console.log('📨 تم العثور على كود إحالة في الرابط:', urlReferralCode);
-                
-                // إذا كان المستخدم مسجل الدخول، لا نفعل شيء
-                if (currentUser) {
-                    showNotification('⚠️ كود الإحالة موجود في الرابط، لكنك مسجل الدخول بالفعل', 'info');
-                } else {
-                    // ملء حقل كود الإحالة في نموذج التسجيل
-                    setTimeout(() => {
-                        const referralField = document.getElementById('registerReferral');
-                        if (referralField) {
-                            referralField.value = urlReferralCode;
-                            showNotification('🎁 تم إضافة كود الإحالة! ستحصل على 20$ عند تفعيل أول باقة', 'success');
-                        }
-                    }, 500);
-                }
+            if (refCode && !currentUser) {
+                sessionStorage.setItem('pending_referral', refCode);
+                setTimeout(() => {
+                    showNotification('🎁 لديك كود إحالة! سجل الآن واحصل على 20$', 'success');
+                }, 1000);
             }
         }
 
-        // ---------- تطبيق كود الإحالة من الصفحة الرئيسية ----------
+        // ========== تطبيق كود الإحالة ==========
         function applyReferralCode() {
-            const code = document.getElementById('quickReferralCode').value.trim();
-            
+            const code = document.getElementById('quickReferralCode').value.trim().toUpperCase();
             if (!code) {
                 showNotification('❌ يرجى إدخال كود الإحالة', 'error');
                 return;
             }
             
-            // التحقق من صحة الكود
-            const referrer = users.find(u => u.referralCode === code);
-            
-            if (!referrer) {
-                showNotification('❌ كود الإحالة غير صحيح', 'error');
-                return;
-            }
-            
             if (currentUser) {
-                showNotification('⚠️ أنت مسجل الدخول بالفعل، لا يمكن تطبيق كود إحالة', 'warning');
+                showNotification('⚠️ أنت مسجل الدخول بالفعل', 'warning');
                 return;
             }
             
-            // ملء حقل كود الإحالة في نموذج التسجيل
-            document.getElementById('registerReferral').value = code;
-            
-            // فتح نافذة التسجيل
+            sessionStorage.setItem('pending_referral', code);
+            const registerField = document.getElementById('registerReferral');
+            if (registerField) registerField.value = code;
             openAuthModal();
-            showTab('register');
-            
-            showNotification('✅ تم تطبيق كود الإحالة! ستحصل على 20$ عند تفعيل أول باقة', 'success');
+            showAuthTab('register');
+            showNotification('✅ تم تطبيق كود الإحالة!', 'success');
         }
 
-        // ---------- إظهار كود الإحالة من القائمة ----------
-        function showReferralCode() {
+        // ========== اختيار باقة ==========
+        async function selectPackage(packageId) {
             if (!currentUser) {
                 showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
                 openAuthModal();
                 return;
             }
             
-            // إنشاء كود إحالة إذا لم يكن موجوداً
-            if (!currentUser.referralCode) {
-                currentUser.referralCode = window.sharedData.generateReferralCode(currentUser.username || currentUser.email);
-                saveUserData();
-            }
-            
-            // التمرير إلى قسم الإحالة
-            const referralSection = document.querySelector('.referral-banner');
-            if (referralSection) {
-                referralSection.scrollIntoView({ behavior: 'smooth' });
-                
-                // تحديث القسم
-                updateReferralSectionForUser();
-            }
-            
-            // إغلاق القائمة المنسدلة
-            document.getElementById('userDropdown').classList.remove('active');
-        }
-
-        // ========== نظام الباقات ==========
-        
-        // ---------- تحميل الباقات ----------
-        function loadPackages() {
-            const packages = window.sharedData.getAllPackages();
-            const packagesGrid = document.getElementById('packagesGrid');
-            
-            if (!packages || packages.length === 0) {
-                packagesGrid.innerHTML = `
-                    <div style="text-align: center; padding: 60px; grid-column: 1/-1;">
-                        <i class="fas fa-box-open" style="font-size: 60px; color: #4b5563; margin-bottom: 20px;"></i>
-                        <h3 style="color: #94a3b8;">لا توجد باقات متاحة حالياً</h3>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            packages.forEach(pkg => {
-                const dailyProfit = (pkg.price * (pkg.profit || 2.5) / 100).toFixed(2);
-                const categoryBadge = pkg.category === 'vip' ? 'VIP' : 
-                                    pkg.category === 'premium' ? 'مميزة' : 'عادية';
-                const badgeClass = pkg.category === 'vip' ? 'vip' : 
-                                 pkg.category === 'premium' ? 'premium' : '';
-                
-                html += `
-                    <div class="package-card">
-                        <div class="package-badge ${badgeClass}">
-                            ${pkg.category === 'vip' ? '💎' : pkg.category === 'premium' ? '🥇' : '🥈'} ${categoryBadge}
-                        </div>
-                        <div class="package-header">
-                            <h3 class="package-title">${pkg.name}</h3>
-                            <div class="package-price">
-                                ${pkg.price}$ <small>USDT</small>
-                            </div>
-                        </div>
-                        ${pkg.description ? `<p style="color: #94a3b8; text-align: center; margin-bottom: 20px;">${pkg.description}</p>` : ''}
-                        <ul class="package-features">
-                            <li><i class="fas fa-check-circle"></i> ربح يومي: <strong>${dailyProfit}$</strong></li>
-                            <li><i class="fas fa-check-circle"></i> ${pkg.tasks || 5} مهمات يومية</li>
-                            <li><i class="fas fa-check-circle"></i> مدة الباقة: ${pkg.duration || 30} يوم</li>
-                            <li><i class="fas fa-check-circle"></i> أرباح يومية مباشرة</li>
-                            <li><i class="fas fa-check-circle"></i> دعم فني 24/7</li>
-                        </ul>
-                        <button class="btn btn-glow" onclick="selectPackage(${pkg.id})">
-                            <i class="fas fa-bolt"></i>
-                            اشترك الآن
-                        </button>
-                    </div>
-                `;
-            });
-            
-            packagesGrid.innerHTML = html;
-        }
-
-        // ---------- اختيار باقة ----------
-        function selectPackage(packageId) {
-            if (!currentUser) {
-                showNotification('❌ يجب تسجيل الدخول أولاً لشراء باقة', 'error');
-                openAuthModal();
-                return;
-            }
-            
-            // التحقق من حالة المستخدم
             if (currentUser.status === 'suspended') {
-                showNotification('⚠️ حسابك معلق. لا يمكنك شراء باقات جديدة حالياً.', 'warning');
+                showNotification('⚠️ حسابك معلق. لا يمكنك شراء باقات جديدة.', 'warning');
                 return;
             }
             
             if (currentUser.status === 'banned') {
-                showNotification('❌ حسابك محظور. لا يمكنك شراء باقات.', 'error');
+                showNotification('❌ حسابك محظور.', 'error');
                 return;
             }
             
-            const pkg = window.sharedData.getPackageById(packageId);
-            if (!pkg) {
-                showNotification('❌ الباقة غير متاحة حالياً', 'error');
-                return;
-            }
-            
-            selectedPackage = pkg;
-            
-            // تحديث معلومات الباقة في نافذة الدفع
-            document.getElementById('selectedPackageName').textContent = pkg.name;
-            document.getElementById('selectedPackagePrice').textContent = pkg.price + '$';
-            document.getElementById('selectedPackageDaily').textContent = 
-                `+${(pkg.price * (pkg.profit || 2.5) / 100).toFixed(2)}$ يومياً`;
-            
-            // عرض كود الإحالة للمستخدم في نافذة الدفع
-            showReferralCodeInPayment();
-            
-            // فتح نافذة الدفع
-            document.getElementById('paymentModal').classList.add('active');
-            
-            // إعادة تعيين الصورة
-            removeImage();
-        }
-
-        // ---------- إغلاق نافذة الدفع ----------
-        function closePaymentModal() {
-            document.getElementById('paymentModal').classList.remove('active');
-            selectedPackage = null;
-        }
-
-        // ---------- نسخ عنوان المحفظة ----------
-        function copyWalletAddress() {
-            copyText(WALLET_ADDRESS);
-        }
-
-        // ---------- معالجة رفع الصورة ----------
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (!file.type.startsWith('image/')) {
-                showNotification('❌ الرجاء اختيار ملف صورة فقط', 'error');
-                return;
-            }
-            
-            if (file.size > 5 * 1024 * 1024) {
-                showNotification('❌ حجم الصورة كبير جداً. الحد الأقصى 5MB', 'error');
-                return;
-            }
-            
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                selectedImage = e.target.result;
+            try {
+                let pkg = null;
                 
-                document.getElementById('previewImage').src = selectedImage;
-                document.getElementById('fileName').textContent = file.name;
-                document.getElementById('uploadPreview').style.display = 'block';
-                document.getElementById('uploadContainer').style.borderColor = 'var(--success)';
+                // محاولة جلب الباقة من Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.getPackageById(packageId);
+                    if (result.success && result.data) {
+                        pkg = result.data;
+                    }
+                }
                 
-                showNotification('✅ تم رفع الصورة بنجاح', 'success');
-            };
-            
-            reader.readAsDataURL(file);
+                // استخدام التخزين المحلي كاحتياطي
+                if (!pkg && window.sharedData) {
+                    pkg = await window.sharedData.getPackageById(parseInt(packageId));
+                }
+                
+                if (!pkg) {
+                    showNotification('❌ الباقة غير متاحة', 'error');
+                    await loadPackages();
+                    return;
+                }
+                
+                selectedPackage = pkg;
+                
+                document.getElementById('selectedPackageName').textContent = pkg.name;
+                document.getElementById('selectedPackagePrice').textContent = pkg.price + '$';
+                document.getElementById('selectedPackageDaily').textContent = 
+                    `+${(pkg.price * (pkg.profit_percentage || pkg.profit || 2.5) / 100).toFixed(2)}$ يومياً`;
+                
+                if (currentUser.referral_code) {
+                    document.getElementById('referralCodeSection').style.display = 'block';
+                    document.getElementById('userReferralCodeDisplay').value = currentUser.referral_code;
+                }
+                
+                document.getElementById('paymentModal').classList.add('active');
+                removeImage();
+            } catch (error) {
+                console.error('خطأ في تحميل الباقة:', error);
+                showNotification('❌ الباقة غير متاحة', 'error');
+            }
         }
 
-        // ---------- حذف الصورة ----------
-        function removeImage() {
-            selectedImage = null;
-            document.getElementById('previewImage').src = '';
-            document.getElementById('fileName').textContent = '';
-            document.getElementById('uploadPreview').style.display = 'none';
-            document.getElementById('fileInput').value = '';
-            document.getElementById('uploadContainer').style.borderColor = 'rgba(124,58,237,0.3)';
+        // ========== تقديم طلب الدفع ==========
+        async function submitPayment() {
+            if (!selectedPackage || !currentUser) return;
+            
+            try {
+                const pendingPackage = {
+                    userId: currentUser.id,
+                    userName: currentUser.name,
+                    userEmail: currentUser.email,
+                    userPhone: currentUser.phone,
+                    packageId: selectedPackage.id,
+                    packageName: selectedPackage.name,
+                    packageCategory: selectedPackage.category,
+                    amount: selectedPackage.price,
+                    paymentProof: selectedImage,
+                    walletAddress: WALLET_ADDRESS,
+                    network: 'TRC20',
+                    transactionHash: selectedImage ? 'IMG_' + Date.now() : null,
+                    date: new Date().toLocaleString('ar-SA'),
+                    fastApproval: !!selectedImage,
+                    estimatedActivation: selectedImage ? 'ساعة واحدة' : '3-6 ساعات',
+                    referredBy: currentUser.referred_by
+                };
+                
+                // محاولة حفظ الطلب في Supabase
+                let saved = false;
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.createPendingPackage(pendingPackage);
+                    if (result.success) {
+                        saved = true;
+                        console.log('✅ تم حفظ الطلب في Supabase');
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!saved && window.sharedData) {
+                    await window.sharedData.addPendingPackage(pendingPackage);
+                    saved = true;
+                }
+                
+                if (saved) {
+                    closePaymentModal();
+                    
+                    if (selectedImage) {
+                        showNotification('✅ تم تقديم الطلب! سيتم التفعيل خلال ساعة.', 'success');
+                    } else {
+                        showNotification('✅ تم تقديم الطلب! سيتم التفعيل خلال 3-6 ساعات.', 'success');
+                    }
+                } else {
+                    showNotification('❌ فشل تقديم الطلب', 'error');
+                }
+                
+            } catch (error) {
+                console.error('خطأ في تقديم الطلب:', error);
+                showNotification('❌ فشل تقديم الطلب: ' + error.message, 'error');
+            }
         }
 
-        // ---------- تقديم طلب الدفع ----------
-        function submitPayment() {
-            if (!selectedPackage) {
-                showNotification('❌ لم يتم تحديد باقة', 'error');
-                return;
-            }
+        // ========== تحديث واجهة المستخدم ==========
+        function updateUIForLoggedInUser() {
+            if (!currentUser) return;
             
-            if (!currentUser) {
-                showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
-                closePaymentModal();
-                openAuthModal();
-                return;
-            }
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('userMenu').classList.add('active');
+            document.getElementById('userAvatar').textContent = currentUser.name?.charAt(0).toUpperCase() || 'م';
+            document.getElementById('dropdownName').textContent = currentUser.name || 'مستخدم';
+            document.getElementById('dropdownEmail').textContent = currentUser.email || '';
             
-            // إنشاء كود إحالة إذا لم يكن موجوداً
-            if (!currentUser.referralCode) {
-                currentUser.referralCode = window.sharedData.generateReferralCode(currentUser.username || currentUser.email);
-                saveUserData();
-            }
-            
-            // إنشاء طلب الاشتراك
-            const pendingPackage = {
-                userId: currentUser.id,
-                userName: currentUser.name,
-                userEmail: currentUser.email,
-                userPhone: currentUser.phone,
-                packageId: selectedPackage.id,
-                packageName: selectedPackage.name,
-                packageCategory: selectedPackage.category,
-                amount: selectedPackage.price,
-                paymentProof: selectedImage,
-                walletAddress: WALLET_ADDRESS,
-                network: 'TRC20',
-                transactionHash: selectedImage ? 'برقم مرجعي' + Date.now() : null,
-                date: new Date().toLocaleString('ar-SA'),
-                requestedDate: new Date().toISOString(),
-                status: 'بانتظار المراجعة',
-                fastApproval: selectedImage ? true : false,
-                estimatedActivation: selectedImage ? 'ساعة واحدة' : '3-6 ساعات',
-                referredBy: currentUser.referredBy || null
-            };
-            
-            // حفظ الطلب في قائمة الطلبات المعلقة
-            const pendingPackages = JSON.parse(localStorage.getItem('pending_packages')) || [];
-            pendingPackages.push(pendingPackage);
-            localStorage.setItem('pending_packages', JSON.stringify(pendingPackages));
-            
-            // تحديث المستخدم
-            currentUser.pendingPackage = {
-                id: selectedPackage.id,
-                name: selectedPackage.name,
-                amount: selectedPackage.price,
-                dailyProfit: (selectedPackage.price * (selectedPackage.profit || 2.5) / 100),
-                category: selectedPackage.category,
-                requestedDate: new Date().toISOString(),
-                fastApproval: selectedImage ? true : false,
-                estimatedActivation: selectedImage ? 'ساعة واحدة' : '3-6 ساعات'
-            };
-            
-            saveUserData();
-            
-            // إضافة معاملة
-            const transactions = JSON.parse(localStorage.getItem(`user_transactions_${currentUser.id}`)) || [];
-            transactions.unshift({
-                id: Date.now(),
-                type: 'اشتراك',
-                amount: selectedPackage.price,
-                description: `طلب اشتراك في باقة ${selectedPackage.name}`,
-                date: new Date().toLocaleString('ar-SA'),
-                status: 'معلق'
-            });
-            localStorage.setItem(`user_transactions_${currentUser.id}`, JSON.stringify(transactions));
-            
-            // إغلاق النافذة
-            closePaymentModal();
-            
-            // إشعار النجاح
-            if (selectedImage) {
-                showNotification('✅ تم تقديم طلب الدفع بنجاح! سيتم تفعيل باقتك خلال ساعة واحدة.', 'success');
+            if (currentUser.package) {
+                document.getElementById('dropdownPackage').innerHTML = `<span class="badge" style="background: var(--primary);">${currentUser.package.name}</span>`;
             } else {
-                showNotification('✅ تم تقديم طلب الدفع بنجاح! سيتم تفعيل باقتك خلال 3-6 ساعات عمل.', 'success');
+                document.getElementById('dropdownPackage').innerHTML = `<span style="color: #94a3b8;">لا توجد باقة</span>`;
             }
             
-            // تحديث الواجهة
-            updateUIForLoggedInUser();
+            document.getElementById('nonUserReferral').style.display = 'none';
             
-            // تحديث البيانات في الصفحات الأخرى
-            window.sharedData.broadcastUpdate('packages');
+            if (currentUser.referral_code) {
+                document.getElementById('userReferralCode').style.display = 'block';
+                document.getElementById('userReferralCode').innerHTML = `
+                    <div style="text-align: center;">
+                        <h4 style="color: var(--purple); margin-bottom: 15px;">
+                            <i class="fas fa-gift"></i> كود الإحالة الخاص بك
+                        </h4>
+                        <div style="display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                            <div style="background: rgba(139,92,246,0.2); padding: 15px 30px; border-radius: 50px; border: 2px solid var(--purple);">
+                                <span style="font-size: 24px; font-weight: bold; letter-spacing: 3px; color: var(--purple);">${currentUser.referral_code}</span>
+                            </div>
+                            <button class="btn btn-sm" style="background: var(--purple); color: white;" onclick="copyText('${currentUser.referral_code}')">
+                                <i class="fas fa-copy"></i> نسخ
+                            </button>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <small class="text-muted">شارك هذا الكود واربح 50$ عن كل مشترك</small>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // ========== نظام تسجيل الدخول والتسجيل ==========
-        
-        // ---------- فتح نافذة تسجيل الدخول ----------
         function openAuthModal() {
             document.getElementById('authModal').classList.add('active');
-            showTab('login');
+            showAuthTab('login');
         }
 
-        // ---------- إغلاق نافذة تسجيل الدخول ----------
         function closeAuthModal() {
             document.getElementById('authModal').classList.remove('active');
-            
-            // تفريغ الحقول
+            resetAuthForms();
+        }
+
+        function resetAuthForms() {
             document.getElementById('loginUsername').value = '';
             document.getElementById('loginPassword').value = '';
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerUsername').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPhone').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerConfirmPassword').value = '';
+            document.getElementById('registerReferral').value = '';
         }
 
-        // ---------- تبديل التبويبات ----------
-        function showTab(tabName) {
-            const tabs = document.querySelectorAll('.tab');
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            if (tabName === 'login') {
-                tabs[0].classList.add('active');
-                loginForm.style.display = 'block';
-                registerForm.style.display = 'none';
-            } else {
-                tabs[1].classList.add('active');
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'block';
-            }
+        function showAuthTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+            document.querySelectorAll('.tab')[tab === 'login' ? 0 : 1].classList.add('active');
         }
 
-        // ---------- تسجيل الدخول ----------
-        function handleLogin(e) {
+        // تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const username = document.getElementById('loginUsername').value.trim();
@@ -1982,58 +1791,51 @@
                 return;
             }
             
-            const user = users.find(u => 
-                (u.username === username || u.email === username) && 
-                u.password === password
-            );
-            
-            if (!user) {
-                showNotification('❌ اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
-                return;
+            try {
+                let user = null;
+                
+                // محاولة تسجيل الدخول عبر Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.loginUser(username, password);
+                    if (result.success) {
+                        user = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!user && window.sharedData) {
+                    user = await window.sharedData.loginUser(username, password);
+                }
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('current_user', JSON.stringify(user));
+                    
+                    showNotification('✅ تم تسجيل الدخول بنجاح', 'success');
+                    
+                    // التوجيه إلى dashboard بعد تسجيل الدخول
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                }
+                
+            } catch (error) {
+                showNotification('❌ ' + error.message, 'error');
             }
-            
-            // التحقق من حالة المستخدم
-            if (user.status === 'banned') {
-                showNotification('❌ حسابك محظور. يرجى التواصل مع الدعم الفني.', 'error');
-                return;
-            }
-            
-            // تحديث آخر تسجيل دخول
-            user.lastLogin = new Date().toISOString();
-            
-            // حفظ المستخدم الحالي
-            currentUser = user;
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-            
-            // تحديث قائمة المستخدمين
-            const userIndex = users.findIndex(u => u.id === user.id);
-            if (userIndex !== -1) {
-                users[userIndex] = user;
-                localStorage.setItem('elite_users', JSON.stringify(users));
-            }
-            
-            // تحديث الواجهة
-            updateUIForLoggedInUser();
-            
-            // إغلاق النافذة
-            closeAuthModal();
-            
-            showNotification(`✅ مرحباً ${user.name}! تم تسجيل الدخول بنجاح`, 'success');
-        }
+        });
 
-        // ---------- إنشاء حساب جديد ----------
-        function handleRegister(e) {
+        // تسجيل جديد
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const name = document.getElementById('registerName').value.trim();
-            const username = document.getElementById('registerUsername').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
+            const username = document.getElementById('registerUsername').value.trim().toLowerCase();
+            const email = document.getElementById('registerEmail').value.trim().toLowerCase();
             const phone = document.getElementById('registerPhone').value.trim();
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            const referralCode = document.getElementById('registerReferral').value.trim().toUpperCase();
+            let referralCode = document.getElementById('registerReferral').value.trim().toUpperCase();
             
-            // التحقق من الحقول
             if (!name || !username || !email || !phone || !password || !confirmPassword) {
                 showNotification('❌ يرجى ملء جميع الحقول المطلوبة', 'error');
                 return;
@@ -2060,116 +1862,66 @@
                 return;
             }
             
-            // التحقق من عدم تكرار اسم المستخدم أو البريد
-            if (users.some(u => u.username === username)) {
-                showNotification('❌ اسم المستخدم موجود مسبقاً', 'error');
-                return;
-            }
-            
-            if (users.some(u => u.email === email)) {
-                showNotification('❌ البريد الإلكتروني موجود مسبقاً', 'error');
-                return;
-            }
-            
-            // التحقق من صحة كود الإحالة
-            let referredBy = null;
-            if (referralCode) {
-                const referrer = users.find(u => u.referralCode === referralCode);
-                if (referrer) {
-                    referredBy = referralCode;
-                } else {
-                    showNotification('⚠️ كود الإحالة غير صحيح، سيتم إنشاء الحساب بدون إحالة', 'warning');
-                }
-            }
-            
-            // إنشاء مستخدم جديد
-            const newUser = {
-                id: Date.now(),
-                name: name,
-                username: username,
-                email: email,
-                phone: phone,
-                password: password,
-                referredBy: referredBy,
-                referralCode: null,
-                balance: 0,
-                package: null,
-                pendingPackage: null,
-                walletAddress: '',
-                walletNetwork: 'TRC20',
-                tasksCompleted: 0,
-                totalEarned: 0,
-                totalWithdrawn: 0,
-                referralCount: 0,
-                referralEarnings: 0,
-                referralRewardPaid: false,
-                joinedDate: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-                isAdmin: false,
-                status: 'active'
-            };
-            
-            // إضافة المستخدم
-            users.push(newUser);
-            localStorage.setItem('elite_users', JSON.stringify(users));
-            
-            // تسجيل الدخول مباشرة
-            currentUser = newUser;
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-            
-            // تحديث الواجهة
-            updateUIForLoggedInUser();
-            
-            // إغلاق النافذة
-            closeAuthModal();
-            
-            // رسالة نجاح مع مكافأة الإحالة
-            if (referredBy) {
-                showNotification('🎉 مبروك! تم إنشاء حسابك مع كود إحالة. ستحصل على 20$ فور تفعيل أول باقة!', 'success');
-            } else {
-                showNotification('🎉 مبروك! تم إنشاء حسابك بنجاح', 'success');
-            }
-            
-            // تفريغ الحقول
-            document.getElementById('registerName').value = '';
-            document.getElementById('registerUsername').value = '';
-            document.getElementById('registerEmail').value = '';
-            document.getElementById('registerPhone').value = '';
-            document.getElementById('registerPassword').value = '';
-            document.getElementById('registerConfirmPassword').value = '';
-            document.getElementById('registerReferral').value = '';
-        }
-
-        // ---------- تسجيل الخروج ----------
-        function logout() {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                if (currentUser) {
-                    currentUser.lastLogout = new Date().toISOString();
-                    saveUserData();
+            try {
+                if (!referralCode) {
+                    const pending = sessionStorage.getItem('pending_referral');
+                    if (pending) referralCode = pending;
                 }
                 
+                const userData = {
+                    name, username, email, phone, password, confirmPassword,
+                    referralCode: referralCode
+                };
+                
+                let user = null;
+                
+                // محاولة التسجيل عبر Supabase
+                if (window.supabaseHelpers) {
+                    const result = await window.supabaseHelpers.registerUser(userData);
+                    if (result.success) {
+                        user = result.data;
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!user && window.sharedData) {
+                    user = await window.sharedData.registerUser(userData);
+                }
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('current_user', JSON.stringify(user));
+                    
+                    showNotification('✅ تم إنشاء الحساب بنجاح', 'success');
+                    
+                    // التوجيه إلى dashboard بعد التسجيل
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                showNotification('❌ ' + error.message, 'error');
+            }
+        });
+
+        // ========== تسجيل الخروج ==========
+        async function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
                 currentUser = null;
                 localStorage.removeItem('current_user');
-                
-                // تحديث الواجهة
                 document.getElementById('loginBtn').style.display = 'flex';
                 document.getElementById('userMenu').classList.remove('active');
-                
-                // إظهار قسم المستخدمين غير المسجلين في الإحالة
                 document.getElementById('nonUserReferral').style.display = 'block';
                 document.getElementById('userReferralCode').style.display = 'none';
-                
                 showNotification('✅ تم تسجيل الخروج بنجاح', 'success');
-                
-                // إغلاق القائمة المنسدلة
-                document.getElementById('userDropdown').classList.remove('active');
+                // تحديث الصفحة
+                location.reload();
             }
         }
 
-        // ---------- الذهاب إلى لوحة التحكم ----------
+        // ========== الذهاب إلى لوحة التحكم ==========
         function goToDashboard() {
             if (currentUser) {
-                saveUserData();
                 window.location.href = 'dashboard.html';
             } else {
                 showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
@@ -2177,18 +1929,10 @@
             }
         }
 
-        // ---------- الذهاب إلى الباقات ----------
+        // ========== الذهاب إلى الباقات ==========
         function goToPackages() {
             if (currentUser) {
-                saveUserData();
-                
-                // التمرير إلى قسم الباقات
-                const packagesSection = document.getElementById('packages');
-                if (packagesSection) {
-                    packagesSection.scrollIntoView({ behavior: 'smooth' });
-                }
-                
-                // إغلاق القائمة المنسدلة
+                document.getElementById('packages').scrollIntoView({ behavior: 'smooth' });
                 document.getElementById('userDropdown').classList.remove('active');
             } else {
                 showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
@@ -2196,107 +1940,173 @@
             }
         }
 
-        // ---------- حفظ بيانات المستخدم ----------
-        function saveUserData() {
-            if (!currentUser) return;
-            
-            const userIndex = users.findIndex(u => u.id === currentUser.id);
-            if (userIndex !== -1) {
-                users[userIndex] = currentUser;
-                localStorage.setItem('elite_users', JSON.stringify(users));
+        // ========== إظهار كود الإحالة ==========
+        function showReferralCode() {
+            if (!currentUser) {
+                showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
+                openAuthModal();
+                return;
             }
-            
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-        }
-
-        // ========== إعدادات مستمعي الأحداث ==========
-        function setupEventListeners() {
-            // نموذج تسجيل الدخول
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            
-            // نموذج إنشاء حساب
-            document.getElementById('registerForm').addEventListener('submit', handleRegister);
-            
-            // زر تسجيل الدخول
-            document.getElementById('loginBtn').addEventListener('click', openAuthModal);
-            
-            // قائمة المستخدم
-            document.getElementById('userAvatar').addEventListener('click', function() {
-                document.getElementById('userDropdown').classList.toggle('active');
-            });
-            
-            // إغلاق القائمة عند النقر خارجها
-            document.addEventListener('click', function(event) {
-                const dropdown = document.getElementById('userDropdown');
-                const avatar = document.getElementById('userAvatar');
-                
-                if (dropdown && avatar && !avatar.contains(event.target) && !dropdown.contains(event.target)) {
-                    dropdown.classList.remove('active');
-                }
-            });
-            
-            // نظام رفع الصور
-            const uploadContainer = document.getElementById('uploadContainer');
-            const fileInput = document.getElementById('fileInput');
-            
-            if (uploadContainer) {
-                uploadContainer.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    uploadContainer.style.borderColor = 'var(--primary)';
-                    uploadContainer.style.background = 'rgba(124,58,237,0.1)';
-                });
-                
-                uploadContainer.addEventListener('dragleave', () => {
-                    uploadContainer.style.borderColor = 'rgba(124,58,237,0.3)';
-                    uploadContainer.style.background = 'rgba(255,255,255,0.03)';
-                });
-                
-                uploadContainer.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    uploadContainer.style.borderColor = 'rgba(124,58,237,0.3)';
-                    uploadContainer.style.background = 'rgba(255,255,255,0.03)';
-                    
-                    if (e.dataTransfer.files.length) {
-                        handleImageUpload({ target: { files: e.dataTransfer.files } });
-                    }
-                });
-                
-                uploadContainer.addEventListener('click', () => {
-                    fileInput.click();
-                });
-            }
+            document.querySelector('.referral-banner').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('userDropdown').classList.remove('active');
         }
 
         // ========== دوال مساعدة ==========
-        
-        // ---------- إظهار الإشعار ----------
+        function copyText(text) {
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('✅ تم النسخ إلى الحافظة', 'success');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('✅ تم النسخ إلى الحافظة', 'success');
+            });
+        }
+
+        function copyWalletAddress() {
+            copyText(WALLET_ADDRESS);
+        }
+
+        function copyUserReferralCode() {
+            const code = document.getElementById('userReferralCodeDisplay')?.value;
+            if (code) copyText(code);
+        }
+
+        // ========== نظام رفع الصور ==========
+        function setupImageUpload() {
+            const uploadContainer = document.getElementById('uploadContainer');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!uploadContainer || !fileInput) return;
+            
+            uploadContainer.addEventListener('click', () => fileInput.click());
+            
+            uploadContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadContainer.style.borderColor = 'var(--primary)';
+                uploadContainer.style.background = 'rgba(124,58,237,0.1)';
+            });
+            
+            uploadContainer.addEventListener('dragleave', () => {
+                uploadContainer.style.borderColor = 'rgba(124,58,237,0.3)';
+                uploadContainer.style.background = 'rgba(255,255,255,0.03)';
+            });
+            
+            uploadContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadContainer.style.borderColor = 'rgba(124,58,237,0.3)';
+                uploadContainer.style.background = 'rgba(255,255,255,0.03)';
+                if (e.dataTransfer.files.length) {
+                    handleImageUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleImageUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        function handleImageUpload(file) {
+            if (!file.type.startsWith('image/')) {
+                showNotification('❌ الرجاء اختيار صورة فقط', 'error');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('❌ حجم الصورة كبير جداً (الحد الأقصى 5MB)', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedImage = e.target.result;
+                document.getElementById('previewImage').src = selectedImage;
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('uploadPreview').style.display = 'block';
+                document.getElementById('uploadContainer').style.borderColor = 'var(--success)';
+                showNotification('✅ تم رفع الصورة بنجاح', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            selectedImage = null;
+            document.getElementById('previewImage').src = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('uploadPreview').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadContainer').style.borderColor = 'rgba(124,58,237,0.3)';
+        }
+
+        // ========== نافذة الدفع ==========
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+            selectedPackage = null;
+            removeImage();
+        }
+
+        // ========== الإشعارات ==========
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = 'notification ' + (type || 'success');
-            notification.style.display = 'block';
+            if (!notification) return;
             
-            // إضافة أيقونة
-            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            
             notification.innerHTML = `${icon} ${message}`;
+            notification.className = 'notification ' + type;
+            notification.style.display = 'block';
             
             setTimeout(() => {
                 notification.style.display = 'none';
             }, 5000);
         }
 
-        // ---------- التهيئة ----------
-        document.addEventListener('DOMContentLoaded', function() {
-            initIndexPage();
-        });
-
-        // ---------- مستمع تحديثات البيانات ----------
-        window.addEventListener('data-updated', function(event) {
-            console.log('📡 تحديث:', event.detail.type);
-            if (event.detail.type === 'packages') {
-                loadPackages();
+        // ========== إعداد مستمعي الأحداث ==========
+        function setupEventListeners() {
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', openAuthModal);
             }
+            
+            const userAvatar = document.getElementById('userAvatar');
+            if (userAvatar) {
+                userAvatar.addEventListener('click', function() {
+                    document.getElementById('userDropdown').classList.toggle('active');
+                });
+            }
+            
+            document.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('userDropdown');
+                const avatar = document.getElementById('userAvatar');
+                if (dropdown && avatar && !avatar.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+            
+            window.addEventListener('data-updated', function(event) {
+                if (event.detail.type === 'packages') {
+                    loadPackages();
+                }
+            });
+            
+            setupImageUpload();
+        }
+
+        // ========== التهيئة ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            initIndexPage().catch(error => {
+                console.error('خطأ في التهيئة:', error);
+                showNotification('❌ حدث خطأ في تحميل الصفحة', 'error');
+            });
         });
     </script>
-<script src="supabase.js"></script><script src="packages.js"></script></body>
+</body>
 </html>

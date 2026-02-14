@@ -2,6 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <script src="shared-data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>لوحة التحكم - Elite Investors</title>
@@ -463,6 +465,32 @@
             font-weight: bold;
         }
         
+        .sync-status {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--dark-light);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--primary);
+            font-size: 13px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .sync-status.online {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .sync-status.offline {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr;
@@ -518,6 +546,12 @@
     </style>
 </head>
 <body>
+    <div class="sync-status online" id="syncStatus">
+        <i class="fas fa-sync-alt fa-spin" style="display: none;" id="syncSpinner"></i>
+        <i class="fas fa-wifi" id="syncIcon"></i>
+        <span id="syncText">متصل</span>
+    </div>
+
     <div class="dashboard-header">
         <div class="user-info">
             <div class="user-avatar" id="userAvatar">م</div>
@@ -643,21 +677,10 @@
         </div>
     </div>
 
-
-
-
-
     <div id="history-page" class="page">
-
-
         <div class="section">
-
-
             <div class="section-title">
-
                 <i class="fas fa-history" style="color: var(--secondary);"></i>
-
-
                 <h3>سجل المعاملات</h3>
             </div>
             <div class="transactions-list" id="transactionsList"></div>
@@ -805,13 +828,14 @@
     <div class="notification" id="notification"></div>
 
     <script>
-        // ==================== نظام لوحة التحكم - النسخة النهائية المصححة ====================
+        // ==================== نظام لوحة التحكم - متوافق مع Supabase ====================
         
         let currentUser = null;
         let transactions = [];
         let withdrawals = [];
         let userTasks = [];
         let withdrawalNetwork = 'TRC20';
+        let supabaseAvailable = false;
         
         const withdrawalFees = {
             'TRC20': 5,
@@ -819,8 +843,35 @@
             'BEP20': 3
         };
 
-        function initDashboard() {
+        // ========== التحقق من توفر Supabase ==========
+        function checkSupabase() {
+            supabaseAvailable = typeof window !== 'undefined' && 
+                               window.supabaseClient && 
+                               window.supabaseHelpers;
+            
+            const syncStatus = document.getElementById('syncStatus');
+            const syncIcon = document.getElementById('syncIcon');
+            const syncText = document.getElementById('syncText');
+            
+            if (supabaseAvailable) {
+                syncStatus.className = 'sync-status online';
+                syncIcon.className = 'fas fa-wifi';
+                syncText.textContent = 'متصل بـ Supabase';
+            } else {
+                syncStatus.className = 'sync-status offline';
+                syncIcon.className = 'fas fa-exclamation-triangle';
+                syncText.textContent = 'وضع عدم الاتصال (تخزين محلي)';
+            }
+            
+            return supabaseAvailable;
+        }
+
+        // ========== تهيئة لوحة التحكم ==========
+        async function initDashboard() {
             console.log('🚀 بدء تشغيل لوحة التحكم...');
+            
+            // التحقق من الاتصال بـ Supabase
+            checkSupabase();
             
             const userData = localStorage.getItem('current_user');
             if (!userData) {
@@ -830,20 +881,41 @@
             
             currentUser = JSON.parse(userData);
             
-            loadUserData();
-            loadTransactions();
-            loadWithdrawals();
-            loadUserTasks();
-            loadReferralStats();
+            // محاولة تحديث بيانات المستخدم من Supabase
+            await refreshUserFromSupabase();
             
-            setInterval(() => {
+            await loadUserData();
+            await loadTransactions();
+            await loadWithdrawals();
+            await loadUserTasks();
+            await loadReferralStats();
+            
+            // تحديث دوري للبيانات
+            setInterval(async () => {
                 if (currentUser) {
-                    refreshUserData();
+                    await refreshUserData();
                 }
             }, 30000);
         }
 
-        function loadUserData() {
+        // ========== تحديث بيانات المستخدم من Supabase ==========
+        async function refreshUserFromSupabase() {
+            if (!currentUser || !supabaseAvailable) return;
+            
+            try {
+                const result = await window.supabaseHelpers.getUserById(currentUser.id);
+                if (result.success && result.data) {
+                    currentUser = result.data;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                    console.log('✅ تم تحديث بيانات المستخدم من Supabase');
+                }
+            } catch (error) {
+                console.log('⚠️ فشل تحديث المستخدم من Supabase، استخدام المحلي');
+            }
+        }
+
+        // ========== تحميل بيانات المستخدم ==========
+        async function loadUserData() {
             if (!currentUser) return;
             
             document.getElementById('userAvatar').textContent = currentUser.name?.charAt(0).toUpperCase() || 'م';
@@ -853,47 +925,61 @@
             document.getElementById('profileName').value = currentUser.name || '';
             document.getElementById('profileEmail').value = currentUser.email || '';
             document.getElementById('profilePhone').value = currentUser.phone || '';
-            document.getElementById('walletAddress').value = currentUser.walletAddress || '';
-            document.getElementById('walletNetwork').value = currentUser.walletNetwork || 'TRC20';
+            document.getElementById('walletAddress').value = currentUser.wallet_address || currentUser.walletAddress || '';
+            document.getElementById('walletNetwork').value = currentUser.wallet_network || currentUser.walletNetwork || 'TRC20';
             
             updateBalance();
             updatePackageInfo();
             checkPendingPackage();
         }
 
-        function refreshUserData() {
+        // ========== تحديث بيانات المستخدم ==========
+        async function refreshUserData() {
             if (!currentUser) return;
             
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const updatedUser = users.find(u => u.id === currentUser.id);
-            
-            if (updatedUser) {
-                currentUser = updatedUser;
-                localStorage.setItem('current_user', JSON.stringify(currentUser));
-                loadUserData();
-                loadReferralStats();
-                loadUserTasks();
+            // محاولة التحديث من Supabase
+            if (supabaseAvailable) {
+                await refreshUserFromSupabase();
+            } else {
+                // استخدام التخزين المحلي كاحتياطي
+                const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                const updatedUser = users.find(u => u.id === currentUser.id);
+                
+                if (updatedUser) {
+                    currentUser = updatedUser;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                }
             }
+            
+            await loadUserData();
+            await loadReferralStats();
+            await loadUserTasks();
         }
 
+        // ========== تحديث الرصيد ==========
         function updateBalance() {
             document.getElementById('balance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
-            document.getElementById('total-earned').textContent = (currentUser?.totalEarned || 0).toFixed(2) + '$';
+            document.getElementById('total-earned').textContent = (currentUser?.total_earned || currentUser?.totalEarned || 0).toFixed(2) + '$';
             document.getElementById('withdrawableBalance').textContent = (currentUser?.balance || 0).toFixed(2) + '$';
             
             if (currentUser?.package) {
-                const dailyProfit = currentUser.package.dailyProfit || (currentUser.package.amount * 0.025);
+                const dailyProfit = currentUser.package.daily_profit || 
+                                   currentUser.package.dailyProfit || 
+                                   (currentUser.package.amount * 0.025);
                 document.getElementById('today-profit').textContent = dailyProfit.toFixed(2) + '$';
             }
         }
 
+        // ========== تحديث معلومات الباقة ==========
         function updatePackageInfo() {
             const packageDiv = document.getElementById('currentPackage');
             
             if (currentUser?.package) {
                 const pkg = currentUser.package;
-                const daysLeft = window.sharedData.calculateDaysLeft(pkg.purchaseDate, pkg.duration || 30);
-                const dailyProfit = pkg.dailyProfit || (pkg.amount * 0.025);
+                const purchaseDate = pkg.purchase_date || pkg.purchaseDate;
+                const duration = pkg.duration || 30;
+                const daysLeft = calculateDaysLeft(purchaseDate, duration);
+                const dailyProfit = pkg.daily_profit || pkg.dailyProfit || (pkg.amount * 0.025);
                 
                 let badgeClass = 'standard';
                 let badgeText = 'عادية';
@@ -940,15 +1026,27 @@
             }
         }
 
+        // ========== حساب الأيام المتبقية ==========
+        function calculateDaysLeft(purchaseDate, duration = 30) {
+            if (!purchaseDate) return 0;
+            const purchase = new Date(purchaseDate);
+            const endDate = new Date(purchase);
+            endDate.setDate(endDate.getDate() + duration);
+            const today = new Date();
+            const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+            return Math.max(0, daysLeft);
+        }
+
+        // ========== التحقق من وجود طلب معلق ==========
         function checkPendingPackage() {
             const pendingSection = document.getElementById('pendingRequestSection');
             
-            if (!currentUser?.pendingPackage) {
+            if (!currentUser?.pending_package && !currentUser?.pendingPackage) {
                 pendingSection.style.display = 'none';
                 return;
             }
             
-            const pending = currentUser.pendingPackage;
+            const pending = currentUser.pending_package || currentUser.pendingPackage;
             
             pendingSection.style.display = 'block';
             pendingSection.className = 'section';
@@ -970,16 +1068,17 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 10px;">
                         <span style="color: #94a3b8;">تاريخ الطلب:</span>
-                        <span style="color: white;">${new Date(pending.requestedDate).toLocaleString('ar-SA')}</span>
+                        <span style="color: white;">${new Date(pending.requested_date || pending.requestedDate).toLocaleString('ar-SA')}</span>
                     </div>
                     <div style="margin-top: 15px; color: #94a3b8; font-size: 14px;">
-                        <i class="fas fa-info-circle"></i> سيتم تفعيل باقتك خلال ${pending.estimatedActivation || '3-6 ساعات'}
+                        <i class="fas fa-info-circle"></i> سيتم تفعيل باقتك خلال ${pending.estimated_activation || pending.estimatedActivation || '3-6 ساعات'}
                     </div>
                 </div>
             `;
         }
 
-        function loadUserTasks() {
+        // ========== تحميل مهام المستخدم ==========
+        async function loadUserTasks() {
             if (!currentUser) return;
             
             if (!currentUser.package) {
@@ -990,7 +1089,22 @@
                 return;
             }
             
-            userTasks = window.sharedData?.getUserTasks(currentUser.package) || [];
+            // محاولة جلب المهام من Supabase
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getUserTasks(currentUser.package.category);
+                    if (result.success && result.data) {
+                        userTasks = result.data;
+                    }
+                } catch (error) {
+                    console.log('⚠️ فشل جلب المهام من Supabase');
+                }
+            }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (userTasks.length === 0 && window.sharedData) {
+                userTasks = await window.sharedData.getUserTasks(currentUser.package) || [];
+            }
             
             const today = new Date().toDateString();
             userTasks.sort((a, b) => {
@@ -1006,6 +1120,7 @@
             updateTasksStats();
         }
 
+        // ========== عرض المهام السريعة ==========
         function displayQuickTasks() {
             const container = document.getElementById('quickTasks');
             if (!container) return;
@@ -1055,10 +1170,10 @@
                 let badgeClass = 'standard';
                 let badgeText = 'عادية';
                 
-                if (task.packageCategories?.includes('vip')) {
+                if (task.package_categories?.includes('vip') || task.packageCategories?.includes('vip')) {
                     badgeClass = 'vip';
                     badgeText = 'VIP';
-                } else if (task.packageCategories?.includes('premium')) {
+                } else if (task.package_categories?.includes('premium') || task.packageCategories?.includes('premium')) {
                     badgeClass = 'premium';
                     badgeText = 'مميزة';
                 }
@@ -1082,6 +1197,7 @@
             container.innerHTML = html;
         }
 
+        // ========== عرض جميع المهام ==========
         function displayUserTasks() {
             const container = document.getElementById('tasksContainer');
             if (!container) return;
@@ -1147,11 +1263,11 @@
                 let badgeText = 'عادية';
                 let borderColor = 'var(--info)';
                 
-                if (task.packageCategories?.includes('vip')) {
+                if (task.package_categories?.includes('vip') || task.packageCategories?.includes('vip')) {
                     badgeClass = 'vip';
                     badgeText = 'VIP';
                     borderColor = 'var(--warning)';
-                } else if (task.packageCategories?.includes('premium')) {
+                } else if (task.package_categories?.includes('premium') || task.packageCategories?.includes('premium')) {
                     badgeClass = 'premium';
                     badgeText = 'مميزة';
                     borderColor = 'var(--primary)';
@@ -1178,7 +1294,7 @@
                             </div>
                             <p style="color: #94a3b8; margin-bottom: 8px; font-size: 14px;">${task.description}</p>
                             <div style="display: flex; gap: 15px; font-size: 13px; color: #64748b;">
-                                <span><i class="fas fa-clock"></i> ${task.timeRequired || 2} دقيقة</span>
+                                <span><i class="fas fa-clock"></i> ${task.time_required || task.timeRequired || 2} دقيقة</span>
                                 <span><i class="fas fa-redo"></i> ${task.type === 'daily' ? 'يومية' : 'أسبوعية'}</span>
                                 <span><i class="fas fa-check-circle"></i> ${task.completions || 0} إكمال</span>
                             </div>
@@ -1200,6 +1316,7 @@
             container.innerHTML = html;
         }
 
+        // ========== تحديث إحصائيات المهام ==========
         function updateTasksStats() {
             if (!currentUser?.package) {
                 document.getElementById('tasks-completed').textContent = '0/0';
@@ -1218,7 +1335,8 @@
             document.getElementById('tasks-completed').textContent = `${completedCount}/${userTasks.length}`;
         }
 
-        function completeTask(taskId, reward) {
+        // ========== إكمال مهمة ==========
+        async function completeTask(taskId, reward) {
             if (!currentUser) {
                 showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
                 return;
@@ -1226,11 +1344,6 @@
             
             if (!currentUser.package) {
                 showNotification('❌ لا يمكن إكمال المهام بدون باقة نشطة', 'error');
-                return;
-            }
-            
-            if (!window.sharedData?.canUserCompleteTask(taskId, currentUser.package)) {
-                showNotification('❌ هذه المهمة غير متاحة لباقتك الحالية', 'error');
                 return;
             }
             
@@ -1246,14 +1359,27 @@
                 return;
             }
             
+            // تحديث الرصيد
             currentUser.balance = (currentUser.balance || 0) + reward;
-            currentUser.totalEarned = (currentUser.totalEarned || 0) + reward;
-            currentUser.tasksCompleted = (currentUser.tasksCompleted || 0) + 1;
+            currentUser.total_earned = (currentUser.total_earned || currentUser.totalEarned || 0) + reward;
+            currentUser.tasks_completed = (currentUser.tasks_completed || currentUser.tasksCompleted || 0) + 1;
             
             localStorage.setItem(`task_${task.id}_${today}`, 'completed');
-            window.sharedData?.incrementTaskCompletion(taskId);
             
-            saveUserData();
+            // تحديث إحصائيات المهمة
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.incrementTaskCompletion(taskId);
+                } catch (error) {
+                    console.log('⚠️ فشل تحديث إحصائيات المهمة في Supabase');
+                }
+            }
+            
+            if (window.sharedData) {
+                window.sharedData.incrementTaskCompletion(taskId);
+            }
+            
+            await saveUserData();
             
             addTransaction({
                 type: 'ربح',
@@ -1263,34 +1389,49 @@
             });
             
             updateBalance();
-            loadUserTasks();
+            await loadUserTasks();
             
             showNotification(`✅ مبروك! لقد ربحت ${reward}$`, 'success');
         }
 
+        // ========== تحديث المهام ==========
         function refreshTasks() {
             loadUserTasks();
             showNotification('✅ تم تحديث المهام', 'success');
         }
 
-        function loadReferralStats() {
+        // ========== تحميل إحصائيات الإحالة ==========
+        async function loadReferralStats() {
             if (!currentUser) return;
             
-            const referralStats = window.sharedData?.getReferralStats(currentUser.id);
-            if (!referralStats) {
-                if (!currentUser.referralCode) {
-                    currentUser.referralCode = window.sharedData?.generateReferralCode(currentUser.username || currentUser.email);
-                    saveUserData();
+            let stats = null;
+            
+            // محاولة جلب الإحصائيات من Supabase
+            if (supabaseAvailable && window.supabaseHelpers) {
+                // يمكن إضافة دالة getReferralStats في supabase.js لاحقاً
+            }
+            
+            // استخدام shared-data
+            if (window.sharedData) {
+                stats = window.sharedData.getReferralStats(currentUser.id);
+            }
+            
+            if (!stats) {
+                if (!currentUser.referral_code && !currentUser.referralCode) {
+                    const code = window.sharedData?.generateReferralCode(currentUser.username || currentUser.email);
+                    currentUser.referral_code = code;
+                    await saveUserData();
                 }
                 setTimeout(loadReferralStats, 100);
                 return;
             }
             
-            displayReferralStats(referralStats);
-            displayReferralCode(referralStats);
-            displayReferredUsers(referralStats);
+            displayReferralStats(stats);
+            displayReferralCode(stats);
+            displayReferredUsers(stats);
         }
 
+        // ========== عرض إحصائيات الإحالة ==========
         function displayReferralStats(stats) {
             const container = document.getElementById('referralStats');
             if (!container) return;
@@ -1309,12 +1450,13 @@
                     <div style="color: #94a3b8;">بانتظار الباقة</div>
                 </div>
                 <div class="referral-stat-card">
-                    <div class="referral-stat-value" style="color: var(--success);">${stats.totalEarned?.toFixed(2) || 0}$</div>
+                    <div class="referral-stat-value" style="color: var(--success);">${(stats.totalEarned || 0).toFixed(2)}$</div>
                     <div style="color: #94a3b8;">أرباح الإحالة</div>
                 </div>
             `;
         }
 
+        // ========== عرض كود الإحالة ==========
         function displayReferralCode(stats) {
             const codeDisplay = document.getElementById('referralCodeDisplay');
             if (codeDisplay) {
@@ -1328,6 +1470,7 @@
             }
         }
 
+        // ========== عرض قائمة المحالين ==========
         function displayReferredUsers(stats) {
             const usersList = document.getElementById('referredUsersList');
             if (!usersList) return;
@@ -1367,6 +1510,7 @@
             }
         }
 
+        // ========== نسخ كود الإحالة ==========
         function copyReferralCode() {
             const code = document.getElementById('referralCodeDisplay')?.textContent;
             if (code) {
@@ -1378,6 +1522,7 @@
             }
         }
 
+        // ========== نسخ رابط الإحالة ==========
         function copyReferralLink() {
             const link = document.getElementById('referralLinkDisplay')?.textContent;
             if (link) {
@@ -1389,14 +1534,32 @@
             }
         }
 
-        function loadTransactions() {
+        // ========== تحميل المعاملات ==========
+        async function loadTransactions() {
             if (!currentUser) return;
             
-            const saved = localStorage.getItem(`user_transactions_${currentUser.id}`);
-            transactions = saved ? JSON.parse(saved) : [];
+            // محاولة جلب المعاملات من Supabase
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getUserTransactions(currentUser.id);
+                    if (result.success && result.data) {
+                        transactions = result.data;
+                    }
+                } catch (error) {
+                    console.log('⚠️ فشل جلب المعاملات من Supabase');
+                }
+            }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (transactions.length === 0) {
+                const saved = localStorage.getItem(`user_transactions_${currentUser.id}`);
+                transactions = saved ? JSON.parse(saved) : [];
+            }
+            
             displayTransactions();
         }
 
+        // ========== عرض المعاملات ==========
         function displayTransactions() {
             const list = document.getElementById('transactionsList');
             if (!list) return;
@@ -1425,7 +1588,7 @@
                     <div class="transaction-item" style="border-right-color: ${borderColor};">
                         <div>
                             <h4 style="margin-bottom: 5px; font-size: 16px;">${t.description || t.type}</h4>
-                            <small style="color: #94a3b8;">${t.date}</small>
+                            <small style="color: #94a3b8;">${t.date || t.created_at}</small>
                         </div>
                         <span style="color: ${borderColor}; font-weight: bold; font-size: 18px;">
                             ${sign}${t.amount}$
@@ -1437,28 +1600,61 @@
             list.innerHTML = html;
         }
 
-        function addTransaction(transaction) {
+        // ========== إضافة معاملة جديدة ==========
+        async function addTransaction(transaction) {
             transactions.unshift({
                 id: Date.now(),
                 ...transaction
             });
             
             if (currentUser) {
+                // حفظ في التخزين المحلي
                 localStorage.setItem(`user_transactions_${currentUser.id}`, JSON.stringify(transactions.slice(0, 100)));
+                
+                // محاولة الحفظ في Supabase
+                if (supabaseAvailable) {
+                    try {
+                        await window.supabaseHelpers.createTransaction({
+                            userId: currentUser.id,
+                            ...transaction
+                        });
+                    } catch (error) {
+                        console.log('⚠️ فشل حفظ المعاملة في Supabase');
+                    }
+                }
+                
                 if (document.getElementById('history-page').classList.contains('active')) {
                     displayTransactions();
                 }
             }
         }
 
-        function loadWithdrawals() {
+        // ========== تحميل طلبات السحب ==========
+        async function loadWithdrawals() {
             if (!currentUser) return;
             
-            const saved = localStorage.getItem(`user_withdrawals_${currentUser.id}`);
-            withdrawals = saved ? JSON.parse(saved) : [];
+            // محاولة جلب طلبات السحب من Supabase
+            if (supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getUserWithdrawals(currentUser.id);
+                    if (result.success && result.data) {
+                        withdrawals = result.data;
+                    }
+                } catch (error) {
+                    console.log('⚠️ فشل جلب طلبات السحب من Supabase');
+                }
+            }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (withdrawals.length === 0) {
+                const saved = localStorage.getItem(`user_withdrawals_${currentUser.id}`);
+                withdrawals = saved ? JSON.parse(saved) : [];
+            }
+            
             displayWithdrawals();
         }
 
+        // ========== عرض طلبات السحب ==========
         function displayWithdrawals() {
             const list = document.getElementById('withdrawalsList');
             if (!list) return;
@@ -1470,10 +1666,10 @@
             
             let html = '';
             withdrawals.slice(0, 5).forEach(w => {
-                const statusColor = w.status === 'مكتمل' ? 'var(--success)' : 
-                                  w.status === 'معلق' ? 'var(--warning)' : 'var(--danger)';
-                const statusText = w.status === 'مكتمل' ? '✅ مكتمل' : 
-                                 w.status === 'معلق' ? '⏳ معلق' : '❌ مرفوض';
+                const statusColor = w.status === 'مكتمل' || w.status === 'completed' ? 'var(--success)' : 
+                                  w.status === 'معلق' || w.status === 'pending' ? 'var(--warning)' : 'var(--danger)';
+                const statusText = w.status === 'مكتمل' || w.status === 'completed' ? '✅ مكتمل' : 
+                                 w.status === 'معلق' || w.status === 'pending' ? '⏳ معلق' : '❌ مرفوض';
                 
                 html += `
                     <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px; margin-bottom: 12px;">
@@ -1482,7 +1678,7 @@
                             <span style="color: ${statusColor};">${statusText}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <small style="color: #94a3b8;">${w.date}</small>
+                            <small style="color: #94a3b8;">${w.date || w.created_at}</small>
                             <small style="color: #94a3b8;">${w.network || 'TRC20'}</small>
                         </div>
                     </div>
@@ -1492,6 +1688,7 @@
             list.innerHTML = html;
         }
 
+        // ========== إظهار نافذة السحب ==========
         function showWithdrawalModal() {
             if (!currentUser) {
                 showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
@@ -1508,15 +1705,16 @@
                 return;
             }
             
-            if (!currentUser.walletAddress) {
+            const wallet = currentUser.wallet_address || currentUser.walletAddress;
+            if (!wallet) {
                 showNotification('⚠️ يرجى إضافة عنوان محفظتك أولاً', 'warning');
                 showPage('profile');
                 return;
             }
             
-            document.getElementById('withdrawWallet').value = currentUser.walletAddress;
+            document.getElementById('withdrawWallet').value = wallet;
             
-            withdrawalNetwork = currentUser.walletNetwork || 'TRC20';
+            withdrawalNetwork = currentUser.wallet_network || currentUser.walletNetwork || 'TRC20';
             document.querySelectorAll('.network-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.network === withdrawalNetwork) {
@@ -1534,6 +1732,7 @@
             document.getElementById('withdrawalModal').classList.add('active');
         }
 
+        // ========== تحديث إجمالي السحب ==========
         function updateWithdrawalTotal() {
             const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
             const fee = withdrawalFees[withdrawalNetwork] || 5;
@@ -1543,12 +1742,14 @@
             document.getElementById('withdrawTotalDisplay').textContent = total.toFixed(2) + '$';
         }
 
+        // ========== إغلاق نافذة السحب ==========
         function closeWithdrawalModal() {
             document.getElementById('withdrawalModal').classList.remove('active');
             document.getElementById('withdrawAmount').value = '';
             document.getElementById('withdrawAmount').removeEventListener('input', updateWithdrawalTotal);
         }
 
+        // ========== اختيار شبكة السحب ==========
         function selectWithdrawalNetwork(network) {
             withdrawalNetwork = network;
             
@@ -1565,7 +1766,8 @@
             updateWithdrawalTotal();
         }
 
-        function submitWithdrawal() {
+        // ========== تقديم طلب سحب ==========
+        async function submitWithdrawal() {
             const amount = parseFloat(document.getElementById('withdrawAmount').value);
             const wallet = document.getElementById('withdrawWallet').value.trim();
             const network = withdrawalNetwork;
@@ -1602,6 +1804,7 @@
                 return;
             }
             
+            // خصم الرصيد
             currentUser.balance -= total;
             
             const withdrawal = {
@@ -1611,12 +1814,27 @@
                 network: network,
                 fee: fee,
                 total: total,
-                status: 'معلق',
+                status: 'pending',
+                created_at: new Date().toISOString(),
                 date: new Date().toLocaleString('ar-SA')
             };
             
             withdrawals.unshift(withdrawal);
+            
+            // حفظ في التخزين المحلي
             localStorage.setItem(`user_withdrawals_${currentUser.id}`, JSON.stringify(withdrawals));
+            
+            // محاولة الحفظ في Supabase
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.createWithdrawal({
+                        userId: currentUser.id,
+                        ...withdrawal
+                    });
+                } catch (error) {
+                    console.log('⚠️ فشل حفظ طلب السحب في Supabase');
+                }
+            }
             
             addTransaction({
                 type: 'سحب',
@@ -1625,7 +1843,7 @@
                 date: new Date().toLocaleString('ar-SA')
             });
             
-            saveUserData();
+            await saveUserData();
             updateBalance();
             displayWithdrawals();
             closeWithdrawalModal();
@@ -1633,7 +1851,33 @@
             showNotification(`✅ تم إرسال طلب سحب بقيمة ${amount}$`, 'success');
         }
 
-        function saveProfile() {
+        // ========== حفظ بيانات المستخدم ==========
+        async function saveUserData() {
+            if (!currentUser) return;
+            
+            // حفظ في التخزين المحلي
+            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            
+            if (userIndex !== -1) {
+                users[userIndex] = currentUser;
+                localStorage.setItem('elite_users', JSON.stringify(users));
+            }
+            
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
+            
+            // محاولة التحديث في Supabase
+            if (supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.updateUser(currentUser.id, currentUser);
+                } catch (error) {
+                    console.log('⚠️ فشل تحديث المستخدم في Supabase');
+                }
+            }
+        }
+
+        // ========== حفظ الملف الشخصي ==========
+        async function saveProfile() {
             const name = document.getElementById('profileName').value.trim();
             const email = document.getElementById('profileEmail').value.trim();
             const phone = document.getElementById('profilePhone').value.trim();
@@ -1660,10 +1904,10 @@
             currentUser.name = name;
             currentUser.email = email;
             currentUser.phone = phone;
-            currentUser.walletAddress = wallet;
-            currentUser.walletNetwork = walletNetwork;
+            currentUser.wallet_address = wallet;
+            currentUser.wallet_network = walletNetwork;
             
-            saveUserData();
+            await saveUserData();
             
             document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
             document.getElementById('userName').textContent = name;
@@ -1672,20 +1916,7 @@
             showNotification('✅ تم حفظ التغييرات', 'success');
         }
 
-        function saveUserData() {
-            if (!currentUser) return;
-            
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const userIndex = users.findIndex(u => u.id === currentUser.id);
-            
-            if (userIndex !== -1) {
-                users[userIndex] = currentUser;
-                localStorage.setItem('elite_users', JSON.stringify(users));
-            }
-            
-            localStorage.setItem('current_user', JSON.stringify(currentUser));
-        }
-
+        // ========== إظهار الإشعارات ==========
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -1702,6 +1933,7 @@
             }, 3000);
         }
 
+        // ========== إظهار صفحة ==========
         function showPage(pageName) {
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
@@ -1725,6 +1957,7 @@
             }
         }
 
+        // ========== الذهاب إلى الباقات ==========
         function goToPackages() {
             if (currentUser) {
                 saveUserData();
@@ -1732,16 +1965,18 @@
             }
         }
 
-        function logout() {
+        // ========== تسجيل الخروج ==========
+        async function logout() {
             if (confirm('هل تريد تسجيل الخروج؟')) {
                 if (currentUser) {
-                    saveUserData();
+                    await saveUserData();
                 }
                 localStorage.removeItem('current_user');
                 window.location.href = 'index.html';
             }
         }
 
+        // ========== تهيئة الصفحة ==========
         document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>

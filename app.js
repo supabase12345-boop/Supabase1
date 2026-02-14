@@ -1,6 +1,6 @@
 /**
  * Elite Investors - التطبيق الرئيسي
- * نسخة متطورة مع دعم نظام الإحالة (50$ + 20$) وإدارة المستخدمين
+ * نسخة متطورة مع دعم Supabase ونظام الإحالة (50$ + 20$) وإدارة المستخدمين
  */
 
 class InvestmentApp {
@@ -9,6 +9,7 @@ class InvestmentApp {
         this.version = '2.0.0';
         this.apiBase = '';
         this.debug = true;
+        this.supabaseAvailable = false;
         this.init();
     }
     
@@ -17,6 +18,7 @@ class InvestmentApp {
      */
     init() {
         this.log('🚀 بدء تشغيل التطبيق v' + this.version);
+        this.checkSupabase();
         this.checkAuth();
         this.setupEventListeners();
         this.loadUserData();
@@ -26,13 +28,53 @@ class InvestmentApp {
     }
     
     /**
+     * التحقق من توفر Supabase
+     */
+    checkSupabase() {
+        this.supabaseAvailable = typeof window !== 'undefined' && 
+                                window.supabaseClient && 
+                                window.supabaseHelpers;
+        
+        if (this.supabaseAvailable) {
+            this.log('✅ متصل بـ Supabase');
+        } else {
+            this.log('⚠️ استخدام التخزين المحلي فقط');
+        }
+        
+        return this.supabaseAvailable;
+    }
+    
+    /**
      * التحقق من صلاحية المستخدم
      */
-    checkAuth() {
+    async checkAuth() {
         try {
             const userData = localStorage.getItem('current_user');
             if (userData) {
-                this.user = JSON.parse(userData);
+                const parsedUser = JSON.parse(userData);
+                
+                // محاولة جلب أحدث بيانات المستخدم من Supabase
+                if (this.supabaseAvailable) {
+                    try {
+                        const result = await window.supabaseHelpers.getUserById(parsedUser.id);
+                        if (result.success && result.data) {
+                            this.user = result.data;
+                            
+                            // تحديث التخزين المحلي
+                            localStorage.setItem('current_user', JSON.stringify(this.user));
+                            
+                            // تحديث قائمة المستخدمين
+                            await this.updateUsersList(this.user);
+                        } else {
+                            this.user = parsedUser;
+                        }
+                    } catch (error) {
+                        this.log('⚠️ فشل جلب المستخدم من Supabase، استخدام المحلي');
+                        this.user = parsedUser;
+                    }
+                } else {
+                    this.user = parsedUser;
+                }
                 
                 // التحقق من حالة المستخدم
                 if (this.user.status === 'banned') {
@@ -42,12 +84,37 @@ class InvestmentApp {
                     return;
                 }
                 
+                if (this.user.status === 'suspended') {
+                    this.log('⚠️ مستخدم معلق: ' + this.user.email);
+                    this.showNotification('⚠️ حسابك معلق مؤقتاً. بعض الخدمات غير متاحة.', 'warning');
+                }
+                
                 this.log('👤 مستخدم نشط: ' + (this.user.name || this.user.email));
                 this.updateAuthUI();
             }
         } catch (e) {
             console.error('خطأ في التحقق من المصادقة:', e);
             this.logout(true);
+        }
+    }
+    
+    /**
+     * تحديث قائمة المستخدمين في التخزين المحلي
+     */
+    async updateUsersList(updatedUser) {
+        try {
+            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            const userIndex = users.findIndex(u => u.id === updatedUser.id);
+            
+            if (userIndex !== -1) {
+                users[userIndex] = updatedUser;
+            } else {
+                users.push(updatedUser);
+            }
+            
+            localStorage.setItem('elite_users', JSON.stringify(users));
+        } catch (e) {
+            console.error('خطأ في تحديث قائمة المستخدمين:', e);
         }
     }
     
@@ -72,10 +139,12 @@ class InvestmentApp {
         window.addEventListener('online', () => {
             this.showNotification('✅ تم استعادة الاتصال بالإنترنت', 'success');
             this.syncOfflineData();
+            this.checkSupabase();
         });
         
         window.addEventListener('offline', () => {
             this.showNotification('⚠️ لا يوجد اتصال بالإنترنت', 'warning');
+            this.supabaseAvailable = false;
         });
     }
     
@@ -96,14 +165,18 @@ class InvestmentApp {
         if (!this.user) return;
         
         try {
-            const stats = window.sharedData?.getReferralStats(this.user.id);
-            if (stats) {
-                this.user.referralStats = stats;
-                
-                // إنشاء كود إحالة إذا لم يكن موجوداً
-                if (!this.user.referralCode && stats.referralCode) {
-                    this.user.referralCode = stats.referralCode;
-                    this.saveUserData();
+            // محاولة استخدام shared-data
+            if (window.sharedData) {
+                const stats = window.sharedData.getReferralStats(this.user.id);
+                if (stats) {
+                    this.user.referralStats = stats;
+                    
+                    // إنشاء كود إحالة إذا لم يكن موجوداً
+                    if (!this.user.referralCode && !this.user.referral_code && stats.referralCode) {
+                        this.user.referralCode = stats.referralCode;
+                        this.user.referral_code = stats.referralCode;
+                        this.saveUserData();
+                    }
                 }
             }
         } catch (e) {
@@ -155,18 +228,36 @@ class InvestmentApp {
     /**
      * تحديث بيانات المستخدم
      */
-    refreshUserData() {
+    async refreshUserData() {
         if (!this.user) return;
         
         try {
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const updatedUser = users.find(u => u.id === this.user.id);
+            let updatedUser = null;
+            
+            // محاولة التحديث من Supabase
+            if (this.supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.getUserById(this.user.id);
+                    if (result.success && result.data) {
+                        updatedUser = result.data;
+                    }
+                } catch (error) {
+                    this.log('⚠️ فشل تحديث المستخدم من Supabase');
+                }
+            }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (!updatedUser) {
+                const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                updatedUser = users.find(u => u.id === this.user.id);
+            }
             
             if (updatedUser) {
                 this.user = updatedUser;
                 localStorage.setItem('current_user', JSON.stringify(this.user));
                 this.updateUserStats();
                 this.updateAuthUI();
+                this.loadUserReferralStats();
             }
         } catch (e) {
             console.error('خطأ في تحديث بيانات المستخدم:', e);
@@ -248,28 +339,61 @@ class InvestmentApp {
     /**
      * مزامنة البيانات غير المتصلة
      */
-    syncOfflineData() {
+    async syncOfflineData() {
         const offlineQueue = JSON.parse(localStorage.getItem('offline_queue')) || [];
         
-        if (offlineQueue.length > 0) {
+        if (offlineQueue.length > 0 && this.supabaseAvailable) {
             this.log('🔄 مزامنة ' + offlineQueue.length + ' عملية غير متصلة');
             
-            offlineQueue.forEach(async (item, index) => {
+            const successfulSyncs = [];
+            
+            for (let i = 0; i < offlineQueue.length; i++) {
+                const item = offlineQueue[i];
+                
                 try {
                     // معالجة كل عملية حسب نوعها
                     if (item.type === 'complete_task') {
-                        // إعادة محاولة إكمال المهمة
+                        if (window.supabaseHelpers) {
+                            await window.supabaseHelpers.incrementTaskCompletion(item.taskId);
+                        }
+                        successfulSyncs.push(i);
+                    } else if (item.type === 'create_withdrawal') {
+                        if (window.supabaseHelpers) {
+                            await window.supabaseHelpers.createWithdrawal(item.data);
+                        }
+                        successfulSyncs.push(i);
+                    } else if (item.type === 'create_transaction') {
+                        if (window.supabaseHelpers) {
+                            await window.supabaseHelpers.createTransaction(item.data);
+                        }
+                        successfulSyncs.push(i);
                     }
-                    
-                    // حذف العملية من قائمة الانتظار بعد النجاح
-                    offlineQueue.splice(index, 1);
                 } catch (e) {
                     console.error('❌ فشل مزامنة العملية:', e);
                 }
-            });
+            }
             
-            localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+            // حذف العمليات الناجحة من قائمة الانتظار
+            const newQueue = offlineQueue.filter((_, index) => !successfulSyncs.includes(index));
+            localStorage.setItem('offline_queue', JSON.stringify(newQueue));
+            
+            if (successfulSyncs.length > 0) {
+                this.showNotification(`✅ تمت مزامنة ${successfulSyncs.length} عملية`, 'success');
+            }
         }
+    }
+    
+    /**
+     * إضافة عملية إلى قائمة الانتظار للمزامنة لاحقاً
+     */
+    addToOfflineQueue(item) {
+        const offlineQueue = JSON.parse(localStorage.getItem('offline_queue')) || [];
+        offlineQueue.push({
+            ...item,
+            timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('offline_queue', JSON.stringify(offlineQueue));
+        this.log('📦 تمت إضافة العملية إلى قائمة الانتظار');
     }
     
     /**
@@ -354,14 +478,15 @@ class InvestmentApp {
         const withdrawableEl = document.getElementById('withdrawable-balance');
         
         if (balanceEl) balanceEl.textContent = this.formatCurrency(this.user.balance || 0);
-        if (earnedEl) earnedEl.textContent = this.formatCurrency(this.user.totalEarned || 0);
-        if (tasksEl) tasksEl.textContent = this.user.tasksCompleted || 0;
+        if (earnedEl) earnedEl.textContent = this.formatCurrency(this.user.totalEarned || this.user.total_earned || 0);
+        if (tasksEl) tasksEl.textContent = this.user.tasksCompleted || this.user.tasks_completed || 0;
         if (withdrawableEl) withdrawableEl.textContent = this.formatCurrency(this.user.balance || 0);
         
         // حساب أرباح اليوم
         if (todayProfitEl && this.user.package) {
             const dailyProfit = this.user.package.dailyProfit || 
-                (this.user.package.amount * (this.user.package.profit || 2.5) / 100);
+                this.user.package.daily_profit ||
+                (this.user.package.amount * (this.user.package.profit || this.user.package.profit_percentage || 2.5) / 100);
             todayProfitEl.textContent = this.formatCurrency(dailyProfit);
         }
     }
@@ -371,11 +496,28 @@ class InvestmentApp {
      */
     async login(username, password) {
         try {
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
-            const user = users.find(u => 
-                (u.username === username || u.email === username) && 
-                u.password === password
-            );
+            let user = null;
+            
+            // محاولة تسجيل الدخول عبر Supabase
+            if (this.supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.loginUser(username, password);
+                    if (result.success) {
+                        user = result.data;
+                    }
+                } catch (error) {
+                    this.log('⚠️ فشل تسجيل الدخول عبر Supabase: ' + error.message);
+                }
+            }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (!user) {
+                const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                user = users.find(u => 
+                    (u.username === username || u.email === username) && 
+                    u.password === password
+                );
+            }
             
             if (!user) {
                 throw new Error('اسم المستخدم أو كلمة المرور غير صحيحة');
@@ -387,21 +529,26 @@ class InvestmentApp {
             
             // تحديث آخر تسجيل دخول
             user.lastLogin = new Date().toISOString();
+            if (this.supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.updateUser(user.id, { last_login: user.lastLogin });
+                } catch (error) {
+                    this.log('⚠️ فشل تحديث آخر تسجيل دخول في Supabase');
+                }
+            }
+            
             this.user = user;
             
             // حفظ المستخدم الحالي
             localStorage.setItem('current_user', JSON.stringify(user));
             
             // تحديث قائمة المستخدمين
-            const userIndex = users.findIndex(u => u.id === user.id);
-            if (userIndex !== -1) {
-                users[userIndex] = user;
-                localStorage.setItem('elite_users', JSON.stringify(users));
-            }
+            await this.updateUsersList(user);
             
             this.log('✅ تسجيل دخول ناجح: ' + user.email);
             this.updateAuthUI();
             this.updateUserStats();
+            this.loadUserReferralStats();
             
             return { success: true, user };
         } catch (error) {
@@ -415,17 +562,10 @@ class InvestmentApp {
      */
     async register(userData) {
         try {
-            const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+            let newUser = null;
+            let referredBy = null;
             
-            // التحقق من عدم تكرار اسم المستخدم أو البريد
-            if (users.some(u => u.username === userData.username)) {
-                throw new Error('اسم المستخدم موجود مسبقاً');
-            }
-            
-            if (users.some(u => u.email === userData.email)) {
-                throw new Error('البريد الإلكتروني موجود مسبقاً');
-            }
-            
+            // التحقق من صحة البيانات
             if (userData.username.includes(' ')) {
                 throw new Error('اسم المستخدم يجب ألا يحتوي على مسافات');
             }
@@ -439,45 +579,112 @@ class InvestmentApp {
             }
             
             // التحقق من صحة كود الإحالة
-            let referredBy = null;
             if (userData.referralCode) {
-                const referrer = users.find(u => u.referralCode === userData.referralCode);
-                if (referrer) {
-                    referredBy = userData.referralCode;
+                // محاولة التحقق من الكود في Supabase
+                if (this.supabaseAvailable) {
+                    try {
+                        const { data: users } = await window.supabaseClient
+                            .from('users')
+                            .select('*')
+                            .eq('referral_code', userData.referralCode)
+                            .maybeSingle();
+                        
+                        if (users) {
+                            referredBy = userData.referralCode;
+                        }
+                    } catch (error) {
+                        this.log('⚠️ فشل التحقق من كود الإحالة في Supabase');
+                    }
+                }
+                
+                // استخدام التخزين المحلي كاحتياطي
+                if (!referredBy) {
+                    const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                    const referrer = users.find(u => u.referralCode === userData.referralCode);
+                    if (referrer) {
+                        referredBy = userData.referralCode;
+                    }
+                }
+                
+                if (referredBy) {
                     this.log('✅ تم التحقق من كود الإحالة: ' + userData.referralCode);
                 }
             }
             
-            // إنشاء مستخدم جديد
-            const newUser = {
-                id: Date.now(),
-                name: userData.name,
-                username: userData.username,
-                email: userData.email,
-                phone: userData.phone,
-                password: userData.password,
-                referredBy: referredBy,
-                referralCode: null,
-                balance: 0,
-                package: null,
-                pendingPackage: null,
-                walletAddress: '',
-                walletNetwork: 'TRC20',
-                tasksCompleted: 0,
-                totalEarned: 0,
-                totalWithdrawn: 0,
-                referralCount: 0,
-                referralEarnings: 0,
-                referralRewardPaid: false,
-                joinedDate: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-                isAdmin: false,
-                status: 'active',
-                statusHistory: []
-            };
+            // إنشاء كود إحالة للمستخدم الجديد
+            const referralCode = this.generateReferralCode(userData.username);
             
-            users.push(newUser);
-            localStorage.setItem('elite_users', JSON.stringify(users));
+            // محاولة التسجيل في Supabase
+            if (this.supabaseAvailable) {
+                try {
+                    const result = await window.supabaseHelpers.registerUser({
+                        ...userData,
+                        referralCode: referredBy
+                    });
+                    
+                    if (result.success) {
+                        newUser = result.data;
+                    }
+                } catch (error) {
+                    this.log('⚠️ فشل التسجيل في Supabase: ' + error.message);
+                }
+            }
+            
+            // استخدام التخزين المحلي كاحتياطي
+            if (!newUser) {
+                const users = JSON.parse(localStorage.getItem('elite_users')) || [];
+                
+                // التحقق من عدم التكرار
+                if (users.some(u => u.username === userData.username)) {
+                    throw new Error('اسم المستخدم موجود مسبقاً');
+                }
+                
+                if (users.some(u => u.email === userData.email)) {
+                    throw new Error('البريد الإلكتروني موجود مسبقاً');
+                }
+                
+                newUser = {
+                    id: Date.now(),
+                    name: userData.name,
+                    username: userData.username,
+                    email: userData.email,
+                    phone: userData.phone,
+                    password: userData.password,
+                    referredBy: referredBy,
+                    referred_by: referredBy,
+                    referralCode: referralCode,
+                    referral_code: referralCode,
+                    balance: 0,
+                    package: null,
+                    pendingPackage: null,
+                    walletAddress: '',
+                    wallet_address: '',
+                    walletNetwork: 'TRC20',
+                    wallet_network: 'TRC20',
+                    tasksCompleted: 0,
+                    tasks_completed: 0,
+                    totalEarned: 0,
+                    total_earned: 0,
+                    totalWithdrawn: 0,
+                    total_withdrawn: 0,
+                    referralCount: 0,
+                    referral_count: 0,
+                    referralEarnings: 0,
+                    referral_earnings: 0,
+                    referralRewardPaid: false,
+                    referral_reward_paid: false,
+                    joinedDate: new Date().toISOString(),
+                    joined_date: new Date().toISOString(),
+                    lastLogin: new Date().toISOString(),
+                    last_login: new Date().toISOString(),
+                    isAdmin: false,
+                    is_admin: false,
+                    status: 'active'
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('elite_users', JSON.stringify(users));
+            }
             
             // تسجيل الدخول مباشرة
             this.user = newUser;
@@ -494,6 +701,17 @@ class InvestmentApp {
             this.log('❌ فشل إنشاء الحساب: ' + error.message);
             return { success: false, error: error.message };
         }
+    }
+    
+    /**
+     * توليد كود إحالة
+     */
+    generateReferralCode(username) {
+        if (!username) username = 'USER';
+        const cleanUsername = username.toString().toUpperCase().replace(/\s/g, '').substring(0, 5);
+        const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+        const timestamp = Date.now().toString().slice(-4);
+        return `${cleanUsername}${random}${timestamp}`.substring(0, 12);
     }
     
     /**
@@ -524,19 +742,38 @@ class InvestmentApp {
     /**
      * حفظ بيانات المستخدم
      */
-    saveUserData() {
-        if (!this.user) return;
+    async saveUserData() {
+        if (!this.user) return false;
         
         try {
+            // حفظ في التخزين المحلي
             const users = JSON.parse(localStorage.getItem('elite_users')) || [];
             const userIndex = users.findIndex(u => u.id === this.user.id);
             
             if (userIndex !== -1) {
                 users[userIndex] = this.user;
-                localStorage.setItem('elite_users', JSON.stringify(users));
+            } else {
+                users.push(this.user);
             }
             
+            localStorage.setItem('elite_users', JSON.stringify(users));
             localStorage.setItem('current_user', JSON.stringify(this.user));
+            
+            // محاولة التحديث في Supabase
+            if (this.supabaseAvailable) {
+                try {
+                    await window.supabaseHelpers.updateUser(this.user.id, this.user);
+                } catch (error) {
+                    this.log('⚠️ فشل تحديث المستخدم في Supabase');
+                    // إضافة إلى قائمة الانتظار للمزامنة لاحقاً
+                    this.addToOfflineQueue({
+                        type: 'update_user',
+                        userId: this.user.id,
+                        data: this.user
+                    });
+                }
+            }
+            
             return true;
         } catch (e) {
             console.error('خطأ في حفظ بيانات المستخدم:', e);
@@ -589,7 +826,7 @@ class InvestmentApp {
                     type === 'error' ? '❌' : 
                     type === 'warning' ? '⚠️' : 'ℹ️';
         
-        notification.textContent = `${icon} ${message}`;
+        notification.innerHTML = `${icon} ${message}`;
         notification.className = 'notification ' + type;
         notification.style.display = 'block';
         
@@ -651,6 +888,16 @@ class InvestmentApp {
             this.showNotification('✅ تم النسخ إلى الحافظة', 'success');
             return true;
         }
+    }
+    
+    /**
+     * الحصول على حالة الاتصال
+     */
+    getConnectionStatus() {
+        return {
+            online: navigator.onLine,
+            supabase: this.supabaseAvailable
+        };
     }
 }
 
@@ -739,6 +986,15 @@ function getWithExpiry(key) {
     }
 }
 
+/**
+ * التحقق من توفر Supabase
+ */
+function isSupabaseAvailable() {
+    return typeof window !== 'undefined' && 
+           window.supabaseClient && 
+           window.supabaseHelpers;
+}
+
 // ========== التهيئة عند تحميل الصفحة ==========
 document.addEventListener('DOMContentLoaded', function() {
     // إنشاء كائن التطبيق العام
@@ -805,8 +1061,68 @@ document.addEventListener('DOMContentLoaded', function() {
                 transform: translateY(0);
             }
         }
+        
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--dark-light);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid var(--primary);
+            font-size: 12px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .connection-status.online {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        .connection-status.offline {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
     `;
     document.head.appendChild(style);
+    
+    // إضافة مؤشر حالة الاتصال
+    const connectionStatus = document.createElement('div');
+    connectionStatus.className = 'connection-status online';
+    connectionStatus.id = 'connectionStatus';
+    connectionStatus.innerHTML = `
+        <i class="fas fa-wifi" id="connectionIcon"></i>
+        <span id="connectionText">متصل</span>
+    `;
+    document.body.appendChild(connectionStatus);
+    
+    // تحديث حالة الاتصال كل 5 ثواني
+    setInterval(() => {
+        const status = window.app?.getConnectionStatus();
+        const connectionDiv = document.getElementById('connectionStatus');
+        const icon = document.getElementById('connectionIcon');
+        const text = document.getElementById('connectionText');
+        
+        if (status && connectionDiv) {
+            if (status.supabase) {
+                connectionDiv.className = 'connection-status online';
+                icon.className = 'fas fa-wifi';
+                text.textContent = 'متصل بـ Supabase';
+            } else if (status.online) {
+                connectionDiv.className = 'connection-status online';
+                icon.className = 'fas fa-cloud';
+                text.textContent = 'متصل (تخزين محلي)';
+            } else {
+                connectionDiv.className = 'connection-status offline';
+                icon.className = 'fas fa-exclamation-triangle';
+                text.textContent = 'غير متصل';
+            }
+        }
+    }, 5000);
 });
 
 // تصدير للاستخدام العام
@@ -818,3 +1134,4 @@ window.truncateText = truncateText;
 window.generateId = generateId;
 window.setWithExpiry = setWithExpiry;
 window.getWithExpiry = getWithExpiry;
+window.isSupabaseAvailable = isSupabaseAvailable;
