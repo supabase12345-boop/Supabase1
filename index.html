@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html dir="rtl" lang="ar">
 <head>
-    <script src="shared-data.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Investors - منصة الاستثمار الذكي</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+<script src="shared-data.js"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Elite Investors - منصة الاستثمار الذكي</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
         /* ========== الأساسيات ========== */
         :root {
             --primary: #7c3aed;
@@ -975,523 +976,477 @@
     </style>
 </head>
 <body>
-    <!-- ========== الشريط العلوي ========== -->
-    <nav class="navbar">
-        <div class="logo">
-            <i class="fas fa-chart-line"></i>
-            <span>Elite Investors</span>
-        </div>
-        
-        <!-- زر تسجيل الدخول -->
-        <button class="login-btn" id="loginBtn">
-            <i class="fas fa-sign-in-alt"></i>
+<!-- ========== الشريط العلوي ========== -->
+<nav class="navbar">
+<div class="logo">
+<i class="fas fa-chart-line"></i>
+<span>Elite Investors</span>
+</div>
+<!-- زر تسجيل الدخول -->
+<button class="login-btn" id="loginBtn">
+<i class="fas fa-sign-in-alt"></i>
             دخول / تسجيل
         </button>
-        
-        <!-- قائمة المستخدم -->
-        <div class="user-menu" id="userMenu">
-            <div class="user-avatar" id="userAvatar">
-                <!-- الحرف الأول من اسم المستخدم -->
-            </div>
-            <div class="user-dropdown" id="userDropdown">
-                <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
-                    <strong id="dropdownName" style="font-size: 18px;"></strong><br>
-                    <small id="dropdownEmail" style="color: #94a3b8;"></small>
-                    <div id="dropdownPackage" style="margin-top: 10px;"></div>
-                </div>
-                <a href="#" onclick="goToDashboard()">
-                    <i class="fas fa-tachometer-alt"></i> لوحة التحكم
+<!-- قائمة المستخدم -->
+<div class="user-menu" id="userMenu">
+<div class="user-avatar" id="userAvatar">
+<!-- الحرف الأول من اسم المستخدم -->
+</div>
+<div class="user-dropdown" id="userDropdown">
+<div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+<strong id="dropdownName" style="font-size: 18px;"></strong><br/>
+<small id="dropdownEmail" style="color: #94a3b8;"></small>
+<div id="dropdownPackage" style="margin-top: 10px;"></div>
+</div>
+<a href="#" onclick="goToDashboard()">
+<i class="fas fa-tachometer-alt"></i> لوحة التحكم
                 </a>
-                <a href="#" onclick="showReferralCode()">
-                    <i class="fas fa-user-friends"></i> كود الإحالة
+<a href="#" onclick="showReferralCode()">
+<i class="fas fa-user-friends"></i> كود الإحالة
                 </a>
-                <a href="#" onclick="goToPackages()">
-                    <i class="fas fa-crown"></i> شراء باقة
+<a href="#" onclick="goToPackages()">
+<i class="fas fa-crown"></i> شراء باقة
                 </a>
-                <a href="#" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+<a href="#" onclick="logout()">
+<i class="fas fa-sign-out-alt"></i> تسجيل الخروج
                 </a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- ========== نافذة تسجيل الدخول ========== -->
-    <div class="modal" id="authModal">
-        <div class="auth-modal">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <h2 style="color: var(--primary);">
-                    <i class="fas fa-user-circle"></i> مرحباً بك
+</div>
+</div>
+</nav>
+<!-- ========== نافذة تسجيل الدخول ========== -->
+<div class="modal" id="authModal">
+<div class="auth-modal">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<h2 style="color: var(--primary);">
+<i class="fas fa-user-circle"></i> مرحباً بك
                 </h2>
-                <button style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;" onclick="closeAuthModal()">
-                    <i class="fas fa-times"></i>
+<button onclick="closeAuthModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;">
+<i class="fas fa-times"></i>
+</button>
+</div>
+<div class="tabs">
+<button class="tab active" onclick="showTab('login')">تسجيل الدخول</button>
+<button class="tab" onclick="showTab('register')">إنشاء حساب جديد</button>
+</div>
+<!-- نموذج تسجيل الدخول -->
+<form class="auth-form" id="loginForm">
+<div class="form-group">
+<label>👤 اسم المستخدم أو البريد الإلكتروني</label>
+<input class="form-control" id="loginUsername" placeholder="أدخل اسم المستخدم أو البريد" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>🔑 كلمة المرور</label>
+<input class="form-control" id="loginPassword" placeholder="أدخل كلمة المرور" required="" type="password"/>
+</div>
+<button class="submit-btn" type="submit">
+<i class="fas fa-sign-in-alt"></i> تسجيل الدخول
                 </button>
-            </div>
-            
-            <div class="tabs">
-                <button class="tab active" onclick="showTab('login')">تسجيل الدخول</button>
-                <button class="tab" onclick="showTab('register')">إنشاء حساب جديد</button>
-            </div>
-            
-            <!-- نموذج تسجيل الدخول -->
-            <form id="loginForm" class="auth-form">
-                <div class="form-group">
-                    <label>👤 اسم المستخدم أو البريد الإلكتروني</label>
-                    <input type="text" class="form-control" id="loginUsername" placeholder="أدخل اسم المستخدم أو البريد" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>🔑 كلمة المرور</label>
-                    <input type="password" class="form-control" id="loginPassword" placeholder="أدخل كلمة المرور" required>
-                </div>
-                
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
-                </button>
-                
-                <p style="text-align: center; margin-top: 20px; color: #94a3b8;">
+<p style="text-align: center; margin-top: 20px; color: #94a3b8;">
                     ليس لديك حساب؟ 
                     <a href="#" onclick="showTab('register')" style="color: var(--primary); text-decoration: none;">إنشاء حساب جديد</a>
-                </p>
-            </form>
-            
-            <!-- نموذج إنشاء حساب -->
-            <form id="registerForm" class="auth-form" style="display: none;">
-                <div class="form-group">
-                    <label>
-                        <span class="required-badge">*</span>
+</p>
+</form>
+<!-- نموذج إنشاء حساب -->
+<form class="auth-form" id="registerForm" style="display: none;">
+<div class="form-group">
+<label>
+<span class="required-badge">*</span>
                         👤 الاسم الكامل
                     </label>
-                    <input type="text" class="form-control" id="registerName" placeholder="أدخل اسمك الكامل" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>
-                        <span class="required-badge">*</span>
+<input class="form-control" id="registerName" placeholder="أدخل اسمك الكامل" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>
+<span class="required-badge">*</span>
                         🆔 اسم المستخدم
                     </label>
-                    <input type="text" class="form-control" id="registerUsername" placeholder="اختر اسم مستخدم فريد" required>
-                    <small style="color: #94a3b8;">يجب أن يكون فريداً ولا يحتوي على مسافات</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>
-                        <span class="required-badge">*</span>
+<input class="form-control" id="registerUsername" placeholder="اختر اسم مستخدم فريد" required="" type="text"/>
+<small style="color: #94a3b8;">يجب أن يكون فريداً ولا يحتوي على مسافات</small>
+</div>
+<div class="form-group">
+<label>
+<span class="required-badge">*</span>
                         📧 البريد الإلكتروني
                     </label>
-                    <input type="email" class="form-control" id="registerEmail" placeholder="أدخل بريدك الإلكتروني" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>
-                        <span class="required-badge">*</span>
+<input class="form-control" id="registerEmail" placeholder="أدخل بريدك الإلكتروني" required="" type="email"/>
+</div>
+<div class="form-group">
+<label>
+<span class="required-badge">*</span>
                         📱 رقم الهاتف
                     </label>
-                    <input type="tel" class="form-control" id="registerPhone" placeholder="أدخل رقم هاتفك" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>
-                        <span class="required-badge">*</span>
+<input class="form-control" id="registerPhone" placeholder="أدخل رقم هاتفك" required="" type="tel"/>
+</div>
+<div class="form-group">
+<label>
+<span class="required-badge">*</span>
                         🔐 كلمة المرور
                     </label>
-                    <input type="password" class="form-control" id="registerPassword" placeholder="اختر كلمة مرور قوية" required>
-                    <small style="color: #94a3b8;">يجب أن تكون 6 أحرف على الأقل</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>
-                        <span class="required-badge">*</span>
+<input class="form-control" id="registerPassword" placeholder="اختر كلمة مرور قوية" required="" type="password"/>
+<small style="color: #94a3b8;">يجب أن تكون 6 أحرف على الأقل</small>
+</div>
+<div class="form-group">
+<label>
+<span class="required-badge">*</span>
                         ✅ تأكيد كلمة المرور
                     </label>
-                    <input type="password" class="form-control" id="registerConfirmPassword" placeholder="أعد إدخال كلمة المرور" required>
-                </div>
-                
-                <!-- قسم كود الإحالة - محدث -->
-                <div class="form-group">
-                    <label>
-                        <span class="optional-badge">اختياري</span>
+<input class="form-control" id="registerConfirmPassword" placeholder="أعد إدخال كلمة المرور" required="" type="password"/>
+</div>
+<!-- قسم كود الإحالة - محدث -->
+<div class="form-group">
+<label>
+<span class="optional-badge">اختياري</span>
                         🎁 كود الإحالة
                     </label>
-                    <input type="text" class="form-control" id="registerReferral" placeholder="أدخل كود الإحالة إن وجد" autocomplete="off">
-                    <div style="background: rgba(139,92,246,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(139,92,246,0.3);">
-                        <div style="display: flex; align-items: center; gap: 10px; color: var(--purple);">
-                            <i class="fas fa-gift" style="font-size: 20px;"></i>
-                            <strong style="font-size: 15px;">مكافآت الإحالة:</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-around; margin-top: 15px;">
-                            <div style="text-align: center;">
-                                <span style="font-size: 24px; font-weight: bold; color: var(--purple);">50$</span>
-                                <p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">لك - صاحب الكود</p>
-                            </div>
-                            <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.2);"></div>
-                            <div style="text-align: center;">
-                                <span style="font-size: 24px; font-weight: bold; color: var(--success);">20$</span>
-                                <p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">لك - عند الاشتراك</p>
-                            </div>
-                        </div>
-                        <p style="color: #cbd5e1; font-size: 13px; margin-top: 15px; text-align: center;">
-                            <i class="fas fa-info-circle"></i>
+<input autocomplete="off" class="form-control" id="registerReferral" placeholder="أدخل كود الإحالة إن وجد" type="text"/>
+<div style="background: rgba(139,92,246,0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid rgba(139,92,246,0.3);">
+<div style="display: flex; align-items: center; gap: 10px; color: var(--purple);">
+<i class="fas fa-gift" style="font-size: 20px;"></i>
+<strong style="font-size: 15px;">مكافآت الإحالة:</strong>
+</div>
+<div style="display: flex; justify-content: space-around; margin-top: 15px;">
+<div style="text-align: center;">
+<span style="font-size: 24px; font-weight: bold; color: var(--purple);">50$</span>
+<p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">لك - صاحب الكود</p>
+</div>
+<div style="width: 1px; height: 40px; background: rgba(255,255,255,0.2);"></div>
+<div style="text-align: center;">
+<span style="font-size: 24px; font-weight: bold; color: var(--success);">20$</span>
+<p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">لك - عند الاشتراك</p>
+</div>
+</div>
+<p style="color: #cbd5e1; font-size: 13px; margin-top: 15px; text-align: center;">
+<i class="fas fa-info-circle"></i>
                             باستخدام كود إحالة، تحصل على <strong style="color: var(--success);">20$</strong> فور تفعيل أول باقة، وصاحب الكود يحصل على <strong style="color: var(--purple);">50$</strong>!
                         </p>
-                    </div>
-                </div>
-                
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+</div>
+</div>
+<button class="submit-btn" type="submit">
+<i class="fas fa-user-plus"></i> إنشاء حساب جديد
                 </button>
-                
-                <p style="text-align: center; margin-top: 20px; color: #94a3b8;">
+<p style="text-align: center; margin-top: 20px; color: #94a3b8;">
                     لديك حساب بالفعل؟ 
                     <a href="#" onclick="showTab('login')" style="color: var(--primary); text-decoration: none;">تسجيل الدخول</a>
-                </p>
-            </form>
-        </div>
-    </div>
-
-    <!-- ========== نافذة الدفع ========== -->
-    <div class="modal" id="paymentModal">
-        <div class="payment-modal">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <h2 style="color: var(--success);">
-                    <i class="fas fa-money-bill-wave"></i> إتمام الدفع
+</p>
+</form>
+</div>
+</div>
+<!-- ========== نافذة الدفع ========== -->
+<div class="modal" id="paymentModal">
+<div class="payment-modal">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<h2 style="color: var(--success);">
+<i class="fas fa-money-bill-wave"></i> إتمام الدفع
                 </h2>
-                <button style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;" onclick="closePaymentModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <!-- ملخص الباقة -->
-            <div class="package-summary">
-                <h3 id="selectedPackageName" style="color: var(--primary); margin-bottom: 15px; text-align: center;"></h3>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #94a3b8;">مبلغ الاستثمار:</span>
-                    <span style="font-size: 28px; font-weight: bold; color: var(--success);" id="selectedPackagePrice"></span>
+<button onclick="closePaymentModal()" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer;">
+<i class="fas fa-times"></i>
+</button>
+</div>
+<!-- ملخص الباقة -->
+<div class="package-summary">
+<h3 id="selectedPackageName" style="color: var(--primary); margin-bottom: 15px; text-align: center;"></h3>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span style="color: #94a3b8;">مبلغ الاستثمار:</span>
+<span id="selectedPackagePrice" style="font-size: 28px; font-weight: bold; color: var(--success);"></span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+<span style="color: #94a3b8;">الربح اليومي:</span>
+<span id="selectedPackageDaily" style="font-size: 20px; color: var(--warning);"></span>
+</div>
+</div>
+<!-- معلومات الدفع - شبكة TRC20 فقط -->
+<div class="network-info">
+<div class="network-badge">
+<i class="fas fa-network-wired"></i> TRC20 فقط
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <span style="color: #94a3b8;">الربح اليومي:</span>
-                    <span style="font-size: 20px; color: var(--warning);" id="selectedPackageDaily"></span>
-                </div>
-            </div>
-            
-            <!-- معلومات الدفع - شبكة TRC20 فقط -->
-            <div class="network-info">
-                <div class="network-badge">
-                    <i class="fas fa-network-wired"></i> TRC20 فقط
-                </div>
-                <p style="color: #cbd5e1; margin-bottom: 20px;">
-                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+<p style="color: #cbd5e1; margin-bottom: 20px;">
+<i class="fas fa-check-circle" style="color: var(--success);"></i>
                     شبكة TRC20 هي الشبكة الوحيدة المدعومة للدفع
                 </p>
-                
-                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px;">
-                    <p style="text-align: center; color: #94a3b8; margin-bottom: 15px;">
-                        <i class="fas fa-wallet"></i>
+<div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px;">
+<p style="text-align: center; color: #94a3b8; margin-bottom: 15px;">
+<i class="fas fa-wallet"></i>
                         أرسل USDT (TRC20) إلى هذا العنوان:
                     </p>
-                    <div class="wallet-address-box" id="walletAddress">
+<div class="wallet-address-box" id="walletAddress">
                         Tymk60K9JvCqS7Fqy6BpWpZp8hLpVHw7D
                     </div>
-                    <button onclick="copyWalletAddress()" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
-                        <i class="fas fa-copy"></i> نسخ العنوان
+<button class="btn btn-primary" onclick="copyWalletAddress()" style="width: 100%; margin-top: 10px;">
+<i class="fas fa-copy"></i> نسخ العنوان
                     </button>
-                </div>
-            </div>
-            
-            <!-- رفع إثبات التحويل (اختياري) -->
-            <div style="margin: 25px 0;">
-                <h4 style="color: #cbd5e1; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-camera"></i>
+</div>
+</div>
+<!-- رفع إثبات التحويل (اختياري) -->
+<div style="margin: 25px 0;">
+<h4 style="color: #cbd5e1; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+<i class="fas fa-camera"></i>
                     إثبات التحويل (اختياري)
                 </h4>
-                
-                <div style="background: rgba(255,255,255,0.03); border: 2px dashed rgba(124,58,237,0.3); border-radius: 15px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s;" id="uploadContainer">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
-                    <p style="color: #94a3b8; margin-bottom: 10px;">
-                        <strong>اسحب وأفلت الصورة هنا</strong><br>
+<div id="uploadContainer" style="background: rgba(255,255,255,0.03); border: 2px dashed rgba(124,58,237,0.3); border-radius: 15px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s;">
+<i class="fas fa-cloud-upload-alt" style="font-size: 40px; color: var(--primary); margin-bottom: 15px;"></i>
+<p style="color: #94a3b8; margin-bottom: 10px;">
+<strong>اسحب وأفلت الصورة هنا</strong><br/>
                         أو انقر لاختيار صورة
                     </p>
-                    <span style="display: inline-block; background: var(--primary); color: white; padding: 10px 25px; border-radius: 50px; font-size: 14px; margin-top: 10px;">
-                        <i class="fas fa-folder-open"></i> اختر صورة
+<span style="display: inline-block; background: var(--primary); color: white; padding: 10px 25px; border-radius: 50px; font-size: 14px; margin-top: 10px;">
+<i class="fas fa-folder-open"></i> اختر صورة
                     </span>
-                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                </div>
-                
-                <div id="uploadPreview" style="display: none; margin-top: 20px;">
-                    <img id="previewImage" style="max-width: 100%; max-height: 200px; border-radius: 10px; border: 2px solid var(--primary);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <span id="fileName" style="color: #94a3b8;"></span>
-                        <span onclick="removeImage()" style="color: var(--danger); cursor: pointer;">
-                            <i class="fas fa-trash"></i> حذف
+<input accept="image/*" id="fileInput" onchange="handleImageUpload(event)" style="display: none;" type="file"/>
+</div>
+<div id="uploadPreview" style="display: none; margin-top: 20px;">
+<img id="previewImage" style="max-width: 100%; max-height: 200px; border-radius: 10px; border: 2px solid var(--primary);"/>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+<span id="fileName" style="color: #94a3b8;"></span>
+<span onclick="removeImage()" style="color: var(--danger); cursor: pointer;">
+<i class="fas fa-trash"></i> حذف
                         </span>
-                    </div>
-                </div>
-                
-                <small style="color: #94a3b8; display: block; margin-top: 15px; text-align: center;">
-                    <i class="fas fa-info-circle"></i>
+</div>
+</div>
+<small style="color: #94a3b8; display: block; margin-top: 15px; text-align: center;">
+<i class="fas fa-info-circle"></i>
                     رفع الصورة يساعد في معالجة طلبك بشكل أسرع (خلال ساعة واحدة)
                 </small>
-            </div>
-            
-            <!-- كود الإحالة للمستخدم المسجل -->
-            <div id="referralCodeSection" style="display: none; background: rgba(139,92,246,0.1); padding: 20px; border-radius: 15px; margin: 25px 0; border: 1px solid var(--purple);">
-                <h4 style="color: var(--purple); margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-gift"></i>
+</div>
+<!-- كود الإحالة للمستخدم المسجل -->
+<div id="referralCodeSection" style="display: none; background: rgba(139,92,246,0.1); padding: 20px; border-radius: 15px; margin: 25px 0; border: 1px solid var(--purple);">
+<h4 style="color: var(--purple); margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+<i class="fas fa-gift"></i>
                     كود الإحالة الخاص بك
                 </h4>
-                <p style="color: #cbd5e1; margin-bottom: 15px;">
+<p style="color: #cbd5e1; margin-bottom: 15px;">
                     شارك كودك مع أصدقائك واربح 50$ عن كل صديق
                 </p>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="userReferralCodeDisplay" class="form-control" readonly style="text-align: center; font-size: 18px; letter-spacing: 2px; font-weight: bold; color: var(--purple);">
-                    <button class="btn btn-sm" style="background: var(--purple); color: white; padding: 0 20px;" onclick="copyUserReferralCode()">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- أزرار الإجراءات -->
-            <div style="display: flex; gap: 15px; margin-top: 30px;">
-                <button class="btn" style="flex: 1; background: var(--danger);" onclick="closePaymentModal()">
-                    <i class="fas fa-times"></i> إلغاء
+<div style="display: flex; gap: 10px;">
+<input class="form-control" id="userReferralCodeDisplay" readonly="" style="text-align: center; font-size: 18px; letter-spacing: 2px; font-weight: bold; color: var(--purple);" type="text"/>
+<button class="btn btn-sm" onclick="copyUserReferralCode()" style="background: var(--purple); color: white; padding: 0 20px;">
+<i class="fas fa-copy"></i>
+</button>
+</div>
+</div>
+<!-- أزرار الإجراءات -->
+<div style="display: flex; gap: 15px; margin-top: 30px;">
+<button class="btn" onclick="closePaymentModal()" style="flex: 1; background: var(--danger);">
+<i class="fas fa-times"></i> إلغاء
                 </button>
-                <button class="btn" style="flex: 2; background: var(--success);" onclick="submitPayment()">
-                    <i class="fas fa-check-circle"></i> تأكيد الدفع
+<button class="btn" onclick="submitPayment()" style="flex: 2; background: var(--success);">
+<i class="fas fa-check-circle"></i> تأكيد الدفع
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== الإشعار ========== -->
-    <div class="notification" id="notification"></div>
-
-    <!-- ========== محتوى الصفحة الرئيسية ========== -->
-    <div class="container">
-        <!-- قسم البطل -->
-        <section class="hero">
-            <h1>استثمر بذكاء واربح يومياً</h1>
-            <p>انضم إلى المنصة الاستثمارية الأسرع نمواً وابدأ رحلتك نحو النجاح المالي مع Elite Investors</p>
-            <button class="btn btn-glow" onclick="openAuthModal()" style="width: auto; padding: 16px 48px;">
-                <i class="fas fa-rocket"></i>
+</div>
+</div>
+</div>
+<!-- ========== الإشعار ========== -->
+<div class="notification" id="notification"></div>
+<!-- ========== محتوى الصفحة الرئيسية ========== -->
+<div class="container">
+<!-- قسم البطل -->
+<section class="hero">
+<h1>استثمر بذكاء واربح يومياً</h1>
+<p>انضم إلى المنصة الاستثمارية الأسرع نمواً وابدأ رحلتك نحو النجاح المالي مع Elite Investors</p>
+<button class="btn btn-glow" onclick="openAuthModal()" style="width: auto; padding: 16px 48px;">
+<i class="fas fa-rocket"></i>
                 ابدأ الآن
             </button>
-        </section>
-        
-        <!-- إحصائيات المنصة -->
-        <section>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">50,000+</div>
-                    <div class="stat-label">مستثمر ناجح</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">$25M+</div>
-                    <div class="stat-label">أرباح تم توزيعها</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">99%</div>
-                    <div class="stat-label">معدل رضا العملاء</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">دعم فني متاح</div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- مميزات المنصة -->
-        <section>
-            <div class="features-grid">
-                <div class="feature-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <h4>أمان تام</h4>
-                    <p>نظام حماية متقدم وأمان للبيانات والاستثمارات</p>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-chart-line"></i>
-                    <h4>أرباح مضمونة</h4>
-                    <p>تحويل يومي مباشر للأرباح إلى محفظتك الشخصية</p>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-headset"></i>
-                    <h4>دعم فني</h4>
-                    <p>فريق دعم متاح على مدار الساعة لمساعدتك</p>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-bolt"></i>
-                    <h4>سرعة التنفيذ</h4>
-                    <p>معاملات سريعة وتفعيل فوري للباقات</p>
-                </div>
-            </div>
-        </section>
-        
-        <!-- ========== نظام الإحالة المتقدم في الصفحة الرئيسية ========== -->
-        <section class="referral-banner">
-            <div class="referral-title">
-                <i class="fas fa-user-friends"></i>
-                <h2 style="font-size: 2rem; color: white;">نظام الإحالة - اربح مع أصدقائك</h2>
-            </div>
-            
-            <p style="color: #cbd5e1; text-align: center; margin-bottom: 30px; font-size: 18px;">
+</section>
+<!-- إحصائيات المنصة -->
+<section>
+<div class="stats-grid">
+<div class="stat-item">
+<div class="stat-number">50,000+</div>
+<div class="stat-label">مستثمر ناجح</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">$25M+</div>
+<div class="stat-label">أرباح تم توزيعها</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">99%</div>
+<div class="stat-label">معدل رضا العملاء</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">24/7</div>
+<div class="stat-label">دعم فني متاح</div>
+</div>
+</div>
+</section>
+<!-- مميزات المنصة -->
+<section>
+<div class="features-grid">
+<div class="feature-item">
+<i class="fas fa-shield-alt"></i>
+<h4>أمان تام</h4>
+<p>نظام حماية متقدم وأمان للبيانات والاستثمارات</p>
+</div>
+<div class="feature-item">
+<i class="fas fa-chart-line"></i>
+<h4>أرباح مضمونة</h4>
+<p>تحويل يومي مباشر للأرباح إلى محفظتك الشخصية</p>
+</div>
+<div class="feature-item">
+<i class="fas fa-headset"></i>
+<h4>دعم فني</h4>
+<p>فريق دعم متاح على مدار الساعة لمساعدتك</p>
+</div>
+<div class="feature-item">
+<i class="fas fa-bolt"></i>
+<h4>سرعة التنفيذ</h4>
+<p>معاملات سريعة وتفعيل فوري للباقات</p>
+</div>
+</div>
+</section>
+<!-- ========== نظام الإحالة المتقدم في الصفحة الرئيسية ========== -->
+<section class="referral-banner">
+<div class="referral-title">
+<i class="fas fa-user-friends"></i>
+<h2 style="font-size: 2rem; color: white;">نظام الإحالة - اربح مع أصدقائك</h2>
+</div>
+<p style="color: #cbd5e1; text-align: center; margin-bottom: 30px; font-size: 18px;">
                 ادعو أصدقائك للانضمام إلى Elite Investors واربح مكافآت فورية عند اشتراكهم
             </p>
-            
-            <div class="referral-rewards">
-                <div class="reward-card referrer">
-                    <div class="reward-amount">50$</div>
-                    <div class="reward-label">لك - صاحب الكود</div>
-                    <div class="reward-desc">عند اشتراك كل صديق</div>
-                </div>
-                <div class="reward-card referee">
-                    <div class="reward-amount">20$</div>
-                    <div class="reward-label">لصديقك - المشترك</div>
-                    <div class="reward-desc">هدية فورية عند تفعيل الباقة</div>
-                </div>
-            </div>
-            
-            <div id="referralActionSection">
-                <!-- للمستخدمين غير المسجلين -->
-                <div id="nonUserReferral" style="text-align: center;">
-                    <p style="color: #cbd5e1; margin-bottom: 20px;">
-                        <i class="fas fa-lock"></i>
+<div class="referral-rewards">
+<div class="reward-card referrer">
+<div class="reward-amount">50$</div>
+<div class="reward-label">لك - صاحب الكود</div>
+<div class="reward-desc">عند اشتراك كل صديق</div>
+</div>
+<div class="reward-card referee">
+<div class="reward-amount">20$</div>
+<div class="reward-label">لصديقك - المشترك</div>
+<div class="reward-desc">هدية فورية عند تفعيل الباقة</div>
+</div>
+</div>
+<div id="referralActionSection">
+<!-- للمستخدمين غير المسجلين -->
+<div id="nonUserReferral" style="text-align: center;">
+<p style="color: #cbd5e1; margin-bottom: 20px;">
+<i class="fas fa-lock"></i>
                         سجل الدخول أو أنشئ حساب للحصول على كود الإحالة الخاص بك
                     </p>
-                    <div style="display: flex; gap: 15px; justify-content: center;">
-                        <button class="btn btn-primary" onclick="openAuthModal()">
-                            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+<div style="display: flex; gap: 15px; justify-content: center;">
+<button class="btn btn-primary" onclick="openAuthModal()">
+<i class="fas fa-sign-in-alt"></i> تسجيل الدخول
                         </button>
-                        <button class="btn" style="background: var(--purple); color: white;" onclick="openAuthModal(); showTab('register')">
-                            <i class="fas fa-user-plus"></i> إنشاء حساب
+<button class="btn" onclick="openAuthModal(); showTab('register')" style="background: var(--purple); color: white;">
+<i class="fas fa-user-plus"></i> إنشاء حساب
                         </button>
-                    </div>
-                </div>
-                
-                <!-- للمستخدمين المسجلين (سيتم عرضه عبر JS) -->
-                <div id="userReferralCode" style="display: none;">
-                    <!-- سيتم تعبئته بالجافاسكريبت -->
-                </div>
-            </div>
-            
-            <!-- صندوق إدخال كود الإحالة للتسجيل -->
-            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
-                <h4 style="color: white; text-align: center; margin-bottom: 20px;">
-                    <i class="fas fa-gift" style="color: var(--warning);"></i>
+</div>
+</div>
+<!-- للمستخدمين المسجلين (سيتم عرضه عبر JS) -->
+<div id="userReferralCode" style="display: none;">
+<!-- سيتم تعبئته بالجافاسكريبت -->
+</div>
+</div>
+<!-- صندوق إدخال كود الإحالة للتسجيل -->
+<div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
+<h4 style="color: white; text-align: center; margin-bottom: 20px;">
+<i class="fas fa-gift" style="color: var(--warning);"></i>
                     لديك كود إحالة؟ أدخله هنا
                 </h4>
-                <div class="referral-code-input">
-                    <input type="text" class="referral-code-field" id="quickReferralCode" placeholder="أدخل كود الإحالة">
-                    <button class="btn btn-primary" onclick="applyReferralCode()" style="width: auto; padding: 0 40px;">
-                        <i class="fas fa-check"></i> تطبيق
+<div class="referral-code-input">
+<input class="referral-code-field" id="quickReferralCode" placeholder="أدخل كود الإحالة" type="text"/>
+<button class="btn btn-primary" onclick="applyReferralCode()" style="width: auto; padding: 0 40px;">
+<i class="fas fa-check"></i> تطبيق
                     </button>
-                </div>
-            </div>
-        </section>
-        
-        <!-- الباقات -->
-        <section id="packages">
-            <div class="section-title">
-                <h2>باقات الاستثمار</h2>
-                <p>اختر الباقة المناسبة لك وابدأ رحلة الربح اليومي</p>
-            </div>
-            <div class="packages-grid" id="packagesGrid">
-                <!-- سيتم ملؤه بالجافاسكريبت -->
-                <div style="text-align: center; grid-column: 1/-1; padding: 50px;">
-                    <div class="loading-spinner"></div>
-                    <p style="color: #94a3b8; margin-top: 20px;">جاري تحميل الباقات...</p>
-                </div>
-            </div>
-        </section>
-        
-        <!-- كيف تبدأ -->
-        <section style="margin-top: 80px;">
-            <div class="section-title">
-                <h2>كيف تبدأ؟</h2>
-                <p>ثلاث خطوات بسيطة لبداية استثمارك</p>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
-                <div style="text-align: center;">
-                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
+</div>
+</div>
+</section>
+<!-- الباقات -->
+<section id="packages">
+<div class="section-title">
+<h2>باقات الاستثمار</h2>
+<p>اختر الباقة المناسبة لك وابدأ رحلة الربح اليومي</p>
+</div>
+<div class="packages-grid" id="packagesGrid">
+<!-- سيتم ملؤه بالجافاسكريبت -->
+<div style="text-align: center; grid-column: 1/-1; padding: 50px;">
+<div class="loading-spinner"></div>
+<p style="color: #94a3b8; margin-top: 20px;">جاري تحميل الباقات...</p>
+</div>
+</div>
+</section>
+<!-- كيف تبدأ -->
+<section style="margin-top: 80px;">
+<div class="section-title">
+<h2>كيف تبدأ؟</h2>
+<p>ثلاث خطوات بسيطة لبداية استثمارك</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+<div style="text-align: center;">
+<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
                         1
                     </div>
-                    <h4 style="margin-bottom: 10px;">إنشاء حساب</h4>
-                    <p style="color: #94a3b8;">سجل حساب مجاني في دقيقة واحدة</p>
-                </div>
-                <div style="text-align: center;">
-                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
+<h4 style="margin-bottom: 10px;">إنشاء حساب</h4>
+<p style="color: #94a3b8;">سجل حساب مجاني في دقيقة واحدة</p>
+</div>
+<div style="text-align: center;">
+<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
                         2
                     </div>
-                    <h4 style="margin-bottom: 10px;">اختيار الباقة</h4>
-                    <p style="color: #94a3b8;">اشترك في إحدى باقاتنا الاستثمارية</p>
-                </div>
-                <div style="text-align: center;">
-                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
+<h4 style="margin-bottom: 10px;">اختيار الباقة</h4>
+<p style="color: #94a3b8;">اشترك في إحدى باقاتنا الاستثمارية</p>
+</div>
+<div style="text-align: center;">
+<div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
                         3
                     </div>
-                    <h4 style="margin-bottom: 10px;">ابدأ الربح</h4>
-                    <p style="color: #94a3b8;">احصل على أرباحك اليومية فوراً</p>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- ========== التذييل ========== -->
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-content">
-                <!-- نبذة عن المنصة -->
-                <div class="footer-section">
-                    <h4><i class="fas fa-info-circle"></i> عن المنصة</h4>
-                    <p>Elite Investors منصة استثمارية رقمية توفر فرصة حقيقية للربح اليومي من خلال باقات استثمارية متنوعة وآمنة.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-telegram"></i></a>
-                        <a href="#"><i class="fab fa-whatsapp"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                
-                <!-- روابط سريعة -->
-                <div class="footer-section">
-                    <h4><i class="fas fa-link"></i> روابط سريعة</h4>
-                    <ul>
-                        <li><a href="#" onclick="openAuthModal()">تسجيل الدخول</a></li>
-                        <li><a href="#" onclick="openAuthModal(); showTab('register')">إنشاء حساب</a></li>
-                        <li><a href="#packages">الباقات</a></li>
-                        <li><a href="#" onclick="showNotification('سيتم إضافة الشروط قريباً', 'info')">الشروط والأحكام</a></li>
-                        <li><a href="#" onclick="showNotification('سيتم إضافة سياسة الخصوصية قريباً', 'info')">سياسة الخصوصية</a></li>
-                    </ul>
-                </div>
-                
-                <!-- طرق الدفع -->
-                <div class="footer-section">
-                    <h4><i class="fas fa-credit-card"></i> طرق الدفع</h4>
-                    <ul>
-                        <li><i class="fas fa-coins"></i> USDT (TRC20)</li>
-                        <li><i class="fab fa-bitcoin"></i> Bitcoin</li>
-                        <li><i class="fab fa-ethereum"></i> Ethereum</li>
-                        <li><i class="fas fa-bolt"></i> تحويل فوري</li>
-                    </ul>
-                </div>
-                
-                <!-- معلومات التواصل -->
-                <div class="footer-section">
-                    <h4><i class="fas fa-headset"></i> الدعم الفني</h4>
-                    <ul>
-                        <li><i class="fas fa-clock"></i> متاح 24/7</li>
-                        <li><i class="fas fa-envelope"></i> support@elite-investors.com</li>
-                        <li><i class="fas fa-globe"></i> www.elite-investors.com</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>© 2025 Elite Investors. جميع الحقوق محفوظة.</p>
-                <p style="margin-top: 10px;">هذا الموقع مخصص للاستثمار الآمن والمربح. يخضع استخدامك للموقع لشروط الاستخدام.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
+<h4 style="margin-bottom: 10px;">ابدأ الربح</h4>
+<p style="color: #94a3b8;">احصل على أرباحك اليومية فوراً</p>
+</div>
+</div>
+</section>
+</div>
+<!-- ========== التذييل ========== -->
+<footer class="site-footer">
+<div class="footer-container">
+<div class="footer-content">
+<!-- نبذة عن المنصة -->
+<div class="footer-section">
+<h4><i class="fas fa-info-circle"></i> عن المنصة</h4>
+<p>Elite Investors منصة استثمارية رقمية توفر فرصة حقيقية للربح اليومي من خلال باقات استثمارية متنوعة وآمنة.</p>
+<div class="social-links">
+<a href="#"><i class="fab fa-telegram"></i></a>
+<a href="#"><i class="fab fa-whatsapp"></i></a>
+<a href="#"><i class="fab fa-twitter"></i></a>
+<a href="#"><i class="fab fa-instagram"></i></a>
+</div>
+</div>
+<!-- روابط سريعة -->
+<div class="footer-section">
+<h4><i class="fas fa-link"></i> روابط سريعة</h4>
+<ul>
+<li><a href="#" onclick="openAuthModal()">تسجيل الدخول</a></li>
+<li><a href="#" onclick="openAuthModal(); showTab('register')">إنشاء حساب</a></li>
+<li><a href="#packages">الباقات</a></li>
+<li><a href="#" onclick="showNotification('سيتم إضافة الشروط قريباً', 'info')">الشروط والأحكام</a></li>
+<li><a href="#" onclick="showNotification('سيتم إضافة سياسة الخصوصية قريباً', 'info')">سياسة الخصوصية</a></li>
+</ul>
+</div>
+<!-- طرق الدفع -->
+<div class="footer-section">
+<h4><i class="fas fa-credit-card"></i> طرق الدفع</h4>
+<ul>
+<li><i class="fas fa-coins"></i> USDT (TRC20)</li>
+<li><i class="fab fa-bitcoin"></i> Bitcoin</li>
+<li><i class="fab fa-ethereum"></i> Ethereum</li>
+<li><i class="fas fa-bolt"></i> تحويل فوري</li>
+</ul>
+</div>
+<!-- معلومات التواصل -->
+<div class="footer-section">
+<h4><i class="fas fa-headset"></i> الدعم الفني</h4>
+<ul>
+<li><i class="fas fa-clock"></i> متاح 24/7</li>
+<li><i class="fas fa-envelope"></i> support@elite-investors.com</li>
+<li><i class="fas fa-globe"></i> www.elite-investors.com</li>
+</ul>
+</div>
+</div>
+<div class="copyright">
+<p>© 2025 Elite Investors. جميع الحقوق محفوظة.</p>
+<p style="margin-top: 10px;">هذا الموقع مخصص للاستثمار الآمن والمربح. يخضع استخدامك للموقع لشروط الاستخدام.</p>
+</div>
+</div>
+</footer>
+<script>
         // ==================== نظام الصفحة الرئيسية المتكامل ====================
         
         // ---------- المتغيرات العامة ----------
@@ -2343,5 +2298,5 @@
             }
         });
     </script>
-</body>
+<script src="supabase.js"></script><script src="packages.js"></script></body>
 </html>
