@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Elite Investors | منصة الاستثمار الذكي</title>
+    
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===== المتغيرات والأساسيات ===== */
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --primary-light: #a78bfa;
+            --secondary: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(139, 92, 246, 0.2);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 60px rgba(139, 92, 246, 0.3);
+            --radius: 24px;
+            --radius-sm: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 15px 25px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--gradient);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: 100px;
+            padding-bottom: 100px;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
+            border-radius: var(--radius);
+            margin-bottom: 50px;
+        }
+
+        .hero-section h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .package-card {
+            background: var(--dark-card);
+            border-radius: var(--radius);
+            padding: 40px 30px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .package-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .package-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .package-badge.standard { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .package-badge.premium { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .package-badge.vip { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .package-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .package-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .package-price {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--dark-card);
+            border-radius: var(--radius);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid var(--primary);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 5px;
+            border-radius: 50px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: none;
+            z-index: 3000;
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 50px;
+        }
+
+        .nav-item.active {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .packages-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            
+            .bottom-nav {
+                width: 95%;
+                justify-content: space-around;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <!-- الشريط العلوي -->
+    <nav class="navbar">
+        <div class="logo" onclick="window.location.href='index.html'">
+            <div class="logo-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <span class="logo-text">Elite Investors</span>
+        </div>
+
+        <button class="btn btn-primary" id="loginBtn" onclick="openAuthModal()">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>دخول / تسجيل</span>
+        </button>
+    </nav>
+
+    <!-- نافذة تسجيل الدخول -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>مرحباً بك</h2>
+                <button class="close-btn" onclick="closeModal('authModal')">×</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showAuthTab('login')">تسجيل الدخول</button>
+                <button class="tab" onclick="showAuthTab('register')">إنشاء حساب</button>
+            </div>
+
+            <!-- نموذج تسجيل الدخول -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" class="form-control" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" class="form-control" id="loginPassword" required>
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 25px;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('authModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
+                </div>
+            </form>
+
+            <!-- نموذج إنشاء حساب -->
+            <form id="registerForm" style="display: none;" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>الاسم الكامل</label>
+                    <input type="text" class="form-control" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <input type="text" class="form-control" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" class="form-control" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف</label>
+                    <input type="tel" class="form-control" id="registerPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" class="form-control" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>تأكيد كلمة المرور</label>
+                    <input type="password" class="form-control" id="registerConfirmPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>كود الإحالة (اختياري)</label>
+                    <input type="text" class="form-control" id="registerReferral">
+                </div>
+                
+                <div style="display: flex; gap: 15px; margin-top: 25px;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal('authModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-success">إنشاء حساب</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة الدفع -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 إتمام الدفع</h2>
+                <button class="close-btn" onclick="closeModal('paymentModal')">×</button>
+            </div>
+
+            <div id="selectedPackageInfo" style="padding: 20px; text-align: center; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;"></div>
+
+            <div style="padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;">
+                <p style="text-align: center; margin-bottom: 15px;">أرسل المبلغ إلى عنوان USDT (TRC20):</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: center; direction: ltr; word-break: break-all;" id="walletAddressDisplay">
+                    TYmk60K9JvCqS7Fqy6BpWpZp8hLpVHw7D
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-danger" onclick="closeModal('paymentModal')">إلغاء</button>
+                <button class="btn btn-success" onclick="submitPayment()">تم الدفع</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة طلب السحب -->
+    <div class="modal" id="withdrawalModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💳 طلب سحب</h2>
+                <button class="close-btn" onclick="closeModal('withdrawalModal')">×</button>
+            </div>
+
+            <div style="padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>الرصيد المتاح:</span>
+                    <span style="font-size: 24px; font-weight: bold; color: var(--success);" id="availableBalance">0$</span>
+                </div>
+                <div style="margin-top: 10px; font-size: 13px; color: var(--text-muted);">الحد الأدنى: 50$</div>
+            </div>
+
+            <div class="form-group">
+                <label>💰 المبلغ ($)</label>
+                <input type="number" class="form-control" id="withdrawAmount" min="50" step="10" oninput="calculateWithdrawal()">
+            </div>
+
+            <div class="form-group">
+                <label>💳 عنوان المحفظة</label>
+                <input type="text" class="form-control" id="withdrawWallet">
+            </div>
+
+            <div class="form-group">
+                <label>🌐 الشبكة</label>
+                <select class="form-control" id="withdrawNetwork" onchange="calculateWithdrawal()">
+                    <option value="TRC20">TRC20 (رسوم 5$)</option>
+                    <option value="ERC20">ERC20 (رسوم 15$)</option>
+                    <option value="BEP20">BEP20 (رسوم 3$)</option>
+                </select>
+            </div>
+
+            <div style="padding: 15px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>المبلغ:</span>
+                    <span id="withdrawAmountDisplay">0$</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>الرسوم:</span>
+                    <span id="withdrawFeeDisplay">5$</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                    <span>الإجمالي:</span>
+                    <span id="withdrawTotalDisplay">0$</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <button class="btn btn-danger" onclick="closeModal('withdrawalModal')">إلغاء</button>
+                <button class="btn btn-success" onclick="submitWithdrawal()">تأكيد الطلب</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإشعار -->
+    <div class="notification" id="notification"></div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="container">
+        <!-- الصفحة الرئيسية -->
+        <div id="home-page">
+            <section class="hero-section">
+                <h1>استثمر بذكاء واربح يومياً</h1>
+                <p>انضم إلى Elite Investors، المنصة الاستثمارية الأسرع نمواً</p>
+                <button class="btn btn-primary" onclick="scrollToPackages()" style="padding: 15px 50px;">
+                    <i class="fas fa-rocket"></i> ابدأ الآن
+                </button>
+            </section>
+
+            <section id="packages">
+                <div class="section-title">
+                    <h2>باقات الاستثمار</h2>
+                    <p>اختر الباقة المناسبة لك</p>
+                </div>
+                <div class="packages-grid" id="packagesGrid">
+                    <div class="loading-spinner">جاري التحميل...</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- التنقل السفلي -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showPage('home')">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </div>
+        <div class="nav-item" onclick="showPage('tasks')">
+            <i class="fas fa-tasks"></i>
+            <span>المهام</span>
+        </div>
+        <div class="nav-item" onclick="showPage('referral')">
+            <i class="fas fa-user-friends"></i>
+            <span>الإحالة</span>
+        </div>
+        <div class="nav-item" onclick="showPage('profile')">
+            <i class="fas fa-user"></i>
+            <span>حسابي</span>
+        </div>
+    </div>
+
+    <!-- تحميل المكتبات -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    
+    <script>
+        // ========== المتغيرات العامة ==========
+        let currentUser = null;
+        let selectedPackage = null;
+        let packages = [];
+
+        // ========== الدوال الأساسية ==========
+        window.openAuthModal = function() {
+            document.getElementById('authModal').classList.add('active');
+        };
+
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.remove('active');
+        };
+
+        window.showAuthTab = function(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+            event.currentTarget.classList.add('active');
+        };
+
+        window.showPage = function(page) {
+            // هذه دالة بسيطة للتجربة
+            showNotification('جاري الانتقال إلى صفحة ' + page);
+        };
+
+        window.scrollToPackages = function() {
+            document.getElementById('packages').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // ========== دوال Supabase ==========
+        async function loadPackages() {
+            try {
+                const { data, error } = await supabase
+                    .from('packages')
+                    .select('*')
+                    .eq('status', 'active');
+                
+                if (error) throw error;
+                
+                packages = data || [];
+                displayPackages();
+            } catch (error) {
+                console.error('خطأ:', error);
+                showNotification('فشل تحميل الباقات', 'error');
+            }
+        }
+
+        function displayPackages() {
+            const grid = document.getElementById('packagesGrid');
+            
+            if (!packages.length) {
+                grid.innerHTML = '<div class="empty-state">لا توجد باقات متاحة</div>';
+                return;
+            }
+            
+            let html = '';
+            packages.forEach(p => {
+                const daily = (p.price * (p.profit || 2.5) / 100).toFixed(2);
+                const badgeClass = p.category === 'vip' ? 'vip' : p.category === 'premium' ? 'premium' : 'standard';
+                const icon = p.category === 'vip' ? 'fa-crown' : p.category === 'premium' ? 'fa-star' : 'fa-bolt';
+                
+                html += `
+                    <div class="package-card">
+                        <div class="package-badge ${badgeClass}">${p.category === 'vip' ? 'VIP' : p.category === 'premium' ? 'ذهبية' : 'فضية'}</div>
+                        <div class="package-icon"><i class="fas ${icon}"></i></div>
+                        <h3 class="package-name">${p.name}</h3>
+                        <div class="package-price">${p.price}$</div>
+                        <ul class="package-features">
+                            <li><i class="fas fa-check-circle"></i> ربح يومي: ${daily}$</li>
+                            <li><i class="fas fa-check-circle"></i> ${p.tasks_count || 5} مهام يومية</li>
+                            <li><i class="fas fa-check-circle"></i> مدة: ${p.duration || 30} يوم</li>
+                        </ul>
+                        <button class="btn btn-primary" onclick="selectPackage(${p.id})">اشترك الآن</button>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        window.selectPackage = function(id) {
+            if (!currentUser) {
+                showNotification('يجب تسجيل الدخول أولاً', 'error');
+                openAuthModal();
+                return;
+            }
+            
+            const pkg = packages.find(p => p.id === id);
+            if (!pkg) return;
+            
+            selectedPackage = pkg;
+            document.getElementById('selectedPackageInfo').innerHTML = `
+                <h4 style="color: var(--primary);">${pkg.name}</h4>
+                <p style="font-size: 32px; font-weight: bold; color: var(--success);">${pkg.price}$</p>
+                <p style="color: var(--text-muted);">الربح اليومي: ${(pkg.price * (pkg.profit || 2.5) / 100).toFixed(2)}$</p>
+            `;
+            document.getElementById('paymentModal').classList.add('active');
+        };
+
+        window.submitPayment = async function() {
+            if (!selectedPackage || !currentUser) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('pending_packages')
+                    .insert([{
+                        user_id: currentUser.id,
+                        user_name: currentUser.name,
+                        package_id: selectedPackage.id,
+                        package_name: selectedPackage.name,
+                        amount: selectedPackage.price,
+                        status: 'pending',
+                        created_at: new Date().toISOString()
+                    }]);
+                
+                if (error) throw error;
+                
+                closeModal('paymentModal');
+                showNotification('✅ تم تقديم الطلب، بانتظار المراجعة');
+            } catch (error) {
+                showNotification('❌ فشل تقديم الطلب', 'error');
+            }
+        };
+
+        // ========== دوال المصادقة ==========
+        window.handleLogin = async function(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .single();
+                
+                if (error || !data) {
+                    showNotification('❌ بيانات غير صحيحة', 'error');
+                    return;
+                }
+                
+                currentUser = data;
+                localStorage.setItem('current_user', JSON.stringify(data));
+                
+                closeModal('authModal');
+                showNotification('✅ تم تسجيل الدخول');
+            } catch (error) {
+                showNotification('❌ فشل تسجيل الدخول', 'error');
+            }
+        };
+
+        window.handleRegister = async function(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('registerPassword').value;
+            const confirm = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirm) {
+                showNotification('❌ كلمتا المرور غير متطابقتين', 'error');
+                return;
+            }
+            
+            const newUser = {
+                name: document.getElementById('registerName').value,
+                username: document.getElementById('registerUsername').value,
+                email: document.getElementById('registerEmail').value,
+                phone: document.getElementById('registerPhone').value,
+                password: password,
+                referred_by: document.getElementById('registerReferral').value || null,
+                referral_code: 'REF' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+                balance: 0,
+                status: 'active',
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .insert([newUser]);
+                
+                if (error) throw error;
+                
+                closeModal('authModal');
+                showNotification('✅ تم إنشاء الحساب');
+            } catch (error) {
+                showNotification('❌ فشل إنشاء الحساب', 'error');
+            }
+        };
+
+        // ========== دوال السحب ==========
+        window.showWithdrawalModal = function() {
+            if (!currentUser) {
+                showNotification('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            document.getElementById('availableBalance').textContent = (currentUser.balance || 0).toFixed(2) + '$';
+            document.getElementById('withdrawalModal').classList.add('active');
+        };
+
+        window.calculateWithdrawal = function() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+            const network = document.getElementById('withdrawNetwork').value;
+            const fees = { 'TRC20': 5, 'ERC20': 15, 'BEP20': 3 };
+            const fee = fees[network];
+            
+            document.getElementById('withdrawAmountDisplay').textContent = amount + '$';
+            document.getElementById('withdrawFeeDisplay').textContent = fee + '$';
+            document.getElementById('withdrawTotalDisplay').textContent = (amount + fee) + '$';
+        };
+
+        window.submitWithdrawal = async function() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const wallet = document.getElementById('withdrawWallet').value.trim();
+            const network = document.getElementById('withdrawNetwork').value;
+            const fees = { 'TRC20': 5, 'ERC20': 15, 'BEP20': 3 };
+            const fee = fees[network];
+            
+            if (!amount || amount < 50) {
+                showNotification('الحد الأدنى 50$', 'error');
+                return;
+            }
+            
+            if (amount > (currentUser.balance || 0)) {
+                showNotification('الرصيد غير كافي', 'error');
+                return;
+            }
+            
+            showNotification('✅ تم تقديم طلب السحب');
+            closeModal('withdrawalModal');
+        };
+
+        // ========== دوال مساعدة ==========
+        function showNotification(msg, type = 'success') {
+            const n = document.getElementById('notification');
+            n.textContent = msg;
+            n.className = 'notification ' + type;
+            n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 3000);
+        }
+
+        // التحقق من المستخدم الحالي
+        async function checkCurrentUser() {
+            const saved = localStorage.getItem('current_user');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+            }
+        }
+
+        // ========== التهيئة ==========
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('✅ الموقع يعمل');
+            await checkCurrentUser();
+            await loadPackages();
+        });
+    </script>
+</body>
+</html>
