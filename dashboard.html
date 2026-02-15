@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>لوحة التحكم - Elite Capital</title>
     
+    <!-- منع التخزين المؤقت -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -15,8 +20,8 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <!-- Supabase -->
-    
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
     
     <style>
         * {
@@ -49,7 +54,7 @@
             color: var(--text);
             overflow-x: hidden;
             min-height: 100vh;
-            padding-bottom: 100px; /* مسافة للشريط السفلي */
+            padding-bottom: 100px;
         }
 
         /* شريط التمرير */
@@ -311,6 +316,34 @@
             color: var(--text-muted);
         }
 
+        /* حالة عدم وجود اشتراك */
+        .no-subscription {
+            text-align: center;
+            padding: 60px;
+            background: rgba(200, 169, 126, 0.05);
+            border-radius: 40px;
+            border: 2px dashed var(--gold);
+            margin-bottom: 30px;
+        }
+
+        .no-subscription i {
+            font-size: 80px;
+            color: var(--gold);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-subscription h3 {
+            font-size: 28px;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        .no-subscription p {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
         /* شبكة المحتوى */
         .content-grid {
             display: grid;
@@ -468,7 +501,7 @@
             color: var(--danger);
         }
 
-        /* الشريط السفلي الفاخر */
+        /* الشريط السفلي */
         .bottom-nav {
             position: fixed;
             bottom: 20px;
@@ -567,11 +600,6 @@
             color: var(--text);
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-gold);
-        }
-
         .btn-sm {
             padding: 8px 16px;
             font-size: 14px;
@@ -579,6 +607,30 @@
 
         .btn-block {
             width: 100%;
+        }
+
+        .refresh-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(200, 169, 126, 0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .refresh-btn:hover {
+            background: var(--gold);
+            color: var(--dark);
+            transform: rotate(180deg);
         }
 
         /* النوافذ المنبثقة */
@@ -709,33 +761,6 @@
             animation: fadeIn 0.3s;
         }
 
-        /* حالة عدم وجود اشتراك */
-        .no-subscription {
-            text-align: center;
-            padding: 60px;
-            background: rgba(200, 169, 126, 0.05);
-            border-radius: 40px;
-            border: 2px dashed var(--gold);
-        }
-
-        .no-subscription i {
-            font-size: 80px;
-            color: var(--gold);
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .no-subscription h3 {
-            font-size: 28px;
-            color: var(--gold);
-            margin-bottom: 15px;
-        }
-
-        .no-subscription p {
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-
         /* الإشعارات */
         .notification {
             position: fixed;
@@ -758,6 +783,10 @@
 
         .notification.warning {
             background: var(--warning);
+        }
+
+        .notification.info {
+            background: var(--secondary);
         }
 
         /* استجابة */
@@ -809,18 +838,18 @@
             .nav-item {
                 padding: 10px;
             }
-        }
-
-        @media (max-width: 480px) {
-            .stat-value {
-                font-size: 24px;
-            }
             
             .subscription-name {
                 font-size: 22px;
             }
             
             .profit-amount {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-value {
                 font-size: 24px;
             }
             
@@ -877,6 +906,10 @@
                     <i class="fas fa-gift"></i>
                     كود الإحالة
                 </div>
+                <div class="user-dropdown-item" onclick="refreshSubscription()">
+                    <i class="fas fa-sync-alt"></i>
+                    تحديث البيانات
+                </div>
                 <div class="user-dropdown-item" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
                     تسجيل الخروج
@@ -921,8 +954,8 @@
                 </div>
             </div>
 
-            <!-- الاشتراك الحالي -->
-            <div id="subscriptionSection"></div>
+            <!-- الاشتراك الحالي (مع زر تحديث) -->
+            <div id="subscriptionSection" style="position: relative;"></div>
 
             <!-- شبكة المحتوى -->
             <div class="content-grid">
@@ -1045,7 +1078,7 @@
         </div>
     </div>
 
-    <!-- الشريط السفلي الفاخر -->
+    <!-- الشريط السفلي -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="showPage('home')">
             <i class="fas fa-home"></i>
@@ -1143,6 +1176,7 @@
 
         // تهيئة الصفحة
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 بدء تحميل لوحة التحكم...');
             await checkUser();
             await loadUserData();
             await loadSubscription();
@@ -1150,6 +1184,9 @@
             await loadWithdrawals();
             await loadReferralStats();
             updateUI();
+            
+            // إضافة زر التحديث إذا وجد اشتراك
+            setTimeout(addRefreshButton, 1000);
         });
 
         // التحقق من المستخدم
@@ -1161,6 +1198,7 @@
             }
             
             currentUser = JSON.parse(savedUser);
+            console.log('المستخدم الحالي:', currentUser);
             
             if (window.supabaseHelpers) {
                 const result = await window.supabaseHelpers.getUserById(currentUser.id);
@@ -1196,12 +1234,23 @@
         async function loadSubscription() {
             if (!currentUser) return;
             
-            const result = await window.supabaseHelpers.getUserSubscription(currentUser.id);
-            
-            if (result.success && result.data) {
-                subscription = result.data;
-                displaySubscription();
-            } else {
+            try {
+                console.log('جاري تحميل الاشتراك للمستخدم:', currentUser.id);
+                
+                const result = await window.supabaseHelpers.getUserSubscription(currentUser.id);
+                
+                console.log('نتيجة الاشتراك من قاعدة البيانات:', result);
+                
+                if (result.success && result.data) {
+                    subscription = result.data;
+                    console.log('بيانات الاشتراك:', subscription);
+                    displaySubscription();
+                } else {
+                    console.log('لا يوجد اشتراك نشط');
+                    displayNoSubscription();
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الاشتراك:', error);
                 displayNoSubscription();
             }
         }
@@ -1210,48 +1259,44 @@
         function displaySubscription() {
             if (!subscription) return;
             
+            console.log('عرض الاشتراك:', subscription);
+            
             const startDate = new Date(subscription.start_date);
             const endDate = new Date(subscription.end_date);
             const today = new Date();
             const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
             const totalDays = 30;
-            const daysPassed = totalDays - daysLeft;
-            const progress = (daysPassed / totalDays) * 100;
+            const daysPassed = totalDays - (daysLeft > 0 ? daysLeft : 0);
+            const progress = ((daysPassed / totalDays) * 100).toFixed(1);
             
-            let badgeClass = 'standard';
-            let badgeText = 'عادية';
-            
-            if (subscription.package_category === 'vip') {
-                badgeClass = 'vip';
-                badgeText = 'VIP';
-            } else if (subscription.package_category === 'premium') {
-                badgeClass = 'premium';
-                badgeText = 'مميزة';
-            }
+            // التأكد من أن القيم أرقام
+            const amount = subscription.amount || 0;
+            const dailyProfit = subscription.daily_profit || 0;
+            const packageName = subscription.package_name || 'باقة غير معروفة';
             
             const subscriptionHtml = `
                 <div class="subscription-card" data-aos="fade-up">
                     <div class="subscription-header">
-                        <h2 class="subscription-name">${subscription.package_name}</h2>
+                        <h2 class="subscription-name" style="color: var(--gold);">${packageName}</h2>
                         <span class="subscription-badge">نشط</span>
                     </div>
                     
                     <div class="subscription-details">
                         <div class="detail-item">
                             <div class="detail-label">الاستثمار</div>
-                            <div class="detail-value">${subscription.amount}$</div>
+                            <div class="detail-value">${amount}$</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">الربح اليومي</div>
-                            <div class="detail-value" style="color: var(--success);">+${subscription.daily_profit}$</div>
+                            <div class="detail-value" style="color: var(--success);">+${dailyProfit}$</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">الأيام المتبقية</div>
-                            <div class="detail-value">${daysLeft}</div>
+                            <div class="detail-value">${daysLeft > 0 ? daysLeft : 0}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">تقدم الباقة</div>
-                            <div class="detail-value">${Math.round(progress)}%</div>
+                            <div class="detail-value">${progress}%</div>
                         </div>
                     </div>
                     
@@ -1261,7 +1306,7 @@
                     
                     <div class="profit-timer">
                         <div>
-                            <span class="profit-amount">+${subscription.daily_profit}$</span>
+                            <span class="profit-amount">+${dailyProfit}$</span>
                             <span class="profit-time">أرباح اليوم</span>
                         </div>
                         <div>
@@ -1273,7 +1318,10 @@
             `;
             
             document.getElementById('subscriptionSection').innerHTML = subscriptionHtml;
-            document.getElementById('todayProfit').textContent = subscription.daily_profit + '$';
+            document.getElementById('todayProfit').textContent = dailyProfit + '$';
+            
+            // إضافة زر التحديث
+            addRefreshButton();
         }
 
         // عرض حالة عدم وجود اشتراك
@@ -1292,6 +1340,45 @@
             
             document.getElementById('subscriptionSection').innerHTML = html;
             document.getElementById('todayProfit').textContent = '0$';
+        }
+
+        // إضافة زر التحديث
+        function addRefreshButton() {
+            const subscriptionDiv = document.getElementById('subscriptionSection');
+            if (!subscriptionDiv) return;
+            
+            // حذف الزر القديم إذا موجود
+            const oldBtn = document.querySelector('.refresh-btn');
+            if (oldBtn) oldBtn.remove();
+            
+            // إنشاء زر جديد
+            const refreshBtn = document.createElement('div');
+            refreshBtn.className = 'refresh-btn';
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            refreshBtn.onclick = refreshSubscription;
+            refreshBtn.title = 'تحديث بيانات الباقة';
+            
+            subscriptionDiv.appendChild(refreshBtn);
+        }
+
+        // دالة تحديث البيانات
+        async function refreshSubscription() {
+            showNotification('جاري تحديث بيانات الباقة...', 'info');
+            
+            // تحديث المستخدم أولاً
+            if (window.supabaseHelpers) {
+                const userResult = await window.supabaseHelpers.getUserById(currentUser.id);
+                if (userResult.success && userResult.data) {
+                    currentUser = userResult.data;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                }
+            }
+            
+            // تحديث الاشتراك
+            await loadSubscription();
+            await loadUserData();
+            
+            showNotification('✅ تم تحديث البيانات بنجاح');
         }
 
         // تحميل إحصائيات الإحالة
@@ -1353,14 +1440,16 @@
                     itemClass += ' referral';
                 }
                 
+                const date = t.created_at ? new Date(t.created_at).toLocaleDateString('ar-SA') : '';
+                
                 html += `
                     <div class="${itemClass}">
                         <div class="transaction-info">
-                            <h4>${t.type}</h4>
-                            <p>${t.description || ''}<br><small>${new Date(t.created_at).toLocaleDateString('ar-SA')}</small></p>
+                            <h4>${t.type || 'معاملة'}</h4>
+                            <p>${t.description || ''}<br><small>${date}</small></p>
                         </div>
                         <div class="transaction-amount ${amountClass}">
-                            ${sign}${t.amount}$
+                            ${sign}${t.amount || 0}$
                         </div>
                     </div>
                 `;
@@ -1383,6 +1472,8 @@
                 if (pendingCount > 0) {
                     document.getElementById('pendingWithdrawalsBadge').style.display = 'block';
                     document.getElementById('pendingWithdrawalsBadge').textContent = pendingCount;
+                } else {
+                    document.getElementById('pendingWithdrawalsBadge').style.display = 'none';
                 }
             }
         }
@@ -1409,15 +1500,17 @@
                     statusText = 'مرفوض';
                 }
                 
+                const date = w.created_at ? new Date(w.created_at).toLocaleDateString('ar-SA') : '';
+                
                 html += `
                     <div class="withdrawal-item">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="font-weight: 700;">${w.amount}$</span>
+                            <span style="font-weight: 700;">${w.amount || 0}$</span>
                             <span class="withdrawal-status ${statusClass}">${statusText}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <small style="color: var(--text-muted);">${new Date(w.created_at).toLocaleDateString('ar-SA')}</small>
-                            <small style="color: var(--text-muted);">${w.network}</small>
+                            <small style="color: var(--text-muted);">${date}</small>
+                            <small style="color: var(--text-muted);">${w.network || 'TRC20'}</small>
                         </div>
                     </div>
                 `;
@@ -1562,18 +1655,21 @@
             }
         });
 
-        // تحديث دوري
+        // تحديث عند العودة للصفحة
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // تحديث دوري كل 30 ثانية
         setInterval(async () => {
-            if (currentUser) {
+            if (currentUser && document.visibilityState === 'visible') {
+                console.log('تحديث تلقائي للبيانات...');
                 await loadUserData();
                 await loadTransactions();
             }
         }, 30000);
     </script>
-
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script src="app.js"></script>
-
 </body>
 </html>
