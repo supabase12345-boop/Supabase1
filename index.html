@@ -2,13 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Capital - منصة الاستثمار الذكي</title>
-    
-    <!-- منع التخزين المؤقت -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة - Elite Capital</title>
     
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,13 +11,24 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
-    <!-- AOS Animation -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#c8a97e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Elite Capital">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
+    <meta name="msapplication-TileColor" content="#c8a97e">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+
     <style>
         * {
             margin: 0;
@@ -58,7 +64,7 @@
 
         /* شريط التمرير */
         ::-webkit-scrollbar {
-            width: 10px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -67,110 +73,135 @@
 
         ::-webkit-scrollbar-thumb {
             background: var(--gold);
-            border-radius: 5px;
+            border-radius: 4px;
         }
 
-        /* الشريط العلوي */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
+        /* الحاوية الرئيسية */
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* الشريط الجانبي */
+        .sidebar {
+            width: 280px;
             background: rgba(15, 23, 42, 0.98);
             backdrop-filter: blur(10px);
-            border-bottom: 2px solid var(--gold);
-            padding: 12px 20px;
+            border-left: 3px solid var(--gold);
+            padding: 25px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 5px 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(200, 169, 126, 0.3);
+        }
+
+        .sidebar-header h2 {
+            color: var(--gold);
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 15px;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(200, 169, 126, 0.1);
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .sidebar-menu i {
+            width: 25px;
+            font-size: 18px;
+        }
+
+        .sidebar-menu .badge {
+            background: var(--danger);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-right: auto;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            margin-right: 280px;
+            padding: 25px;
+        }
+
+        /* الشريط العلوي للوحة */
+        .admin-header {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(200, 169, 126, 0.3);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .logo-icon {
-            width: 45px;
-            height: 45px;
-            background: var(--gradient-gold);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .admin-header h2 {
+            color: var(--gold);
             font-size: 24px;
-            color: var(--dark);
-            transform: rotate(0deg);
-            transition: all 0.5s;
         }
 
-        .logo:hover .logo-icon {
-            transform: rotate(360deg);
-        }
-
-        .logo-text {
-            font-size: 20px;
-            font-weight: 900;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo-text span {
-            display: block;
-            font-size: 10px;
+        .admin-header .date {
             color: var(--text-muted);
-            -webkit-text-fill-color: var(--text-muted);
-            letter-spacing: 1px;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: 600;
             font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
+        }
+
+        .admin-header-left {
             display: flex;
             align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        .btn-primary {
-            background: var(--gradient-gold);
-            color: var(--dark);
-            box-shadow: var(--shadow-gold);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--gold);
-            color: var(--text);
-        }
-
-        .btn-primary:hover, .btn-outline:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-gold);
+            gap: 20px;
         }
 
         /* قائمة المستخدم */
         .user-menu {
             position: relative;
-            display: none;
-        }
-
-        .user-menu.active {
-            display: block;
         }
 
         .user-avatar {
@@ -186,11 +217,6 @@
             color: var(--dark);
             cursor: pointer;
             border: 2px solid var(--gold);
-            transition: all 0.3s;
-        }
-
-        .user-avatar:hover {
-            transform: scale(1.1);
         }
 
         .user-dropdown {
@@ -232,6 +258,7 @@
             border-radius: 12px;
             transition: all 0.3s;
             cursor: pointer;
+            position: relative;
         }
 
         .user-dropdown-item:hover {
@@ -239,473 +266,458 @@
             color: var(--gold);
         }
 
-        /* المحتوى الرئيسي */
-        .main {
-            margin-top: 80px;
-            padding: 20px 30px;
-        }
-
-        /* القسم الرئيسي */
-        .hero {
-            min-height: 80vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            border-radius: 50px;
-            margin-bottom: 50px;
-            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
-            border: 1px solid rgba(200, 169, 126, 0.3);
-            padding: 80px 60px;
-        }
-
-        .hero::before {
-            content: '';
+        .user-dropdown-item .badge {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="%23c8a97e" stroke-width="0.5" opacity="0.1"/></svg>') repeat;
-            opacity: 0.1;
-            animation: float 20s linear infinite;
-        }
-
-        @keyframes float {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 600px;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            padding: 8px 25px;
-            background: rgba(200, 169, 126, 0.2);
-            border: 1px solid var(--gold);
-            border-radius: 50px;
-            color: var(--gold);
-            font-weight: 500;
-            margin-bottom: 30px;
-            backdrop-filter: blur(5px);
-        }
-
-        .hero-title {
-            font-size: 64px;
-            font-weight: 900;
-            line-height: 1.2;
-            margin-bottom: 20px;
-        }
-
-        .hero-title span {
-            color: var(--gold);
-            display: block;
-        }
-
-        .hero-description {
-            font-size: 18px;
-            color: var(--text-muted);
-            margin-bottom: 40px;
-            line-height: 1.8;
-            max-width: 500px;
-        }
-
-        .hero-stats {
-            display: flex;
-            gap: 50px;
-            margin-bottom: 40px;
-        }
-
-        .hero-stat-item {
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--danger);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            min-width: 18px;
             text-align: center;
         }
 
-        .hero-stat-value {
-            font-size: 36px;
-            font-weight: 900;
-            color: var(--gold);
-            margin-bottom: 5px;
-        }
-
-        .hero-stat-label {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        /* الإحصائيات */
+        /* شبكة الإحصائيات */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-            margin: 50px 0;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5));
+            background: rgba(30, 41, 59, 0.5);
             backdrop-filter: blur(10px);
-            border-radius: 30px;
-            padding: 30px;
-            text-align: center;
+            border-radius: 25px;
+            padding: 25px;
             border: 1px solid rgba(200, 169, 126, 0.3);
             transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--gradient-gold);
         }
 
         .stat-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-5px);
             border-color: var(--gold);
             box-shadow: var(--shadow-gold);
         }
 
         .stat-icon {
-            width: 70px;
-            height: 70px;
+            width: 50px;
+            height: 50px;
             background: rgba(200, 169, 126, 0.1);
-            border-radius: 20px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 30px;
+            margin-bottom: 15px;
+            font-size: 24px;
             color: var(--gold);
-            border: 1px solid var(--gold);
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 900;
-            color: var(--gold);
-            margin-bottom: 10px;
         }
 
         .stat-label {
             color: var(--text-muted);
-            font-size: 15px;
-        }
-
-        /* نظام الإحالة */
-        .referral-section {
-            background: linear-gradient(135deg, rgba(200, 169, 126, 0.15), rgba(179, 139, 91, 0.15));
-            border-radius: 50px;
-            padding: 60px;
-            margin: 50px 0;
-            border: 2px solid var(--gold);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .referral-section::before {
-            content: '🎁';
-            position: absolute;
-            bottom: -50px;
-            left: -50px;
-            font-size: 200px;
-            opacity: 0.1;
-            transform: rotate(-15deg);
-        }
-
-        .referral-title {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .referral-title h2 {
-            font-size: 48px;
-            font-weight: 900;
-            color: var(--gold);
-            margin-bottom: 15px;
-        }
-
-        .referral-title p {
-            color: var(--text-muted);
-            font-size: 18px;
-        }
-
-        .referral-cards {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-            margin-bottom: 40px;
-        }
-
-        .referral-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border-radius: 40px;
-            padding: 40px;
-            min-width: 280px;
-            text-align: center;
-            border: 1px solid var(--gold);
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        .referral-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--shadow-gold);
-        }
-
-        .referral-card.referrer {
-            border-color: var(--gold);
-        }
-
-        .referral-card.referee {
-            border-color: var(--success);
-        }
-
-        .referral-card-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(200, 169, 126, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 40px;
-        }
-
-        .referral-card.referrer .referral-card-icon {
-            color: var(--gold);
-            border: 2px solid var(--gold);
-        }
-
-        .referral-card.referee .referral-card-icon {
-            color: var(--success);
-            border: 2px solid var(--success);
-        }
-
-        .referral-amount {
-            font-size: 60px;
-            font-weight: 900;
-            margin-bottom: 10px;
-        }
-
-        .referral-card.referrer .referral-amount {
-            color: var(--gold);
-        }
-
-        .referral-card.referee .referral-amount {
-            color: var(--success);
-        }
-
-        .referral-label {
-            font-size: 18px;
-            color: var(--text);
+            font-size: 14px;
             margin-bottom: 5px;
         }
 
-        .referral-desc {
-            color: var(--text-muted);
-            font-size: 14px;
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold);
         }
 
-        .referral-code-input {
-            max-width: 500px;
-            margin: 0 auto;
+        /* شبكة المحتوى */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* البطاقات */
+        .card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 25px;
+            border: 1px solid rgba(200, 169, 126, 0.3);
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 20px;
             display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
             gap: 15px;
         }
 
-        .referral-code-field {
-            flex: 1;
-            padding: 15px 25px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--gold);
-            border-radius: 50px;
-            color: white;
-            font-size: 16px;
-            text-align: center;
-            letter-spacing: 2px;
-            font-weight: bold;
+        /* الجداول */
+        .table-responsive {
+            overflow-x: auto;
         }
 
-        .referral-code-field:focus {
-            outline: none;
-            box-shadow: var(--shadow-gold);
-        }
-
-        /* الباقات */
-        .packages-section {
-            padding: 80px 0;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .section-title h2 {
-            font-size: 48px;
-            font-weight: 900;
-            color: var(--gold);
-            margin-bottom: 15px;
-        }
-
-        .section-title p {
-            color: var(--text-muted);
-            font-size: 18px;
-        }
-
-        .packages-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-        }
-
-        .package-card {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5));
-            backdrop-filter: blur(10px);
-            border-radius: 40px;
-            padding: 40px;
-            border: 2px solid rgba(200, 169, 126, 0.3);
-            transition: all 0.5s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .package-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: var(--gradient-gold);
-        }
-
-        .package-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            border-color: var(--gold);
-            box-shadow: var(--shadow-gold);
-        }
-
-        .package-badge {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .package-badge.standard {
-            background: var(--gold);
-        }
-
-        .package-badge.premium {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-
-        .package-badge.vip {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-        }
-
-        .package-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(200, 169, 126, 0.1);
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            font-size: 40px;
-            color: var(--gold);
-            border: 2px solid var(--gold);
-        }
-
-        .package-name {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: var(--gold);
-        }
-
-        .package-price {
-            font-size: 48px;
-            font-weight: 900;
-            color: var(--text);
-            margin-bottom: 10px;
-        }
-
-        .package-price small {
-            font-size: 18px;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .package-profit {
-            font-size: 24px;
-            color: var(--success);
-            margin-bottom: 30px;
-            padding: 15px;
-            background: rgba(39, 174, 96, 0.1);
-            border-radius: 20px;
-            border: 1px solid var(--success);
-        }
-
-        .package-features {
-            list-style: none;
-            margin-bottom: 30px;
-        }
-
-        .package-features li {
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-muted);
-        }
-
-        .package-features li i {
-            color: var(--success);
-        }
-
-        .package-btn {
+        .admin-table {
             width: 100%;
-            padding: 18px;
-            background: var(--gradient-gold);
-            border: none;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            text-align: right;
+            padding: 15px;
+            background: rgba(200, 169, 126, 0.1);
+            color: var(--gold);
+            font-weight: 600;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .admin-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-table tr:hover {
+            background: rgba(200, 169, 126, 0.05);
+        }
+
+        /* شارات الحالة */
+        .status-badge {
+            padding: 5px 12px;
             border-radius: 30px;
-            color: var(--dark);
-            font-weight: 700;
-            font-size: 18px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+
+        .status-suspended {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .status-banned {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .status-approved {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+        }
+
+        .status-rejected {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .status-online {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-muted);
+        }
+
+        /* شارات الأولوية */
+        .priority-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .priority-high {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .priority-medium {
+            background: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+
+        .priority-low {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        /* الأزرار */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            font-size: 14px;
         }
 
-        .package-btn:hover {
+        .btn-sm {
+            padding: 6px 15px;
+            font-size: 12px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-gold);
+            color: var(--dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--text);
+        }
+
+        .btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-gold);
         }
 
-        /* نافذة تسجيل الدخول */
+        /* محادثة مباشرة */
+        .chat-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-right: 4px solid var(--success);
+        }
+
+        .chat-item:hover {
+            background: rgba(200, 169, 126, 0.1);
+            transform: translateX(-5px);
+        }
+
+        .chat-item.unread {
+            border-right-color: var(--danger);
+            background: rgba(231, 76, 60, 0.05);
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-info h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--gold);
+        }
+
+        .chat-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+
+        .chat-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 60px;
+            text-align: left;
+        }
+
+        .chat-unread-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 50px;
+            min-width: 22px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        /* ===== نظام التنبيهات العامة ===== */
+        .alerts-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-left: 10px;
+        }
+
+        .alert-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-right: 4px solid var(--gold);
+            transition: all 0.3s;
+        }
+
+        .alert-item:hover {
+            background: rgba(200, 169, 126, 0.1);
+        }
+
+        .alert-item.info {
+            border-right-color: #3498db;
+        }
+
+        .alert-item.success {
+            border-right-color: #27ae60;
+        }
+
+        .alert-item.warning {
+            border-right-color: #f39c12;
+        }
+
+        .alert-item.danger {
+            border-right-color: #e74c3c;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .alert-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .alert-type {
+            padding: 4px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .type-info {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid #3498db;
+        }
+
+        .type-success {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+
+        .type-warning {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid #f39c12;
+        }
+
+        .type-danger {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .alert-message {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        .alert-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .alert-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .no-alerts {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 30px;
+            border: 2px dashed rgba(200,169,126,0.3);
+        }
+
+        .no-alerts i {
+            font-size: 60px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* النوافذ المنبثقة */
         .modal {
             display: none;
             position: fixed;
@@ -713,13 +725,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.98);
-            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
             z-index: 2000;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
             padding: 20px;
-            overflow-y: auto;
         }
 
         .modal.active {
@@ -734,36 +745,28 @@
 
         .modal-content {
             background: linear-gradient(135deg, #1e293b, #0f172a);
-            border-radius: 50px;
-            padding: 40px;
+            border-radius: 30px;
+            padding: 30px;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             border: 2px solid var(--gold);
-            box-shadow: var(--shadow);
-            margin: 60px auto;
-            position: relative;
             max-height: 85vh;
             overflow-y: auto;
         }
 
-        .modal-content::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 2px;
+        .modal-content.large {
+            max-width: 800px;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .modal-title {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 900;
             color: var(--gold);
         }
@@ -772,43 +775,118 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 30px;
+            font-size: 28px;
             cursor: pointer;
-            transition: all 0.3s;
         }
 
         .modal-close:hover {
-            color: var(--gold);
-            transform: rotate(90deg);
+            color: var(--danger);
         }
 
-        .auth-tabs {
+        .modal-footer {
             display: flex;
             gap: 15px;
-            margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 10px;
-            border-radius: 60px;
+            margin-top: 25px;
         }
 
-        .auth-tab {
+        /* نافذة الدردشة */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+        }
+
+        .chat-messages {
             flex: 1;
-            padding: 15px;
-            background: none;
-            border: none;
-            border-radius: 50px;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chat-message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-message.user {
+            align-items: flex-start;
+        }
+
+        .chat-message.admin {
+            align-items: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .chat-message.user .message-bubble {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-message.admin .message-bubble {
+            background: var(--gold);
+            color: var(--dark);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-info {
+            font-size: 11px;
             color: var(--text-muted);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+            margin-top: 5px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-message.admin .message-info {
+            justify-content: flex-end;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(200, 169, 126, 0.3);
+            border-radius: 50px;
+            color: white;
             font-size: 16px;
         }
 
-        .auth-tab.active {
-            background: var(--gradient-gold);
-            color: var(--dark);
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: var(--gold);
         }
 
+        .chat-send-btn {
+            width: 60px;
+            height: 60px;
+            background: var(--gold);
+            border: none;
+            border-radius: 50%;
+            color: var(--dark);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chat-send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* النماذج */
         .form-group {
             margin-bottom: 20px;
         }
@@ -818,191 +896,40 @@
             margin-bottom: 8px;
             color: var(--text-muted);
             font-size: 14px;
-            font-weight: 500;
         }
 
         .form-control {
             width: 100%;
-            padding: 15px 20px;
+            padding: 12px 15px;
             background: rgba(255, 255, 255, 0.03);
-            border: 2px solid rgba(200, 169, 126, 0.3);
-            border-radius: 30px;
+            border: 1px solid rgba(200, 169, 126, 0.3);
+            border-radius: 15px;
             color: white;
-            font-size: 16px;
-            transition: all 0.3s;
+            font-size: 14px;
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--gold);
-            background: rgba(200, 169, 126, 0.1);
         }
 
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background: var(--gradient-gold);
-            border: none;
-            border-radius: 50px;
-            color: var(--dark);
-            font-weight: 700;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-gold);
-        }
-
-        .referral-info {
-            background: rgba(200, 169, 126, 0.1);
-            border-radius: 20px;
-            padding: 15px;
-            margin: 20px 0;
-            border: 1px solid var(--gold);
-            text-align: center;
-        }
-
-        /* نافذة الدفع */
-        .payment-modal {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border-radius: 50px;
-            padding: 40px;
-            width: 100%;
-            max-width: 550px;
-            border: 2px solid var(--gold);
-            margin: 60px auto;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-        .payment-summary {
-            background: rgba(200, 169, 126, 0.1);
-            border-radius: 30px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border: 1px solid var(--gold);
-        }
-
-        .wallet-box {
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px dashed var(--gold);
-            border-radius: 30px;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            direction: ltr;
-        }
-
-        .upload-area {
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px dashed var(--gold);
-            border-radius: 30px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin: 20px 0;
-        }
-
-        .upload-area:hover {
-            border-color: var(--gold);
-            background: rgba(200, 169, 126, 0.05);
-        }
-
-        .upload-area i {
-            font-size: 40px;
-            color: var(--gold);
-            margin-bottom: 15px;
-        }
-
-        /* التذييل */
-        .footer {
-            background: rgba(15, 23, 42, 0.98);
-            padding: 60px 40px 30px;
-            margin-top: 100px;
-            border-top: 2px solid var(--gold);
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-
-        .footer-section h4 {
-            color: var(--gold);
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        .footer-section p,
-        .footer-section ul {
-            color: var(--text-muted);
-            font-size: 14px;
-            line-height: 1.8;
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section ul li {
-            margin-bottom: 10px;
-        }
-
-        .footer-section ul li a {
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.3s;
+        select.form-control {
             cursor: pointer;
         }
 
-        .footer-section ul li a:hover {
-            color: var(--gold);
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
         }
 
-        .social-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
+        /* أقسام الصفحات */
+        .section {
+            display: none;
         }
 
-        .social-links a {
-            width: 45px;
-            height: 45px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            transition: all 0.3s;
-            font-size: 20px;
-            border: 1px solid rgba(200, 169, 126, 0.3);
-        }
-
-        .social-links a:hover {
-            background: var(--gold);
-            color: var(--dark);
-            transform: translateY(-5px);
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(200, 169, 126, 0.3);
-            color: var(--text-muted);
-            font-size: 14px;
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
         }
 
         /* الإشعارات */
@@ -1012,14 +939,13 @@
             right: 20px;
             background: var(--success);
             color: white;
-            padding: 16px 24px;
+            padding: 15px 25px;
             border-radius: 50px;
             display: none;
             z-index: 3000;
             box-shadow: var(--shadow);
-            border-right: 6px solid white;
-            min-width: 350px;
-            animation: slideInLeft 0.3s;
+            border-right: 4px solid white;
+            min-width: 300px;
         }
 
         .notification.error {
@@ -1030,154 +956,10 @@
             background: var(--warning);
         }
 
-        .notification.info {
-            background: var(--secondary);
-        }
-
-        @keyframes slideInLeft {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* استجابة */
-        @media (max-width: 1200px) {
-            .packages-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 992px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .footer-content {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 12px 15px;
-            }
-            
-            .logo-text {
-                font-size: 16px;
-            }
-            
-            .btn {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-            
-            .main {
-                padding: 15px;
-            }
-            
-            .hero {
-                padding: 40px 20px;
-            }
-            
-            .hero-title {
-                font-size: 40px;
-            }
-            
-            .hero-stats {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .packages-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .referral-section {
-                padding: 40px 20px;
-            }
-            
-            .referral-title h2 {
-                font-size: 32px;
-            }
-            
-            .referral-cards {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .footer-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .notification {
-                right: 10px;
-                left: 10px;
-                min-width: auto;
-            }
-            
-            .modal-content {
-                padding: 25px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-title {
-                font-size: 32px;
-            }
-            
-            .section-title h2 {
-                font-size: 32px;
-            }
-            
-            .package-price {
-                font-size: 40px;
-            }
-            
-            .referral-code-input {
-                flex-direction: column;
-            }
-        }
-
-        /* تأثيرات */
-        .glow {
-            animation: glow 2s ease-in-out infinite;
-        }
-
-        @keyframes glow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(200, 169, 126, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(200, 169, 126, 0.6);
-            }
-        }
-
-        .floating {
-            animation: floating 3s ease-in-out infinite;
-        }
-
-        @keyframes floating {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        /* تحميل */
+        /* التحميل */
         .loading-spinner {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border: 3px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             border-top-color: var(--gold);
@@ -1188,685 +970,2008 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* قائمة المحادثات */
+        .chats-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-left: 10px;
+        }
+
+        /* استجابة */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+                padding: 15px;
+            }
+            
+            .sidebar-header h2,
+            .sidebar-header p,
+            .sidebar-menu a span {
+                display: none;
+            }
+            
+            .sidebar-menu a {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .sidebar-menu i {
+                margin: 0;
+                font-size: 22px;
+            }
+            
+            .main-content {
+                margin-right: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+            
+            .admin-container {
+                flex-direction: column;
+            }
+            
+            .admin-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .chat-window {
+                height: 60vh;
+            }
+        }
+
+        /* تنسيقات إضافية */
+        .text-success { color: var(--success); }
+        .text-warning { color: var(--warning); }
+        .text-danger { color: var(--danger); }
+        .text-gold { color: var(--gold); }
+        .text-muted { color: var(--text-muted); }
+        
+        .w-100 { width: 100%; }
+        .mt-3 { margin-top: 15px; }
+        .mb-3 { margin-bottom: 15px; }
+        .d-flex { display: flex; }
+        .align-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 10px; }
+        .gap-3 { gap: 15px; }
     </style>
 </head>
 <body>
-    <!-- الشريط العلوي -->
-    <nav class="navbar">
-        <div class="logo" onclick="window.location.href='index.html'">
-            <div class="logo-icon">
-                <i class="fas fa-crown"></i>
-            </div>
-            <div class="logo-text">
-                ELITE CAPITAL
-                <span>الاستثمار الذكي</span>
-            </div>
-        </div>
-        
-        <div class="nav-buttons" id="navButtons">
-            <button class="btn btn-outline" onclick="openAuthModal('login')">
-                <i class="fas fa-sign-in-alt"></i>
-                دخول
-            </button>
-            <button class="btn btn-primary" onclick="openAuthModal('register')">
-                <i class="fas fa-user-plus"></i>
-                تسجيل
-            </button>
-        </div>
-        
-        <!-- قائمة المستخدم (تظهر بعد تسجيل الدخول) -->
-        <div class="user-menu" id="userMenu">
-            <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">م</div>
-            <div class="user-dropdown" id="userDropdown">
-                <div class="user-dropdown-item" onclick="goToDashboard()">
-                    <i class="fas fa-tachometer-alt"></i>
-                    لوحة التحكم
-                </div>
-                <div class="user-dropdown-item" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    تسجيل الخروج
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- المحتوى الرئيسي -->
-    <div class="main">
-        <!-- القسم الرئيسي -->
-        <section class="hero" data-aos="fade-up">
-            <div class="hero-content">
-                <span class="hero-badge">
-                    <i class="fas fa-crown"></i>
-                    منصة استثمارية مرخصة
-                </span>
-                <h1 class="hero-title">
-                    استثمر بذكاء
-                    <span>واربح يومياً</span>
-                </h1>
-                <p class="hero-description">
-                    انضم إلى Elite Capital، المنصة الاستثمارية الأسرع نمواً في المنطقة. 
-                    حقق أرباحاً يومية تصل إلى 125$ مع باقاتنا الاستثمارية المتنوعة.
-                </p>
-                <div class="hero-stats">
-                    <div class="hero-stat-item">
-                        <div class="hero-stat-value" id="statUsers">0</div>
-                        <div class="hero-stat-label">مستثمر نشط</div>
-                    </div>
-                    <div class="hero-stat-item">
-                        <div class="hero-stat-value" id="statProfits">0$</div>
-                        <div class="hero-stat-label">أرباح مدفوعة</div>
-                    </div>
-                    <div class="hero-stat-item">
-                        <div class="hero-stat-value" id="statSatisfaction">99%</div>
-                        <div class="hero-stat-label">رضا العملاء</div>
-                    </div>
-                </div>
-                <button class="btn btn-primary" onclick="document.getElementById('packages').scrollIntoView({behavior: 'smooth'})" style="padding: 15px 40px;">
-                    <i class="fas fa-rocket"></i>
-                    ابدأ الاستثمار الآن
-                </button>
-            </div>
-        </section>
-
-        <!-- الإحصائيات -->
-        <section class="stats-grid">
-            <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
-                <div class="stat-icon">
-                    <i class="fas fa-wallet"></i>
-                </div>
-                <div class="stat-value" id="statTotalInvested">1.2M$</div>
-                <div class="stat-label">إجمالي الاستثمارات</div>
-            </div>
-            <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
-                <div class="stat-icon">
-                    <i class="fas fa-hand-holding-usd"></i>
-                </div>
-                <div class="stat-value" id="statDailyProfits">15.3K$</div>
-                <div class="stat-label">أرباح يومية</div>
-            </div>
-            <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-value" id="statActiveUsers">2,847</div>
-                <div class="stat-label">مستثمر نشط</div>
-            </div>
-            <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-value" id="statAvgTime">2.4</div>
-                <div class="stat-label">متوسط ساعات الدعم</div>
-            </div>
-        </section>
-
-        <!-- نظام الإحالة -->
-        <section class="referral-section" data-aos="fade-up">
-            <div class="referral-title">
-                <h2>🎁 نظام الإحالة المميز</h2>
-                <p>ادعُ أصدقائك واربح مكافآت فورية</p>
+    <div class="admin-container">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>ELITE CAPITAL</h2>
+                <p>لوحة الإدارة</p>
             </div>
             
-            <div class="referral-cards">
-                <div class="referral-card referrer" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="referral-card-icon">
-                        <i class="fas fa-gift"></i>
+            <ul class="sidebar-menu">
+                <li><a class="active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>لوحة التحكم</span>
+                </a></li>
+                <li><a onclick="showSection('users')">
+                    <i class="fas fa-users"></i>
+                    <span>المستخدمين</span>
+                    <span class="badge" id="usersBadge">0</span>
+                </a></li>
+                <li><a onclick="showSection('packages')">
+                    <i class="fas fa-crown"></i>
+                    <span>الباقات</span>
+                </a></li>
+                <li><a onclick="showSection('pending')">
+                    <i class="fas fa-clock"></i>
+                    <span>طلبات الاشتراك</span>
+                    <span class="badge" id="pendingBadge">0</span>
+                </a></li>
+                <li><a onclick="showSection('withdrawals')">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>طلبات السحب</span>
+                    <span class="badge" id="withdrawalsBadge">0</span>
+                </a></li>
+                <li><a onclick="showSection('livechat')">
+                    <i class="fas fa-comments"></i>
+                    <span>الدردشة المباشرة</span>
+                    <span class="badge" id="chatBadge">0</span>
+                </a></li>
+                <li><a onclick="showSection('referrals')">
+                    <i class="fas fa-user-friends"></i>
+                    <span>الإحالة</span>
+                </a></li>
+                <li><a onclick="showSection('alerts')">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>التنبيهات</span>
+                    <span class="badge" id="alertsBadge">0</span>
+                </a></li>
+                <li><a onclick="showSection('activity_log')">
+                    <i class="fas fa-history"></i>
+                    <span>سجل النشاطات</span>
+                </a></li>
+                <li><a onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>خروج</span>
+                </a></li>
+            </ul>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <!-- الشريط العلوي -->
+            <div class="admin-header">
+                <h2 id="pageTitle">لوحة التحكم</h2>
+                <div class="admin-header-left">
+                    <div class="date" id="currentDateTime"></div>
+                    <div class="user-menu">
+                        <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">أ</div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-item" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i>
+                                تحديث البيانات
+                            </div>
+                            <div class="user-dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                تسجيل الخروج
+                            </div>
+                        </div>
                     </div>
-                    <div class="referral-amount">50$</div>
-                    <div class="referral-label">مكافأة الداعي</div>
-                    <div class="referral-desc">لك عن كل صديق يشترك</div>
                 </div>
-                <div class="referral-card referee" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="referral-card-icon">
-                        <i class="fas fa-star"></i>
+            </div>
+            
+            <!-- قسم لوحة التحكم -->
+            <div id="dashboard-section" class="section active">
+                <!-- إحصائيات سريعة -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-label">إجمالي المستخدمين</div>
+                        <div class="stat-value" id="totalUsers">0</div>
                     </div>
-                    <div class="referral-amount">20$</div>
-                    <div class="referral-label">مكافأة الصديق</div>
-                    <div class="referral-desc">هدية فورية عند الاشتراك</div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-label">إجمالي الإيداعات</div>
+                        <div class="stat-value" id="totalDeposits">0$</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="stat-label">إجمالي المسحوبات</div>
+                        <div class="stat-value" id="totalWithdrawals">0$</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="stat-label">اشتراكات نشطة</div>
+                        <div class="stat-value" id="activeSubscriptions">0</div>
+                    </div>
+                </div>
+                
+                <!-- شبكة المحتوى -->
+                <div class="content-grid">
+                    <!-- طلبات الاشتراك المعلقة -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-clock"></i>
+                                طلبات اشتراك معلقة
+                            </h3>
+                            <button class="btn btn-sm btn-primary" onclick="loadPendingPackages()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>المستخدم</th>
+                                        <th>الباقة</th>
+                                        <th>المبلغ</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingTable">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: var(--text-muted);">
+                                            لا توجد طلبات معلقة
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- طلبات السحب المعلقة -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-money-bill-wave"></i>
+                                طلبات سحب معلقة
+                            </h3>
+                            <button class="btn btn-sm btn-primary" onclick="loadWithdrawals()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>المستخدم</th>
+                                        <th>المبلغ</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="withdrawalsTable">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: var(--text-muted);">
+                                            لا توجد طلبات معلقة
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- إحصائيات إضافية -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-label">مستخدمين نشطين</div>
+                        <div class="stat-value" id="activeUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                        <div class="stat-label">معلقين/محظورين</div>
+                        <div class="stat-value" id="suspendedUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-label">عدد الباقات</div>
+                        <div class="stat-value" id="packagesCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="stat-label">أرباح الإحالة</div>
+                        <div class="stat-value" id="referralEarnings">0$</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم المستخدمين -->
+            <div id="users-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-users"></i>
+                            إدارة المستخدمين
+                        </h3>
+                        <button class="btn btn-sm btn-primary" onclick="loadUsers()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>الاسم</th>
+                                    <th>البريد</th>
+                                    <th>الرصيد</th>
+                                    <th>اشتراك</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم الباقات (محدث) -->
+            <div id="packages-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-crown"></i>
+                            إدارة الباقات
+                        </h3>
+                        <button class="btn btn-success btn-sm" onclick="showAddPackageModal()">
+                            <i class="fas fa-plus"></i>
+                            إضافة باقة
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>اسم الباقة</th>
+                                    <th>السعر</th>
+                                    <th>الربح اليومي</th>
+                                    <th>نسبة الربح</th>
+                                    <th>المدة</th>
+                                    <th>الفئة</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="packagesTable">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-muted);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم طلبات الاشتراك -->
+            <div id="pending-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-clock"></i>
+                            جميع طلبات الاشتراك
+                        </h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>المستخدم</th>
+                                    <th>الباقة</th>
+                                    <th>المبلغ</th>
+                                    <th>التاريخ</th>
+                                    <th>كود الإحالة</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allPendingTable">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم طلبات السحب -->
+            <div id="withdrawals-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-money-bill-wave"></i>
+                            جميع طلبات السحب
+                        </h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>المستخدم</th>
+                                    <th>المبلغ</th>
+                                    <th>الرسوم</th>
+                                    <th>المحفظة</th>
+                                    <th>الشبكة</th>
+                                    <th>التاريخ</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allWithdrawalsTable">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-muted);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم الدردشة المباشرة -->
+            <div id="livechat-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-comments"></i>
+                            المحادثات النشطة
+                        </h3>
+                        <div class="d-flex gap-2">
+                            <select id="chatFilter" class="form-control" style="width: 150px;" onchange="loadActiveChats()">
+                                <option value="all">جميع المحادثات</option>
+                                <option value="unread">غير مقروءة</option>
+                                <option value="active">نشطة</option>
+                            </select>
+                            <button class="btn btn-sm btn-primary" onclick="loadActiveChats()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chats-list" id="chatsContainer">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم الإحالة -->
+            <div id="referrals-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-user-friends"></i>
+                            نظام الإحالة
+                        </h3>
+                    </div>
+                    <div class="stats-grid" style="margin-bottom: 25px;">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-label">إجمالي الإحالات</div>
+                            <div class="stat-value" id="totalReferrals">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="stat-label">أرباح الإحالة</div>
+                            <div class="stat-value" id="totalReferralEarnings">0$</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-label">مكافآت معلقة</div>
+                            <div class="stat-value" id="pendingReferralRewards">0$</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-percent"></i>
+                            </div>
+                            <div class="stat-label">معدل التحويل</div>
+                            <div class="stat-value" id="referralRate">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>المسوق</th>
+                                    <th>كود الإحالة</th>
+                                    <th>عدد الإحالات</th>
+                                    <th>النشطين</th>
+                                    <th>الأرباح</th>
+                                </tr>
+                            </thead>
+                            <tbody id="marketersTable">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: var(--text-muted);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم التنبيهات العامة -->
+            <div id="alerts-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-bullhorn"></i>
+                            إدارة التنبيهات العامة
+                        </h3>
+                        <button class="btn btn-success btn-sm" onclick="showAddAlertModal()">
+                            <i class="fas fa-plus"></i>
+                            إضافة تنبيه جديد
+                        </button>
+                    </div>
+                    
+                    <div class="alerts-list" id="alertsContainer">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
             </div>
 
-            <div id="referralAction">
-                <div class="referral-code-input">
-                    <input type="text" class="referral-code-field" id="quickReferralCode" placeholder="أدخل كود الإحالة">
-                    <button class="btn btn-primary" onclick="applyReferralCode()" style="padding: 15px 30px;">
-                        <i class="fas fa-check"></i>
-                        تطبيق
+            <!-- قسم سجل النشاطات -->
+            <div id="activity_log-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history"></i>
+                            سجل النشاطات (جميع المستخدمين)
+                        </h3>
+                        <div class="d-flex gap-2">
+                            <select id="activityFilter" class="form-control" style="width: 150px;" onchange="loadAllActivities()">
+                                <option value="all">الكل</option>
+                                <option value="profit">أرباح</option>
+                                <option value="withdrawal">سحوبات</option>
+                                <option value="subscription">اشتراكات</option>
+                                <option value="login">دخول</option>
+                            </select>
+                            <button class="btn btn-sm btn-primary" onclick="loadAllActivities()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>المستخدم</th>
+                                    <th>النوع</th>
+                                    <th>العنوان</th>
+                                    <th>الوصف</th>
+                                    <th>المبلغ</th>
+                                    <th>الحالة</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activitiesTable">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة إضافة باقة (محدثة) -->
+    <div class="modal" id="addPackageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة باقة جديدة</h3>
+                <button class="modal-close" onclick="closeAddPackageModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>اسم الباقة *</label>
+                <input type="text" id="packageName" class="form-control" placeholder="مثال: الباقة الذهبية">
+            </div>
+            
+            <div class="form-group">
+                <label>السعر ($) *</label>
+                <input type="number" id="packagePrice" class="form-control" placeholder="1000">
+            </div>
+            
+            <div class="form-group">
+                <label>الربح اليومي ($) *</label>
+                <input type="number" id="packageDailyProfit" class="form-control" placeholder="25" step="0.01">
+                <small style="color: var(--text-muted);">أدخل المبلغ الدقيق للربح اليومي (مثال: 12.5)</small>
+            </div>
+            
+            <div class="form-group">
+                <label>مدة الباقة</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="packageDuration" class="form-control" value="30" min="1" style="flex: 1;">
+                    <select id="packageDurationType" class="form-control" style="flex: 1;">
+                        <option value="day">يوم</option>
+                        <option value="month" selected>شهر</option>
+                        <option value="year">سنة</option>
+                    </select>
+                </div>
+                <small style="color: var(--text-muted);">مثال: 1 شهر = 30 يوم، 1 سنة = 365 يوم</small>
+            </div>
+            
+            <div class="form-group">
+                <label>الفئة</label>
+                <select id="packageCategory" class="form-control">
+                    <option value="standard">عادية</option>
+                    <option value="premium">مميزة</option>
+                    <option value="vip">VIP</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>الوصف</label>
+                <textarea id="packageDescription" class="form-control" rows="3" placeholder="وصف الباقة..."></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1;" onclick="closeAddPackageModal()">إلغاء</button>
+                <button class="btn btn-success" style="flex: 2;" onclick="addPackage()">إضافة الباقة</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة معالجة طلب اشتراك -->
+    <div class="modal" id="processPendingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">معالجة طلب اشتراك</h3>
+                <button class="modal-close" onclick="closeProcessModal()">&times;</button>
+            </div>
+            
+            <div id="pendingDetails" style="margin-bottom: 20px;"></div>
+            
+            <div class="form-group">
+                <label>ملاحظات (اختياري)</label>
+                <textarea id="processNotes" class="form-control" rows="3"></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-danger" style="flex: 1;" onclick="rejectPending()">رفض</button>
+                <button class="btn btn-success" style="flex: 2;" onclick="approvePending()">قبول وتفعيل</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة معالجة سحب -->
+    <div class="modal" id="processWithdrawalModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">معالجة طلب سحب</h3>
+                <button class="modal-close" onclick="closeWithdrawalProcessModal()">&times;</button>
+            </div>
+            
+            <div id="withdrawalDetails" style="margin-bottom: 20px;"></div>
+            
+            <div class="form-group">
+                <label>رقم المعاملة (Transaction Hash)</label>
+                <input type="text" id="transactionHash" class="form-control" placeholder="أدخل رقم المعاملة">
+            </div>
+            
+            <div class="form-group">
+                <label>ملاحظات</label>
+                <textarea id="withdrawalNotes" class="form-control" rows="2"></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-danger" style="flex: 1;" onclick="rejectWithdrawal()">رفض</button>
+                <button class="btn btn-success" style="flex: 2;" onclick="approveWithdrawal()">تأكيد الإرسال</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة تغيير حالة المستخدم -->
+    <div class="modal" id="userStatusModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">تغيير حالة المستخدم</h3>
+                <button class="modal-close" onclick="closeUserStatusModal()">&times;</button>
+            </div>
+            
+            <div id="userStatusInfo" style="margin-bottom: 20px;"></div>
+            
+            <div class="form-group">
+                <label>الحالة الجديدة</label>
+                <select id="newUserStatus" class="form-control">
+                    <option value="active">🟢 نشط</option>
+                    <option value="suspended">🟠 معلق</option>
+                    <option value="banned">🔴 محظور</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>السبب</label>
+                <textarea id="statusReason" class="form-control" rows="2"></textarea>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1;" onclick="closeUserStatusModal()">إلغاء</button>
+                <button class="btn btn-warning" style="flex: 2;" onclick="updateUserStatus()">تحديث الحالة</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة الدردشة -->
+    <div class="modal" id="chatModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 class="modal-title" id="chatModalTitle">محادثة مع <span id="chatUserName"></span></h3>
+                <button class="modal-close" onclick="closeChatModal()">&times;</button>
+            </div>
+            
+            <div class="chat-window">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- الرسائل تظهر هنا -->
+                </div>
+                
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." onkeypress="handleChatKeyPress(event)">
+                    <button class="chat-send-btn" onclick="sendChatMessage()">
+                        <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
             </div>
-        </section>
-
-        <!-- الباقات -->
-        <section id="packages" class="packages-section">
-            <div class="section-title" data-aos="fade-up">
-                <h2>💎 باقات استثمارية متميزة</h2>
-                <p>اختر الباقة التي تناسبك وابدأ جني الأرباح اليومية</p>
-            </div>
-            
-            <div class="packages-grid" id="packagesGrid">
-                <!-- سيتم تحميل الباقات هنا -->
-                <div class="text-center" style="grid-column: 1/-1; padding: 50px;">
-                    <div class="loading-spinner"></div>
-                    <p style="color: var(--text-muted); margin-top: 20px;">جاري تحميل الباقات...</p>
-                </div>
-            </div>
-        </section>
+        </div>
     </div>
 
-    <!-- التذييل -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>عن الشركة</h4>
-                <p>Elite Capital منصة استثمارية رقمية مرخصة، توفر فرصاً استثمارية آمنة ومربحة مع أرباح يومية مضمونة.</p>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-telegram"></i></a>
-                    <a href="#"><i class="fab fa-whatsapp"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-            <div class="footer-section">
-                <h4>روابط سريعة</h4>
-                <ul>
-                    <li><a onclick="openAuthModal('login')">تسجيل الدخول</a></li>
-                    <li><a onclick="openAuthModal('register')">إنشاء حساب</a></li>
-                    <li><a href="#packages">الباقات</a></li>
-                    <li><a>الشروط والأحكام</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>طرق الدفع</h4>
-                <ul>
-                    <li><i class="fas fa-coins"></i> USDT (TRC20)</li>
-                    <li><i class="fab fa-bitcoin"></i> Bitcoin</li>
-                    <li><i class="fab fa-ethereum"></i> Ethereum</li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>الدعم الفني</h4>
-                <ul>
-                    <li><i class="fas fa-clock"></i> متاح 24/7</li>
-                    <li><i class="fas fa-envelope"></i> support@elite-capital.com</li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            <p>© 2025 Elite Capital. جميع الحقوق محفوظة.</p>
-        </div>
-    </footer>
-
-    <!-- نافذة تسجيل الدخول -->
-    <div class="modal" id="authModal">
+    <!-- نافذة إضافة تنبيه -->
+    <div class="modal" id="addAlertModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">مرحباً بك</h2>
-                <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+                <h3 class="modal-title">إضافة تنبيه جديد</h3>
+                <button class="modal-close" onclick="closeAddAlertModal()">&times;</button>
             </div>
             
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="showAuthTab('login')">تسجيل الدخول</button>
-                <button class="auth-tab" onclick="showAuthTab('register')">حساب جديد</button>
+            <div class="form-group">
+                <label>عنوان التنبيه *</label>
+                <input type="text" id="alertTitle" class="form-control" placeholder="مثال: تنبيه هام">
             </div>
             
-            <!-- نموذج تسجيل الدخول -->
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>👤 اسم المستخدم أو البريد الإلكتروني</label>
-                    <input type="text" class="form-control" id="loginUsername" required>
-                </div>
-                <div class="form-group">
-                    <label>🔑 كلمة المرور</label>
-                    <input type="password" class="form-control" id="loginPassword" required>
-                </div>
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-sign-in-alt"></i>
-                    تسجيل الدخول
-                </button>
-                <p style="text-align: center; margin-top: 20px; color: var(--text-muted);">
-                    ليس لديك حساب؟ 
-                    <a href="#" onclick="showAuthTab('register')" style="color: var(--gold);">إنشاء حساب جديد</a>
-                </p>
-            </form>
-            
-            <!-- نموذج إنشاء حساب -->
-            <form id="registerForm" style="display: none;">
-                <div class="form-group">
-                    <label>👤 الاسم الكامل</label>
-                    <input type="text" class="form-control" id="registerName" required>
-                </div>
-                <div class="form-group">
-                    <label>🆔 اسم المستخدم</label>
-                    <input type="text" class="form-control" id="registerUsername" required>
-                </div>
-                <div class="form-group">
-                    <label>📧 البريد الإلكتروني</label>
-                    <input type="email" class="form-control" id="registerEmail" required>
-                </div>
-                <div class="form-group">
-                    <label>📱 رقم الهاتف</label>
-                    <input type="tel" class="form-control" id="registerPhone" required>
-                </div>
-                <div class="form-group">
-                    <label>🔐 كلمة المرور</label>
-                    <input type="password" class="form-control" id="registerPassword" required>
-                </div>
-                <div class="form-group">
-                    <label>✅ تأكيد كلمة المرور</label>
-                    <input type="password" class="form-control" id="registerConfirmPassword" required>
-                </div>
-                <div class="form-group">
-                    <label>🎁 كود الإحالة (اختياري)</label>
-                    <input type="text" class="form-control" id="registerReferral">
-                </div>
-                
-                <div class="referral-info">
-                    <i class="fas fa-gift" style="color: var(--gold);"></i>
-                    عند استخدام كود إحالة، ستحصل على 20$ فور تفعيل الباقة
-                </div>
-                
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-user-plus"></i>
-                    إنشاء حساب
-                </button>
-                <p style="text-align: center; margin-top: 20px; color: var(--text-muted);">
-                    لديك حساب بالفعل؟ 
-                    <a href="#" onclick="showAuthTab('login')" style="color: var(--gold);">تسجيل الدخول</a>
-                </p>
-            </form>
-        </div>
-    </div>
-
-    <!-- نافذة الدفع -->
-    <div class="modal" id="paymentModal">
-        <div class="payment-modal">
-            <div class="modal-header">
-                <h2 class="modal-title">إتمام الدفع</h2>
-                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+            <div class="form-group">
+                <label>نص التنبيه *</label>
+                <textarea id="alertMessage" class="form-control" rows="4" placeholder="أدخل نص التنبيه..."></textarea>
             </div>
             
-            <div class="payment-summary" id="packageSummary"></div>
-            
-            <div style="background: rgba(20, 184, 166, 0.1); border-radius: 30px; padding: 20px; margin: 20px 0; border: 1px solid #14b8a6;">
-                <div style="display: inline-block; background: #14b8a6; color: white; padding: 8px 25px; border-radius: 50px; margin-bottom: 15px;">
-                    <i class="fas fa-network-wired"></i> شبكة TRC20 فقط
-                </div>
-                <div class="wallet-box" id="walletAddress">
-                    TH7am2Vu7jTyxSYTSo9tUS4NC11KVxDuVi
-                </div>
-                <button onclick="copyWalletAddress()" class="btn btn-primary" style="width: 100%;">
-                    <i class="fas fa-copy"></i> نسخ العنوان
-                </button>
+            <div class="form-group">
+                <label>نوع التنبيه</label>
+                <select id="alertType" class="form-control">
+                    <option value="info">معلومات (أزرق)</option>
+                    <option value="success">نجاح (أخضر)</option>
+                    <option value="warning">تحذير (برتقالي)</option>
+                    <option value="danger">هام (أحمر)</option>
+                </select>
             </div>
             
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>إثبات التحويل (اختياري)</p>
-                <small style="color: var(--text-muted);">اسحب وأفلت الصورة أو انقر للاختيار</small>
+            <div class="form-group">
+                <label>تاريخ الانتهاء (اختياري)</label>
+                <input type="datetime-local" id="alertExpires" class="form-control">
+                <small style="color: var(--text-muted);">اترك فارغاً إذا كان التنبيه دائماً</small>
             </div>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-            <div id="uploadPreview" style="display: none; text-align: center; margin: 20px 0;"></div>
             
-            <div style="display: flex; gap: 15px; margin-top: 30px;">
-                <button class="btn btn-outline" style="flex: 1;" onclick="closePaymentModal()">إلغاء</button>
-                <button class="btn btn-primary" style="flex: 2;" onclick="submitPayment()">تأكيد الدفع</button>
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1;" onclick="closeAddAlertModal()">إلغاء</button>
+                <button class="btn btn-success" style="flex: 2;" onclick="addAlert()">إضافة التنبيه</button>
             </div>
         </div>
     </div>
-
+    
     <!-- الإشعارات -->
     <div class="notification" id="notification"></div>
-
-    <!-- AOS Library -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <script>
-        AOS.init({
-            duration: 1000,
-            once: true
-        });
-
         // متغيرات عامة
-        let currentUser = null;
-        let selectedPackage = null;
-        let selectedImage = null;
-        const WALLET_ADDRESS = 'TH7am2Vu7jTyxSYTSo9tUS4NC11KVxDuVi';
-
-        // تهيئة الصفحة
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 بدء تشغيل الصفحة الرئيسية...');
-            await checkCurrentUser();
-            await loadPackages();
-            await loadStats();
-            
-            // التحقق من كود الإحالة في الرابط
-            const urlParams = new URLSearchParams(window.location.search);
-            const refCode = urlParams.get('ref');
-            if (refCode && !currentUser) {
-                sessionStorage.setItem('pending_referral', refCode);
-                document.getElementById('registerReferral').value = refCode;
-                document.getElementById('quickReferralCode').value = refCode;
-                showNotification('🎁 لديك كود إحالة! سجل الآن واحصل على 20$', 'success');
-            }
-        });
-
-        // التحقق من المستخدم الحالي
-        async function checkCurrentUser() {
+        let currentAdmin = null;
+        let currentUserId = null;
+        let currentPendingId = null;
+        let currentWithdrawalId = null;
+        let currentChatId = null;
+        let chatInterval = null;
+        
+        // ========== التحقق من صلاحية المسؤول ==========
+        async function checkAdminAccess() {
             const savedUser = localStorage.getItem('current_user');
-            if (savedUser) {
-                try {
-                    currentUser = JSON.parse(savedUser);
-                    console.log('المستخدم الحالي:', currentUser);
-                    
-                    if (window.supabaseHelpers) {
-                        const result = await window.supabaseHelpers.getUserById(currentUser.id);
-                        if (result.success && result.data) {
-                            currentUser = result.data;
-                            localStorage.setItem('current_user', JSON.stringify(currentUser));
-                        }
-                    }
-                    
-                    if (currentUser.status === 'banned' || currentUser.status === 'suspended') {
-                        localStorage.removeItem('current_user');
-                        return;
-                    }
-                    
-                    // تحديث واجهة المستخدم للمستخدم المسجل
-                    document.getElementById('navButtons').style.display = 'none';
-                    document.getElementById('userMenu').classList.add('active');
-                    document.getElementById('userAvatar').textContent = currentUser.name?.charAt(0).toUpperCase() || 'م';
-                } catch (e) {
-                    console.error('خطأ في التحقق من المستخدم:', e);
-                    localStorage.removeItem('current_user');
-                }
+            if (!savedUser) {
+                window.location.href = 'index.html';
+                return;
             }
-        }
-
-        // تحميل الباقات
-        async function loadPackages() {
-            const grid = document.getElementById('packagesGrid');
             
-            try {
-                let packages = [];
-                if (window.supabaseHelpers) {
-                    const result = await window.supabaseHelpers.getAllPackages();
-                    if (result.success && result.data) {
-                        packages = result.data;
-                    }
-                }
-                
-                if (packages.length === 0) {
-                    // بيانات افتراضية
-                    packages = [
-                        { id: 1, name: 'الباقة الفضية', price: 500, daily_profit: 10, category: 'standard' },
-                        { id: 2, name: 'الباقة الذهبية', price: 1000, daily_profit: 25, category: 'premium' },
-                        { id: 3, name: 'الباقة الماسية', price: 5000, daily_profit: 125, category: 'vip' }
-                    ];
-                }
-                
-                let html = '';
-                packages.forEach(pkg => {
-                    const badgeClass = pkg.category === 'vip' ? 'vip' : pkg.category === 'premium' ? 'premium' : 'standard';
-                    const badgeText = pkg.category === 'vip' ? 'VIP' : pkg.category === 'premium' ? 'مميزة' : 'عادية';
-                    const icon = pkg.category === 'vip' ? 'fa-crown' : pkg.category === 'premium' ? 'fa-star' : 'fa-gem';
-                    
-                    html += `
-                        <div class="package-card" data-aos="fade-up" data-aos-delay="${pkg.id * 100}">
-                            <div class="package-badge ${badgeClass}">${badgeText}</div>
-                            <div class="package-icon">
-                                <i class="fas ${icon}"></i>
-                            </div>
-                            <h3 class="package-name">${pkg.name}</h3>
-                            <div class="package-price">
-                                ${pkg.price}$ <small>USDT</small>
-                            </div>
-                            <div class="package-profit">
-                                <i class="fas fa-chart-line"></i>
-                                +${pkg.daily_profit}$ يومياً
-                            </div>
-                            <ul class="package-features">
-                                <li><i class="fas fa-check-circle"></i> أرباح يومية فورية</li>
-                                <li><i class="fas fa-check-circle"></i> مدة الباقة 30 يوم</li>
-                                <li><i class="fas fa-check-circle"></i> إمكانية إعادة الاستثمار</li>
-                                <li><i class="fas fa-check-circle"></i> دعم فني متميز</li>
-                            </ul>
-                            <button class="package-btn" onclick="selectPackage(${pkg.id})">
-                                <i class="fas fa-bolt"></i>
-                                اشترك الآن
-                            </button>
-                        </div>
-                    `;
-                });
-                
-                grid.innerHTML = html;
-            } catch (error) {
-                console.error('خطأ في تحميل الباقات:', error);
-                grid.innerHTML = '<p style="color: var(--danger); text-align: center;">حدث خطأ في تحميل الباقات</p>';
+            currentAdmin = JSON.parse(savedUser);
+            
+            if (!currentAdmin.is_admin) {
+                window.location.href = 'dashboard.html';
+                return;
             }
+            
+            if (window.supabaseHelpers) {
+                const result = await window.supabaseHelpers.getUserById(currentAdmin.id);
+                if (result.success && result.data) {
+                    currentAdmin = result.data;
+                }
+            }
+            
+            document.getElementById('userAvatar').textContent = currentAdmin.name?.charAt(0).toUpperCase() || 'أ';
         }
-
-        // تحميل الإحصائيات
-        async function loadStats() {
+        
+        // ========== تهيئة الصفحة ==========
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAdminAccess();
+            await loadAllData();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            setInterval(loadActiveChats, 10000);
+        });
+        
+        // ========== تحميل جميع البيانات ==========
+        async function loadAllData() {
+            console.log('جاري تحميل جميع البيانات...');
+            await loadDashboardStats();
+            await loadUsers();
+            await loadPackages();
+            await loadPendingPackages();
+            await loadWithdrawals();
+            await loadReferralStats();
+            await loadActiveChats();
+            await loadAlerts();
+            await loadAllActivities();
+        }
+        
+        // ========== تحميل إحصائيات لوحة التحكم ==========
+        async function loadDashboardStats() {
             try {
-                if (window.supabaseHelpers) {
-                    const result = await window.supabaseHelpers.getDashboardStats();
-                    if (result.success && result.data) {
-                        document.getElementById('statUsers').textContent = result.data.totalUsers || '0';
-                        document.getElementById('statTotalInvested').textContent = (result.data.totalDeposits || 0) + '$';
-                        document.getElementById('statProfits').textContent = (result.data.totalDeposits || 0) + '$';
-                        document.getElementById('statDailyProfits').textContent = (result.data.totalDeposits * 0.025 || 0) + '$';
-                        document.getElementById('statActiveUsers').textContent = result.data.activeUsers || '0';
-                    }
+                const result = await window.supabaseHelpers.getDashboardStats();
+                if (result.success && result.data) {
+                    const stats = result.data;
+                    
+                    document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                    document.getElementById('totalDeposits').textContent = (stats.totalDeposits || 0) + '$';
+                    document.getElementById('totalWithdrawals').textContent = (stats.totalWithdrawals || 0) + '$';
+                    document.getElementById('activeSubscriptions').textContent = stats.activeSubscriptions || 0;
+                    document.getElementById('activeUsers').textContent = stats.activeUsers || 0;
+                    document.getElementById('suspendedUsers').textContent = (stats.suspendedUsers + stats.bannedUsers) || 0;
+                    document.getElementById('packagesCount').textContent = stats.packagesCount || 0;
+                    
+                    document.getElementById('usersBadge').textContent = stats.totalUsers || 0;
+                    document.getElementById('pendingBadge').textContent = stats.pendingPackages || 0;
+                    document.getElementById('withdrawalsBadge').textContent = stats.pendingWithdrawals || 0;
                 }
             } catch (error) {
                 console.error('خطأ في تحميل الإحصائيات:', error);
             }
         }
-
-        // اختيار باقة
-        async function selectPackage(packageId) {
-            if (!currentUser) {
-                showNotification('❌ يجب تسجيل الدخول أولاً', 'error');
-                openAuthModal('login');
-                return;
-            }
-            
-            if (currentUser.status === 'suspended') {
-                showNotification('⚠️ حسابك معلق مؤقتاً', 'warning');
-                return;
-            }
-            
+        
+        // ========== تحميل المستخدمين ==========
+        async function loadUsers() {
             try {
-                const result = await window.supabaseHelpers.getPackageById(packageId);
-                if (!result.success) throw new Error('الباقة غير متاحة');
-                selectedPackage = result.data;
+                const result = await window.supabaseHelpers.getAllUsers();
+                if (result.success && result.data) {
+                    displayUsers(result.data);
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل المستخدمين:', error);
+            }
+        }
+        
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTable');
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا يوجد مستخدمين</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            users.slice(0, 20).forEach((user, index) => {
+                let statusClass = 'status-active';
+                let statusText = 'نشط';
                 
-                document.getElementById('packageSummary').innerHTML = `
-                    <h3 style="color: var(--gold); margin-bottom: 15px;">${selectedPackage.name}</h3>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span>مبلغ الاستثمار:</span>
-                        <strong style="color: var(--success); font-size: 24px;">${selectedPackage.price}$</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span>الربح اليومي:</span>
-                        <strong style="color: var(--gold);">${selectedPackage.daily_profit}$</strong>
+                if (user.status === 'suspended') {
+                    statusClass = 'status-suspended';
+                    statusText = 'معلق';
+                } else if (user.status === 'banned') {
+                    statusClass = 'status-banned';
+                    statusText = 'محظور';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${user.name || '-'}</td>
+                        <td>${user.email || '-'}</td>
+                        <td>${user.balance || 0}$</td>
+                        <td>${user.has_active_subscription ? '✅' : '❌'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="openUserStatusModal(${user.id}, '${user.name}', '${user.status}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // ========== تحميل الباقات (محدث) ==========
+        async function loadPackages() {
+            try {
+                const result = await window.supabaseHelpers.getAllPackages();
+                if (result.success && result.data) {
+                    displayPackages(result.data);
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الباقات:', error);
+            }
+        }
+        
+        function displayPackages(packages) {
+            const tbody = document.getElementById('packagesTable');
+            if (!packages || packages.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا توجد باقات</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            packages.forEach(pkg => {
+                const categoryText = pkg.category === 'vip' ? 'VIP' : pkg.category === 'premium' ? 'مميزة' : 'عادية';
+                
+                // عرض المدة
+                let durationText = '';
+                if (pkg.duration_type === 'day') {
+                    durationText = `${pkg.duration || 30} يوم`;
+                } else if (pkg.duration_type === 'month') {
+                    durationText = `${pkg.duration || 1} شهر`;
+                } else if (pkg.duration_type === 'year') {
+                    durationText = `${pkg.duration || 1} سنة`;
+                } else {
+                    durationText = `${pkg.duration || 30} يوم`;
+                }
+                
+                // نسبة الربح
+                const profitPercentage = ((pkg.daily_profit / pkg.price) * 100).toFixed(2);
+                
+                html += `
+                    <tr>
+                        <td>${pkg.name}</td>
+                        <td>${pkg.price}$</td>
+                        <td>${pkg.daily_profit}$</td>
+                        <td>${profitPercentage}%</td>
+                        <td>${durationText}</td>
+                        <td>${categoryText}</td>
+                        <td><span class="status-badge status-active">نشط</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deletePackage(${pkg.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // ========== تحميل طلبات الاشتراك المعلقة ==========
+        async function loadPendingPackages() {
+            try {
+                const result = await window.supabaseHelpers.getPendingPackages();
+                if (result.success && result.data) {
+                    displayPendingPackages(result.data);
+                    displayAllPendingPackages(result.data);
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الطلبات:', error);
+            }
+        }
+        
+        function displayPendingPackages(pending) {
+            const tbody = document.getElementById('pendingTable');
+            const pendingOnly = pending.filter(p => p.status === 'pending');
+            
+            if (pendingOnly.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">لا توجد طلبات معلقة</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            pendingOnly.slice(0, 5).forEach(p => {
+                html += `
+                    <tr>
+                        <td>${p.user_name}</td>
+                        <td>${p.package_name}</td>
+                        <td>${p.amount}$</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" onclick="openProcessModal(${p.id})">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        function displayAllPendingPackages(pending) {
+            const tbody = document.getElementById('allPendingTable');
+            
+            if (pending.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد طلبات</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            pending.forEach(p => {
+                let statusClass = 'status-pending';
+                let statusText = 'معلق';
+                
+                if (p.status === 'approved') {
+                    statusClass = 'status-approved';
+                    statusText = 'مقبول';
+                } else if (p.status === 'rejected') {
+                    statusClass = 'status-rejected';
+                    statusText = 'مرفوض';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${p.user_name}</td>
+                        <td>${p.package_name}</td>
+                        <td>${p.amount}$</td>
+                        <td>${new Date(p.created_at).toLocaleDateString('ar-SA')}</td>
+                        <td>${p.referred_by || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            ${p.status === 'pending' ? `
+                                <button class="btn btn-sm btn-success" onclick="openProcessModal(${p.id})">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // ========== تحميل طلبات السحب ==========
+        async function loadWithdrawals() {
+            try {
+                const result = await window.supabaseHelpers.getAllWithdrawals();
+                if (result.success && result.data) {
+                    displayWithdrawals(result.data);
+                    displayAllWithdrawals(result.data);
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل طلبات السحب:', error);
+            }
+        }
+        
+        function displayWithdrawals(withdrawals) {
+            const tbody = document.getElementById('withdrawalsTable');
+            const pendingOnly = withdrawals.filter(w => w.status === 'pending');
+            
+            if (pendingOnly.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">لا توجد طلبات معلقة</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            pendingOnly.slice(0, 5).forEach(w => {
+                html += `
+                    <tr>
+                        <td>${w.users?.name || '-'}</td>
+                        <td>${w.amount}$</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" onclick="openWithdrawalModal(${w.id})">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        function displayAllWithdrawals(withdrawals) {
+            const tbody = document.getElementById('allWithdrawalsTable');
+            
+            if (withdrawals.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا توجد طلبات سحب</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            withdrawals.forEach(w => {
+                let statusClass = 'status-pending';
+                let statusText = 'معلق';
+                
+                if (w.status === 'completed') {
+                    statusClass = 'status-approved';
+                    statusText = 'مكتمل';
+                } else if (w.status === 'rejected') {
+                    statusClass = 'status-rejected';
+                    statusText = 'مرفوض';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${w.users?.name || '-'}</td>
+                        <td>${w.amount}$</td>
+                        <td>${w.fee}$</td>
+                        <td>${w.wallet}</td>
+                        <td>${w.network}</td>
+                        <td>${new Date(w.created_at).toLocaleDateString('ar-SA')}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            ${w.status === 'pending' ? `
+                                <button class="btn btn-sm btn-success" onclick="openWithdrawalModal(${w.id})">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // ========== تحميل إحصائيات الإحالة ==========
+        async function loadReferralStats() {
+            try {
+                const users = await window.supabaseHelpers.getAllUsers();
+                if (!users.success) return;
+                
+                let totalReferrals = 0;
+                let totalEarnings = 0;
+                let marketers = [];
+                
+                users.data.forEach(user => {
+                    if (user.referral_count > 0) {
+                        totalReferrals += user.referral_count;
+                        totalEarnings += user.referral_earnings || 0;
+                        
+                        marketers.push({
+                            name: user.name,
+                            code: user.referral_code,
+                            count: user.referral_count,
+                            active: 0,
+                            earnings: user.referral_earnings || 0
+                        });
+                    }
+                });
+                
+                document.getElementById('totalReferrals').textContent = totalReferrals;
+                document.getElementById('totalReferralEarnings').textContent = totalEarnings + '$';
+                document.getElementById('pendingReferralRewards').textContent = '0$';
+                document.getElementById('referralRate').textContent = '0%';
+                
+                displayMarketers(marketers.sort((a, b) => b.count - a.count));
+            } catch (error) {
+                console.error('خطأ في تحميل إحصائيات الإحالة:', error);
+            }
+        }
+        
+        function displayMarketers(marketers) {
+            const tbody = document.getElementById('marketersTable');
+            
+            if (marketers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">لا يوجد مسوقين</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            marketers.slice(0, 10).forEach(m => {
+                html += `
+                    <tr>
+                        <td>${m.name}</td>
+                        <td><span style="color: var(--gold);">${m.code}</span></td>
+                        <td>${m.count}</td>
+                        <td>0</td>
+                        <td>${m.earnings}$</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // ========== إدارة الدردشة المباشرة ==========
+        async function loadActiveChats() {
+            try {
+                const result = await window.supabaseHelpers.getActiveChats();
+                
+                if (result.success && result.data) {
+                    displayChats(result.data);
+                    
+                    const unreadCount = result.data.reduce((sum, chat) => sum + (chat.unread_count || 0), 0);
+                    document.getElementById('chatBadge').textContent = unreadCount > 0 ? unreadCount : 0;
+                    
+                    if (unreadCount > 0) {
+                        document.title = `(${unreadCount}) لوحة الإدارة - Elite Capital`;
+                    }
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل المحادثات:', error);
+            }
+        }
+        
+        function displayChats(chats) {
+            const container = document.getElementById('chatsContainer');
+            
+            if (!chats || chats.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">لا توجد محادثات نشطة</div>';
+                return;
+            }
+            
+            const filter = document.getElementById('chatFilter')?.value || 'all';
+            let filteredChats = chats;
+            
+            if (filter === 'unread') {
+                filteredChats = chats.filter(chat => chat.unread_count > 0);
+            } else if (filter === 'active') {
+                filteredChats = chats.filter(chat => !chat.admin_id);
+            }
+            
+            if (filteredChats.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">لا توجد محادثات تطابق الفلتر</div>';
+                return;
+            }
+            
+            let html = '';
+            filteredChats.forEach(chat => {
+                const lastMessage = chat.last_message?.message || 'لا توجد رسائل بعد';
+                const timeAgo = getTimeAgo(new Date(chat.last_message_at));
+                const isUnread = chat.unread_count > 0;
+                
+                html += `
+                    <div class="chat-item ${isUnread ? 'unread' : ''}" onclick="openChat(${chat.id}, '${chat.users?.name || 'مستخدم'}')">
+                        <div class="chat-avatar">
+                            ${(chat.users?.name || 'م').charAt(0).toUpperCase()}
+                        </div>
+                        <div class="chat-info">
+                            <h4>${chat.users?.name || 'مستخدم'} <small style="color: var(--text-muted);">(${chat.users?.email || ''})</small></h4>
+                            <p>${lastMessage}</p>
+                        </div>
+                        <div class="chat-time">
+                            <div>${timeAgo}</div>
+                            ${isUnread ? `<div class="chat-unread-badge">${chat.unread_count}</div>` : ''}
+                        </div>
                     </div>
                 `;
-                
-                document.getElementById('paymentModal').classList.add('active');
-            } catch (error) {
-                showNotification('❌ الباقة غير متاحة', 'error');
-            }
+            });
+            
+            container.innerHTML = html;
         }
-
-        // تقديم طلب الدفع
-        async function submitPayment() {
-            if (!selectedPackage || !currentUser) return;
+        
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            
+            if (diff < 60) return 'الآن';
+            if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
+            if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
+            return `منذ ${Math.floor(diff / 86400)} يوم`;
+        }
+        
+        async function openChat(chatId, userName) {
+            currentChatId = chatId;
+            document.getElementById('chatUserName').textContent = userName;
+            document.getElementById('chatModal').classList.add('active');
+            
+            await window.supabaseHelpers.joinChat(chatId, currentAdmin.id);
+            await loadChatMessages();
+            
+            if (chatInterval) clearInterval(chatInterval);
+            chatInterval = setInterval(loadChatMessages, 3000);
+        }
+        
+        async function loadChatMessages() {
+            if (!currentChatId) return;
             
             try {
-                const pendingData = {
-                    userId: currentUser.id,
-                    userName: currentUser.name,
-                    userEmail: currentUser.email,
-                    packageId: selectedPackage.id,
-                    packageName: selectedPackage.name,
-                    packageCategory: selectedPackage.category,
-                    amount: selectedPackage.price,
-                    paymentProof: selectedImage,
-                    walletAddress: WALLET_ADDRESS,
-                    referredBy: currentUser.referred_by
-                };
+                const result = await window.supabaseHelpers.getChatMessages(currentChatId);
                 
-                const result = await window.supabaseHelpers.createPendingPackage(pendingData);
-                
-                if (result.success) {
-                    closePaymentModal();
-                    showNotification('✅ تم تقديم الطلب! بانتظار موافقة الإدارة', 'success');
-                } else {
-                    showNotification('❌ فشل تقديم الطلب', 'error');
+                if (result.success && result.data) {
+                    displayChatMessages(result.data);
+                    await window.supabaseHelpers.markMessagesAsRead(currentChatId, currentAdmin.id);
+                    await loadActiveChats();
                 }
             } catch (error) {
-                showNotification('❌ حدث خطأ', 'error');
+                console.error('خطأ في تحميل الرسائل:', error);
             }
         }
-
-        // تطبيق كود الإحالة
-        function applyReferralCode() {
-            const code = document.getElementById('quickReferralCode').value.trim().toUpperCase();
-            if (!code) {
-                showNotification('❌ يرجى إدخال كود الإحالة', 'error');
-                return;
-            }
+        
+        function displayChatMessages(messages) {
+            const container = document.getElementById('chatMessages');
             
-            if (currentUser) {
-                showNotification('⚠️ أنت مسجل الدخول بالفعل', 'warning');
-                return;
-            }
+            let html = '';
+            let lastDate = null;
             
-            sessionStorage.setItem('pending_referral', code);
-            document.getElementById('registerReferral').value = code;
-            openAuthModal('register');
-            showNotification('✅ تم تطبيق كود الإحالة', 'success');
-        }
-
-        // دوال المصادقة
-        function openAuthModal(tab = 'login') {
-            document.getElementById('authModal').classList.add('active');
-            showAuthTab(tab);
-        }
-
-        function closeAuthModal() {
-            document.getElementById('authModal').classList.remove('active');
-        }
-
-        function showAuthTab(tab) {
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-            document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-            document.querySelectorAll('.auth-tab')[tab === 'login' ? 0 : 1].classList.add('active');
-        }
-
-        // تسجيل الدخول
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            messages.forEach(msg => {
+                const isAdmin = msg.users?.is_admin;
+                const msgDate = new Date(msg.created_at);
+                const dateStr = msgDate.toLocaleDateString('ar-SA');
+                
+                if (lastDate !== dateStr) {
+                    html += `
+                        <div style="text-align: center; margin: 20px 0;">
+                            <span style="background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 50px; font-size: 12px;">
+                                ${dateStr}
+                            </span>
+                        </div>
+                    `;
+                    lastDate = dateStr;
+                }
+                
+                const timeStr = msgDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                const senderName = isAdmin ? 'أنت' : msg.users?.name || 'مستخدم';
+                
+                html += `
+                    <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
+                        <div class="message-bubble">
+                            ${msg.message}
+                        </div>
+                        <div class="message-info">
+                            <span>${senderName}</span>
+                            <span>•</span>
+                            <span>${timeStr}</span>
+                            ${msg.is_read ? '<span>✓✓</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
             
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
+            container.innerHTML = html;
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
             
-            const result = await window.supabaseHelpers.loginUser(username, password);
+            if (!message || !currentChatId) return;
+            
+            input.value = '';
+            
+            const result = await window.supabaseHelpers.sendChatMessage(
+                currentChatId,
+                currentAdmin.id,
+                message
+            );
             
             if (result.success) {
-                currentUser = result.data;
-                localStorage.setItem('current_user', JSON.stringify(currentUser));
-                closeAuthModal();
-                showNotification('✅ تم تسجيل الدخول بنجاح', 'success');
-                
-                if (currentUser.is_admin) {
-                    setTimeout(() => window.location.href = 'admin.html', 1000);
-                } else {
-                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
-                }
+                await loadChatMessages();
             } else {
                 showNotification('❌ ' + result.error, 'error');
             }
-        });
-
-        // تسجيل جديد
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        }
+        
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        }
+        
+        function closeChatModal() {
+            document.getElementById('chatModal').classList.remove('active');
+            if (chatInterval) {
+                clearInterval(chatInterval);
+            }
+            currentChatId = null;
+        }
+        
+        // ========== إدارة الباقات (محدثة) ==========
+        function showAddPackageModal() {
+            document.getElementById('addPackageModal').classList.add('active');
+        }
+        
+        function closeAddPackageModal() {
+            document.getElementById('addPackageModal').classList.remove('active');
+            document.getElementById('packageName').value = '';
+            document.getElementById('packagePrice').value = '';
+            document.getElementById('packageDailyProfit').value = '';
+            document.getElementById('packageDuration').value = '30';
+            document.getElementById('packageDurationType').value = 'month';
+            document.getElementById('packageCategory').value = 'standard';
+            document.getElementById('packageDescription').value = '';
+        }
+        
+        async function addPackage() {
+            const name = document.getElementById('packageName').value.trim();
+            const price = parseFloat(document.getElementById('packagePrice').value);
+            const dailyProfit = parseFloat(document.getElementById('packageDailyProfit').value);
+            const duration = parseInt(document.getElementById('packageDuration').value);
+            const durationType = document.getElementById('packageDurationType').value;
+            const category = document.getElementById('packageCategory').value;
+            const description = document.getElementById('packageDescription').value.trim();
             
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            
-            if (password !== confirmPassword) {
-                showNotification('❌ كلمتا المرور غير متطابقتين', 'error');
+            if (!name || !price || !dailyProfit || !duration) {
+                showNotification('يرجى ملء جميع الحقول المطلوبة', 'error');
                 return;
             }
             
-            const userData = {
-                name: document.getElementById('registerName').value.trim(),
-                username: document.getElementById('registerUsername').value.trim().toLowerCase(),
-                email: document.getElementById('registerEmail').value.trim().toLowerCase(),
-                phone: document.getElementById('registerPhone').value.trim(),
-                password: password,
-                confirmPassword: confirmPassword,
-                referralCode: document.getElementById('registerReferral').value.trim().toUpperCase() || null
+            if (price <= 0 || dailyProfit <= 0 || duration <= 0) {
+                showNotification('جميع القيم يجب أن تكون أكبر من 0', 'error');
+                return;
+            }
+            
+            const result = await window.supabaseHelpers.createPackage({
+                name,
+                price,
+                dailyProfit,
+                duration,
+                durationType,
+                category,
+                description
+            });
+            
+            if (result.success) {
+                closeAddPackageModal();
+                showNotification('✅ تم إضافة الباقة بنجاح');
+                await loadPackages();
+                await loadDashboardStats();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        async function deletePackage(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه الباقة؟')) return;
+            
+            const result = await window.supabaseHelpers.deletePackage(id);
+            
+            if (result.success) {
+                showNotification('✅ تم حذف الباقة');
+                await loadPackages();
+                await loadDashboardStats();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        // ========== معالجة طلبات الاشتراك ==========
+        function openProcessModal(id) {
+            currentPendingId = id;
+            document.getElementById('pendingDetails').innerHTML = `<p>جارٍ تحميل التفاصيل...</p>`;
+            document.getElementById('processPendingModal').classList.add('active');
+        }
+        
+        function closeProcessModal() {
+            document.getElementById('processPendingModal').classList.remove('active');
+            currentPendingId = null;
+        }
+        
+        async function approvePending() {
+            if (!currentPendingId) return;
+            
+            const result = await window.supabaseHelpers.approvePendingPackage(currentPendingId, currentAdmin.id);
+            
+            if (result.success) {
+                closeProcessModal();
+                showNotification('✅ تم قبول الطلب وتفعيل الباقة');
+                await loadAllData();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        async function rejectPending() {
+            if (!currentPendingId) return;
+            
+            const notes = document.getElementById('processNotes').value;
+            const result = await window.supabaseHelpers.rejectPendingPackage(currentPendingId, notes || 'مرفوض', currentAdmin.id);
+            
+            if (result.success) {
+                closeProcessModal();
+                showNotification('✅ تم رفض الطلب');
+                await loadAllData();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        // ========== معالجة طلبات السحب ==========
+        function openWithdrawalModal(id) {
+            currentWithdrawalId = id;
+            document.getElementById('withdrawalDetails').innerHTML = `<p>جارٍ تحميل التفاصيل...</p>`;
+            document.getElementById('processWithdrawalModal').classList.add('active');
+        }
+        
+        function closeWithdrawalProcessModal() {
+            document.getElementById('processWithdrawalModal').classList.remove('active');
+            currentWithdrawalId = null;
+            document.getElementById('transactionHash').value = '';
+        }
+        
+        async function approveWithdrawal() {
+            if (!currentWithdrawalId) return;
+            
+            const txHash = document.getElementById('transactionHash').value.trim();
+            
+            const result = await window.supabaseHelpers.updateWithdrawalStatus(
+                currentWithdrawalId, 
+                'completed', 
+                currentAdmin.id, 
+                txHash || null
+            );
+            
+            if (result.success) {
+                closeWithdrawalProcessModal();
+                showNotification('✅ تم تأكيد طلب السحب');
+                await loadAllData();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        async function rejectWithdrawal() {
+            if (!currentWithdrawalId) return;
+            
+            const result = await window.supabaseHelpers.updateWithdrawalStatus(
+                currentWithdrawalId, 
+                'rejected', 
+                currentAdmin.id
+            );
+            
+            if (result.success) {
+                closeWithdrawalProcessModal();
+                showNotification('✅ تم رفض طلب السحب');
+                await loadAllData();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        // ========== إدارة حالة المستخدم ==========
+        function openUserStatusModal(userId, userName, currentStatus) {
+            currentUserId = userId;
+            
+            let statusText = '';
+            if (currentStatus === 'active') statusText = 'نشط';
+            else if (currentStatus === 'suspended') statusText = 'معلق';
+            else if (currentStatus === 'banned') statusText = 'محظور';
+            
+            document.getElementById('userStatusInfo').innerHTML = `
+                <p><strong>المستخدم:</strong> ${userName}</p>
+                <p><strong>الحالة الحالية:</strong> ${statusText}</p>
+            `;
+            
+            document.getElementById('newUserStatus').value = currentStatus || 'active';
+            document.getElementById('userStatusModal').classList.add('active');
+        }
+        
+        function closeUserStatusModal() {
+            document.getElementById('userStatusModal').classList.remove('active');
+            currentUserId = null;
+            document.getElementById('statusReason').value = '';
+        }
+        
+        async function updateUserStatus() {
+            if (!currentUserId) return;
+            
+            const newStatus = document.getElementById('newUserStatus').value;
+            const reason = document.getElementById('statusReason').value;
+            
+            const result = await window.supabaseHelpers.updateUserStatus(currentUserId, newStatus);
+            
+            if (result.success) {
+                closeUserStatusModal();
+                showNotification('✅ تم تحديث حالة المستخدم');
+                await loadUsers();
+                await loadDashboardStats();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        // ========== إدارة التنبيهات ==========
+        async function loadAlerts() {
+            try {
+                console.log('جاري تحميل التنبيهات...');
+                
+                const { data, error } = await supabaseClient
+                    .from('global_alerts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                console.log('نتيجة الاستعلام:', { data, error });
+                
+                const container = document.getElementById('alertsContainer');
+                const badge = document.getElementById('alertsBadge');
+                
+                if (error) {
+                    console.error('خطأ في جلب التنبيهات:', error);
+                    container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--danger);">خطأ: ${error.message}</div>`;
+                    return;
+                }
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-alerts">
+                            <i class="fas fa-bell-slash"></i>
+                            <h3>لا توجد تنبيهات</h3>
+                            <p>قم بإضافة تنبيه جديد ليظهر للمستخدمين</p>
+                        </div>
+                    `;
+                    if (badge) {
+                        badge.style.display = 'none';
+                    }
+                    return;
+                }
+                
+                displayAlerts(data);
+                
+                if (badge) {
+                    badge.textContent = data.length;
+                    badge.style.display = data.length > 0 ? 'inline' : 'none';
+                }
+            } catch (error) {
+                console.error('استثناء في تحميل التنبيهات:', error);
+            }
+        }
+        
+        function displayAlerts(alerts) {
+            const container = document.getElementById('alertsContainer');
+            
+            let html = '';
+            alerts.forEach(alert => {
+                let typeClass = '';
+                let typeText = '';
+                
+                switch(alert.type) {
+                    case 'info':
+                        typeClass = 'type-info';
+                        typeText = 'معلومات';
+                        break;
+                    case 'success':
+                        typeClass = 'type-success';
+                        typeText = 'نجاح';
+                        break;
+                    case 'warning':
+                        typeClass = 'type-warning';
+                        typeText = 'تحذير';
+                        break;
+                    case 'danger':
+                        typeClass = 'type-danger';
+                        typeText = 'هام';
+                        break;
+                    default:
+                        typeClass = 'type-info';
+                        typeText = 'معلومات';
+                }
+                
+                const date = new Date(alert.created_at).toLocaleDateString('ar-SA');
+                const time = new Date(alert.created_at).toLocaleTimeString('ar-SA');
+                const expires = alert.expires_at ? new Date(alert.expires_at).toLocaleDateString('ar-SA') : 'دائم';
+                
+                html += `
+                    <div class="alert-item ${alert.type}">
+                        <div class="alert-header">
+                            <span class="alert-title">${alert.title}</span>
+                            <span class="alert-type ${typeClass}">${typeText}</span>
+                        </div>
+                        <div class="alert-message">${alert.message}</div>
+                        <div class="alert-footer">
+                            <div class="alert-date">
+                                <i class="far fa-calendar"></i> ${date} ${time}
+                            </div>
+                            <div class="alert-date">
+                                <i class="far fa-hourglass"></i> ينتهي: ${expires}
+                            </div>
+                            <div class="alert-actions">
+                                <button class="btn btn-sm btn-danger" onclick="deleteAlert(${alert.id})">
+                                    <i class="fas fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function showAddAlertModal() {
+            document.getElementById('addAlertModal').classList.add('active');
+        }
+        
+        function closeAddAlertModal() {
+            document.getElementById('addAlertModal').classList.remove('active');
+            document.getElementById('alertTitle').value = '';
+            document.getElementById('alertMessage').value = '';
+            document.getElementById('alertType').value = 'info';
+            document.getElementById('alertExpires').value = '';
+        }
+        
+        async function addAlert() {
+            const title = document.getElementById('alertTitle').value.trim();
+            const message = document.getElementById('alertMessage').value.trim();
+            const type = document.getElementById('alertType').value;
+            const expires = document.getElementById('alertExpires').value;
+            
+            if (!title || !message) {
+                showNotification('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+            
+            console.log('إضافة تنبيه:', { title, message, type, expires });
+            
+            const alertData = {
+                title: title,
+                message: message,
+                type: type,
+                created_by: currentAdmin?.id || 1
             };
             
-            const result = await window.supabaseHelpers.registerUser(userData);
-            
-            if (result.success) {
-                currentUser = result.data;
-                localStorage.setItem('current_user', JSON.stringify(currentUser));
-                closeAuthModal();
-                showNotification('✅ تم إنشاء الحساب بنجاح', 'success');
-                setTimeout(() => window.location.href = 'dashboard.html', 1000);
-            } else {
-                showNotification('❌ ' + result.error, 'error');
+            if (expires) {
+                alertData.expires_at = new Date(expires).toISOString();
             }
-        });
-
-        // دوال مساعدة
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('global_alerts')
+                    .insert([alertData])
+                    .select();
+                
+                console.log('نتيجة الإضافة:', { data, error });
+                
+                if (error) throw error;
+                
+                closeAddAlertModal();
+                showNotification('✅ تم إضافة التنبيه بنجاح');
+                await loadAlerts();
+                
+                document.getElementById('alertTitle').value = '';
+                document.getElementById('alertMessage').value = '';
+                document.getElementById('alertType').value = 'info';
+                document.getElementById('alertExpires').value = '';
+                
+            } catch (error) {
+                console.error('خطأ في إضافة التنبيه:', error);
+                showNotification('❌ ' + error.message, 'error');
+            }
+        }
+        
+        async function deleteAlert(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا التنبيه؟')) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('global_alerts')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                showNotification('✅ تم حذف التنبيه');
+                await loadAlerts();
+                
+            } catch (error) {
+                console.error('خطأ في حذف التنبيه:', error);
+                showNotification('❌ ' + error.message, 'error');
+            }
+        }
+        
+        // ========== تحميل جميع النشاطات ==========
+        async function loadAllActivities() {
+            try {
+                const filter = document.getElementById('activityFilter')?.value || 'all';
+                
+                let query = supabaseClient
+                    .from('activity_log')
+                    .select(`
+                        *,
+                        users:user_id (
+                            name,
+                            email
+                        )
+                    `)
+                    .order('created_at', { ascending: false })
+                    .limit(200);
+                
+                const { data, error } = await query;
+                
+                if (error) throw error;
+                
+                displayAllActivities(data || []);
+                
+            } catch (error) {
+                console.error('خطأ في تحميل النشاطات:', error);
+            }
+        }
+        
+        function displayAllActivities(activities) {
+            const tbody = document.getElementById('activitiesTable');
+            const filter = document.getElementById('activityFilter')?.value || 'all';
+            
+            let filteredActivities = activities;
+            if (filter !== 'all') {
+                filteredActivities = activities.filter(a => a.type === filter);
+            }
+            
+            if (filteredActivities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد نشاطات</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            filteredActivities.forEach(activity => {
+                let typeText = '';
+                let typeClass = '';
+                
+                switch(activity.type) {
+                    case 'profit':
+                        typeText = '💰 ربح';
+                        typeClass = 'status-approved';
+                        break;
+                    case 'withdrawal':
+                        typeText = '💳 سحب';
+                        typeClass = 'status-pending';
+                        break;
+                    case 'subscription':
+                        typeText = '📦 اشتراك';
+                        typeClass = 'status-active';
+                        break;
+                    case 'login':
+                        typeText = '🔐 دخول';
+                        typeClass = 'status-info';
+                        break;
+                    default:
+                        typeText = activity.type;
+                }
+                
+                let statusBadge = '';
+                if (activity.status) {
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    if (activity.status === 'pending') {
+                        statusClass = 'status-pending';
+                        statusText = 'قيد المراجعة';
+                    } else if (activity.status === 'approved') {
+                        statusClass = 'status-approved';
+                        statusText = 'تمت الموافقة';
+                    } else if (activity.status === 'completed') {
+                        statusClass = 'status-approved';
+                        statusText = 'مكتمل';
+                    } else if (activity.status === 'rejected') {
+                        statusClass = 'status-rejected';
+                        statusText = 'مرفوض';
+                    }
+                    
+                    statusBadge = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+                }
+                
+                const date = new Date(activity.created_at).toLocaleString('ar-SA');
+                
+                html += `
+                    <tr>
+                        <td>${activity.users?.name || 'غير معروف'}</td>
+                        <td><span class="status-badge" style="background: rgba(200,169,126,0.2); color: var(--gold);">${typeText}</span></td>
+                        <td>${activity.title}</td>
+                        <td>${activity.description || '-'}</td>
+                        <td>${activity.amount ? activity.amount + '$' : '-'}</td>
+                        <td>${statusBadge || '-'}</td>
+                        <td>${date}</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // ========== دوال مساعدة ==========
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
+            
+            document.getElementById(sectionId + '-section').classList.add('active');
+            
+            const activeLink = Array.from(document.querySelectorAll('.sidebar-menu a')).find(a => 
+                a.getAttribute('onclick')?.includes(sectionId)
+            );
+            if (activeLink) activeLink.classList.add('active');
+            
+            const titles = {
+                'dashboard': 'لوحة التحكم',
+                'users': 'إدارة المستخدمين',
+                'packages': 'إدارة الباقات',
+                'pending': 'طلبات الاشتراك',
+                'withdrawals': 'طلبات السحب',
+                'livechat': 'الدردشة المباشرة',
+                'referrals': 'نظام الإحالة',
+                'alerts': 'إدارة التنبيهات',
+                'activity_log': 'سجل النشاطات'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[sectionId] || 'لوحة التحكم';
+            
+            // تحميل البيانات عند فتح القسم
+            if (sectionId === 'livechat') {
+                loadActiveChats();
+            } else if (sectionId === 'alerts') {
+                loadAlerts();
+            } else if (sectionId === 'activity_log') {
+                loadAllActivities();
+            } else if (sectionId === 'users') {
+                loadUsers();
+            } else if (sectionId === 'packages') {
+                loadPackages();
+            } else if (sectionId === 'pending') {
+                loadPendingPackages();
+            } else if (sectionId === 'withdrawals') {
+                loadWithdrawals();
+            } else if (sectionId === 'referrals') {
+                loadReferralStats();
+            }
+        }
+        
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentDateTime').textContent = now.toLocaleString('ar-SA');
+        }
+        
         function toggleUserMenu() {
             document.getElementById('userDropdown').classList.toggle('active');
         }
-
-        function goToDashboard() {
-            window.location.href = 'dashboard.html';
+        
+        function refreshData() {
+            showNotification('جاري تحديث البيانات...', 'info');
+            loadAllData();
         }
-
-        async function logout() {
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.innerHTML = message;
+            notification.className = 'notification ' + type;
+            notification.style.display = 'block';
+            setTimeout(() => notification.style.display = 'none', 3000);
+        }
+        
+        function logout() {
             if (confirm('هل تريد تسجيل الخروج؟')) {
-                currentUser = null;
+                if (chatInterval) clearInterval(chatInterval);
                 localStorage.removeItem('current_user');
-                location.reload();
+                window.location.href = 'index.html';
             }
         }
-
-        function copyWalletAddress() {
-            navigator.clipboard.writeText(WALLET_ADDRESS);
-            showNotification('✅ تم نسخ العنوان');
-        }
-
-        function closePaymentModal() {
-            document.getElementById('paymentModal').classList.remove('active');
-            selectedPackage = null;
-            selectedImage = null;
-        }
-
-        // رفع الصور
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    selectedImage = event.target.result;
-                    document.getElementById('uploadPreview').innerHTML = `
-                        <img src="${selectedImage}" style="max-width: 100%; max-height: 200px; border-radius: 20px; border: 3px solid var(--gold);">
-                    `;
-                    document.getElementById('uploadPreview').style.display = 'block';
-                };
-                reader.readAsDataURL(e.target.files[0]);
+        
+        // تنظيف عند مغادرة الصفحة
+        window.addEventListener('beforeunload', function() {
+            if (chatInterval) {
+                clearInterval(chatInterval);
             }
         });
 
@@ -1878,22 +2983,8 @@
                 dropdown.classList.remove('active');
             }
         });
-
-        // الإشعارات
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.innerHTML = message;
-            notification.className = 'notification ' + type;
-            notification.style.display = 'block';
-            setTimeout(() => notification.style.display = 'none', 3000);
-        }
-
-        // تحديث عند العودة للصفحة
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            }
-        });
     </script>
+
+    <script src="/pwa-init.js"></script>
 </body>
 </html>

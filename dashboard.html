@@ -23,6 +23,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
     
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#c8a97e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Elite Capital">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
+    <meta name="msapplication-TileColor" content="#c8a97e">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+
     <style>
         * {
             margin: 0;
@@ -129,19 +140,21 @@
             color: var(--dark);
             cursor: pointer;
             border: 2px solid var(--gold);
+            position: relative;
         }
 
         .user-dropdown {
             position: absolute;
             top: 60px;
             left: 0;
-            width: 250px;
+            width: 280px;
             background: var(--dark-light);
             border-radius: 20px;
             padding: 15px;
             border: 2px solid var(--gold);
             display: none;
             box-shadow: var(--shadow);
+            z-index: 1001;
         }
 
         .user-dropdown.active {
@@ -169,11 +182,152 @@
             border-radius: 12px;
             transition: all 0.3s;
             cursor: pointer;
+            position: relative;
         }
 
         .user-dropdown-item:hover {
             background: rgba(200, 169, 126, 0.1);
             color: var(--gold);
+        }
+
+        .chat-badge {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--danger);
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 50px;
+            min-width: 22px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.1); }
+            100% { transform: translateY(-50%) scale(1); }
+        }
+
+        /* ===== نافذة التنبيهات المنبثقة ===== */
+        .alert-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .alert-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        .alert-modal-content {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            border: 2px solid var(--gold);
+            box-shadow: var(--shadow-gold);
+            position: relative;
+            animation: slideUp 0.3s;
+        }
+
+        .alert-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .alert-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: var(--dark);
+        }
+
+        .alert-modal-title {
+            flex: 1;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        .alert-modal-close {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .alert-modal-close:hover {
+            color: var(--danger);
+        }
+
+        .alert-modal-message {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .alert-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .alert-modal-btn {
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .alert-modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* المحتوى الرئيسي */
@@ -416,53 +570,115 @@
             font-size: 12px;
         }
 
-        /* قائمة المعاملات */
-        .transactions-list {
-            max-height: 300px;
+        /* ===== سجل النشاطات ===== */
+        .activities-list {
+            max-height: 400px;
             overflow-y: auto;
-            padding-right: 10px;
+            padding-left: 10px;
         }
 
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
+        .activity-item {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 15px;
-            margin-bottom: 10px;
-            border-right: 4px solid var(--success);
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-right: 4px solid transparent;
+            transition: all 0.3s;
         }
 
-        .transaction-item.withdrawal {
-            border-right-color: var(--danger);
+        .activity-item:hover {
+            background: rgba(200, 169, 126, 0.1);
+            transform: translateX(-5px);
         }
 
-        .transaction-item.referral {
-            border-right-color: var(--gold);
+        .activity-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
         }
 
-        .transaction-info h4 {
-            font-size: 16px;
-            margin-bottom: 5px;
+        .icon-profit { background: rgba(39, 174, 96, 0.2); color: #27ae60; }
+        .icon-withdrawal { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+        .icon-subscription { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .icon-login { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+
+        .activity-content {
+            flex: 1;
         }
 
-        .transaction-info p {
-            color: var(--text-muted);
+        .activity-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .activity-desc {
             font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
         }
 
-        .transaction-amount {
-            font-size: 18px;
+        .activity-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .activity-amount {
+            color: var(--success);
             font-weight: 700;
         }
 
-        .transaction-amount.positive {
-            color: var(--success);
+        .activity-status {
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 600;
         }
 
-        .transaction-amount.negative {
-            color: var(--danger);
+        .status-pending {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+
+        .status-approved, .status-completed {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+        }
+
+        .status-rejected {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .view-all-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--gold);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px;
+            border: 1px solid var(--gold);
+            border-radius: 50px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .view-all-link:hover {
+            background: var(--gold);
+            color: var(--dark);
         }
 
         /* قائمة طلبات السحب */
@@ -501,18 +717,18 @@
             color: var(--danger);
         }
 
-        /* الشريط السفلي */
+        /* ===== الشريط السفلي ===== */
         .bottom-nav {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: 90%;
-            max-width: 600px;
+            max-width: 500px;
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(20px);
-            border-radius: 60px;
-            padding: 10px;
+            border-radius: 40px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-around;
             border: 2px solid var(--gold);
@@ -527,24 +743,24 @@
             text-decoration: none;
             color: var(--text-muted);
             transition: all 0.3s;
-            padding: 8px 15px;
-            border-radius: 50px;
             cursor: pointer;
+            position: relative;
+            padding: 8px 0;
+            min-width: 70px;
         }
 
         .nav-item.active {
-            background: var(--gradient-gold);
-            color: var(--dark);
-            transform: translateY(-5px);
+            color: var(--gold);
+            transform: translateY(-3px);
         }
 
         .nav-item.active i {
-            color: var(--dark);
+            color: var(--gold);
         }
 
         .nav-item i {
-            font-size: 22px;
-            margin-bottom: 5px;
+            font-size: 24px;
+            margin-bottom: 4px;
             transition: all 0.3s;
         }
 
@@ -555,8 +771,8 @@
 
         .nav-badge {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: -5px;
+            right: 15px;
             background: var(--danger);
             color: white;
             font-size: 10px;
@@ -564,6 +780,49 @@
             border-radius: 10px;
             min-width: 18px;
             text-align: center;
+            border: 2px solid var(--gold);
+            animation: pulse 2s infinite;
+        }
+
+        /* زر الدردشة العائم */
+        .chat-float-btn {
+            position: fixed;
+            bottom: 100px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: var(--shadow-gold);
+            transition: all 0.3s;
+            z-index: 999;
+            border: 3px solid var(--gold);
+        }
+
+        .chat-float-btn:hover {
+            transform: scale(1.1) rotate(10deg);
+        }
+
+        .chat-float-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 50px;
+            min-width: 28px;
+            text-align: center;
+            font-weight: bold;
+            border: 2px solid white;
+            animation: pulse 1.5s infinite;
         }
 
         /* الأزرار */
@@ -761,8 +1020,8 @@
             animation: fadeIn 0.3s;
         }
 
-        /* الإشعارات */
-        .notification {
+        /* الإشعارات المنبثقة الصغيرة */
+        .toast {
             position: fixed;
             top: 100px;
             right: 20px;
@@ -777,15 +1036,15 @@
             min-width: 300px;
         }
 
-        .notification.error {
+        .toast.error {
             background: var(--danger);
         }
 
-        .notification.warning {
+        .toast.warning {
             background: var(--warning);
         }
 
-        .notification.info {
+        .toast.info {
             background: var(--secondary);
         }
 
@@ -826,17 +1085,16 @@
                 padding: 8px;
             }
             
-            .nav-item span {
-                display: none;
+            .nav-item i {
+                font-size: 22px;
             }
             
-            .nav-item i {
-                font-size: 24px;
-                margin: 0;
+            .nav-item span {
+                font-size: 11px;
             }
             
             .nav-item {
-                padding: 10px;
+                min-width: 60px;
             }
             
             .subscription-name {
@@ -845,6 +1103,23 @@
             
             .profit-amount {
                 font-size: 24px;
+            }
+            
+            .chat-float-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+                bottom: 90px;
+                left: 15px;
+            }
+            
+            .alert-modal-content {
+                margin: 15px;
+                padding: 20px;
+            }
+            
+            .alert-modal-title {
+                font-size: 20px;
             }
         }
 
@@ -855,6 +1130,14 @@
             
             .modal-content {
                 padding: 25px;
+            }
+            
+            .bottom-nav {
+                width: 98%;
+            }
+            
+            .nav-item {
+                min-width: 50px;
             }
         }
 
@@ -890,6 +1173,25 @@
     </style>
 </head>
 <body>
+    <!-- نافذة التنبيهات المنبثقة -->
+    <div class="alert-modal" id="alertModal">
+        <div class="alert-modal-content">
+            <button class="alert-modal-close" onclick="closeAlertModal()">&times;</button>
+            <div class="alert-modal-header">
+                <div class="alert-modal-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div class="alert-modal-title" id="alertModalTitle">تنبيه هام</div>
+            </div>
+            <div class="alert-modal-message" id="alertModalMessage">
+                هذا تنبيه مهم لجميع المستخدمين
+            </div>
+            <div class="alert-modal-footer">
+                <button class="alert-modal-btn" onclick="closeAlertModal()">حسناً</button>
+            </div>
+        </div>
+    </div>
+
     <!-- الشريط العلوي -->
     <nav class="navbar">
         <div class="logo" onclick="window.location.href='index.html'">
@@ -902,11 +1204,26 @@
         <div class="user-menu">
             <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">م</div>
             <div class="user-dropdown" id="userDropdown">
+                <div class="user-dropdown-item" onclick="window.location.href='profile.html'">
+                    <i class="fas fa-user"></i>
+                    الملف الشخصي
+                </div>
+                <div class="user-dropdown-item" onclick="window.location.href='chat.html'">
+                    <i class="fas fa-headset"></i>
+                    الدعم الفني
+                    <span class="chat-badge" id="chatBadge" style="display: none;">!</span>
+                </div>
+                <!-- إضافة رابط الدردشة الجماعية الجديد -->
+                <div class="user-dropdown-item" onclick="window.location.href='group-chat.html'">
+                    <i class="fas fa-users"></i>
+                    الدردشة الجماعية
+                    <span class="chat-badge" style="background: var(--gold);" id="groupChatBadge">جديد</span>
+                </div>
                 <div class="user-dropdown-item" onclick="copyReferralCode()">
                     <i class="fas fa-gift"></i>
                     كود الإحالة
                 </div>
-                <div class="user-dropdown-item" onclick="refreshSubscription()">
+                <div class="user-dropdown-item" onclick="refreshAllData()">
                     <i class="fas fa-sync-alt"></i>
                     تحديث البيانات
                 </div>
@@ -917,6 +1234,12 @@
             </div>
         </div>
     </nav>
+
+    <!-- زر الدردشة العائم -->
+    <div class="chat-float-btn" onclick="window.location.href='group-chat.html'" id="chatFloatBtn" title="الدردشة الجماعية">
+        <i class="fas fa-users"></i>
+        <span class="chat-float-badge" id="chatFloatBadge" style="display: none;">جديد</span>
+    </div>
 
     <!-- المحتوى الرئيسي -->
     <div class="main">
@@ -957,19 +1280,17 @@
             <!-- الاشتراك الحالي (مع زر تحديث) -->
             <div id="subscriptionSection" style="position: relative;"></div>
 
-            <!-- شبكة المحتوى -->
+            <!-- شبكة المحتوى - سطرين: الإحالة + سجل النشاطات -->
             <div class="content-grid">
                 <!-- نظام الإحالة -->
-                <div class="card" data-aos="fade-up" data-aos-delay="100">
+                <div class="card">
                     <div class="card-title">
-                        <i class="fas fa-gift" style="color: var(--gold);"></i>
+                        <i class="fas fa-gift"></i>
                         نظام الإحالة
                     </div>
                     
                     <div class="referral-box">
-                        <div style="text-align: center; margin-bottom: 15px;">
-                            <span style="color: var(--gold); font-size: 14px;">كود الإحالة الخاص بك</span>
-                        </div>
+                        <div style="text-align: center; margin-bottom: 10px; color: var(--text-muted);">كود الإحالة الخاص بك</div>
                         <div class="referral-code" id="referralCodeDisplay">-</div>
                         <button class="btn btn-primary btn-block" onclick="copyReferralCode()">
                             <i class="fas fa-copy"></i>
@@ -993,14 +1314,18 @@
                     </div>
                 </div>
 
-                <!-- آخر المعاملات -->
-                <div class="card" data-aos="fade-up" data-aos-delay="200">
+                <!-- سجل النشاطات -->
+                <div class="card">
                     <div class="card-title">
-                        <i class="fas fa-history" style="color: var(--gold);"></i>
-                        آخر المعاملات
+                        <i class="fas fa-history"></i>
+                        سجل النشاطات
                     </div>
-                    <div class="transactions-list" id="transactionsList">
-                        <p style="color: var(--text-muted); text-align: center;">لا توجد معاملات</p>
+                    <div class="activities-list" id="recentActivities">
+                        <p style="color: var(--text-muted); text-align: center;">جاري التحميل...</p>
+                    </div>
+                    <div class="view-all-link" onclick="showAllActivitiesPage()">
+                        <i class="fas fa-arrow-left"></i>
+                        عرض جميع النشاطات
                     </div>
                 </div>
             </div>
@@ -1076,6 +1401,36 @@
                 </div>
             </div>
         </div>
+
+        <!-- صفحة جميع النشاطات -->
+        <div id="all-activities-page" class="page">
+            <div class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="card-title" style="margin-bottom: 0;">
+                        <i class="fas fa-history"></i>
+                        جميع النشاطات
+                    </h3>
+                    <button class="btn btn-sm btn-primary" onclick="goBackToHome()">
+                        <i class="fas fa-arrow-right"></i>
+                        رجوع
+                    </button>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <select id="activitiesFilter" class="form-control" style="width: 150px;" onchange="filterAllActivities()">
+                        <option value="all">الكل</option>
+                        <option value="profit">أرباح</option>
+                        <option value="withdrawal">سحوبات</option>
+                        <option value="subscription">اشتراكات</option>
+                        <option value="login">دخول</option>
+                    </select>
+                </div>
+                
+                <div class="activities-list" id="allActivitiesList" style="max-height: 500px;">
+                    <p style="color: var(--text-muted); text-align: center;">جاري التحميل...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- الشريط السفلي -->
@@ -1093,9 +1448,9 @@
             <i class="fas fa-chart-pie"></i>
             <span>الإحصائيات</span>
         </div>
-        <div class="nav-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-store"></i>
-            <span>المتجر</span>
+        <div class="nav-item" onclick="showAllActivitiesPage()">
+            <i class="fas fa-history"></i>
+            <span>النشاطات</span>
         </div>
     </div>
 
@@ -1148,8 +1503,8 @@
         </div>
     </div>
 
-    <!-- الإشعارات -->
-    <div class="notification" id="notification"></div>
+    <!-- الإشعارات المنبثقة الصغيرة -->
+    <div class="toast" id="toast"></div>
 
     <!-- AOS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -1167,6 +1522,10 @@
         let withdrawals = [];
         let referralStats = null;
         let currentNetwork = 'TRC20';
+        let chatCheckInterval = null;
+        let activitiesInterval = null;
+        let allActivities = [];
+        let hasShownAlert = false;
         
         const withdrawalFees = {
             'TRC20': 5,
@@ -1183,11 +1542,71 @@
             await loadTransactions();
             await loadWithdrawals();
             await loadReferralStats();
+            await loadRecentActivities();
+            await checkForActiveAlerts();
+            await checkUnreadMessages();
             updateUI();
             
             // إضافة زر التحديث إذا وجد اشتراك
             setTimeout(addRefreshButton, 1000);
+            
+            // بدء التحقق من الرسائل غير المقروءة كل 10 ثواني
+            chatCheckInterval = setInterval(checkUnreadMessages, 10000);
+            
+            // تحديث النشاطات كل 30 ثانية
+            activitiesInterval = setInterval(loadRecentActivities, 30000);
+            
+            // التحقق من التنبيهات كل دقيقة
+            setInterval(checkForActiveAlerts, 60000);
         });
+
+        // التحقق من وجود تنبيهات نشطة
+        async function checkForActiveAlerts() {
+            try {
+                console.log('🔍 التحقق من التنبيهات النشطة...');
+                
+                const { data, error } = await supabaseClient
+                    .from('global_alerts')
+                    .select('*')
+                    .eq('is_active', true);
+                
+                if (error) {
+                    console.error('خطأ في جلب التنبيهات:', error);
+                    return;
+                }
+                
+                console.log('✅ التنبيهات النشطة:', data);
+                
+                const now = new Date().toISOString();
+                const activeAlerts = data?.filter(alert => {
+                    if (!alert.expires_at) return true;
+                    return alert.expires_at > now;
+                }) || [];
+                
+                console.log('✅ التنبيهات بعد الفلترة:', activeAlerts);
+                
+                if (activeAlerts.length > 0 && !hasShownAlert) {
+                    const alert = activeAlerts[0];
+                    showAlertModal(alert.title, alert.message);
+                    hasShownAlert = true;
+                    localStorage.setItem('last_alert_time', Date.now().toString());
+                }
+            } catch (error) {
+                console.error('❌ استثناء في التحقق من التنبيهات:', error);
+            }
+        }
+
+        // عرض نافذة التنبيه
+        function showAlertModal(title, message) {
+            document.getElementById('alertModalTitle').textContent = title;
+            document.getElementById('alertModalMessage').textContent = message;
+            document.getElementById('alertModal').classList.add('active');
+        }
+
+        // إغلاق نافذة التنبيه
+        function closeAlertModal() {
+            document.getElementById('alertModal').classList.remove('active');
+        }
 
         // التحقق من المستخدم
         async function checkUser() {
@@ -1255,7 +1674,7 @@
             }
         }
 
-        // عرض الاشتراك
+        // عرض الاشتراك - مع حساب الأيام المتبقية بشكل صحيح
         function displaySubscription() {
             if (!subscription) return;
             
@@ -1264,12 +1683,31 @@
             const startDate = new Date(subscription.start_date);
             const endDate = new Date(subscription.end_date);
             const today = new Date();
-            const daysLeft = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-            const totalDays = 30;
-            const daysPassed = totalDays - (daysLeft > 0 ? daysLeft : 0);
-            const progress = ((daysPassed / totalDays) * 100).toFixed(1);
             
-            // التأكد من أن القيم أرقام
+            // حساب الأيام المتبقية بشكل صحيح
+            const diffTime = endDate - today;
+            const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+            
+            // حساب الأيام المنقضية
+            const diffPassed = today - startDate;
+            const daysPassed = Math.max(0, Math.ceil(diffPassed / (1000 * 60 * 60 * 24)));
+            
+            // حساب المدة الإجمالية بالأيام
+            const totalDuration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            
+            // حساب نسبة التقدم (تجنب القيم السالبة)
+            let progress = ((daysPassed / totalDuration) * 100).toFixed(1);
+            if (progress > 100) progress = 100;
+            if (progress < 0) progress = 0;
+            
+            console.log('تاريخ البدء:', startDate);
+            console.log('تاريخ الانتهاء:', endDate);
+            console.log('اليوم:', today);
+            console.log('الأيام المتبقية:', daysLeft);
+            console.log('الأيام المنقضية:', daysPassed);
+            console.log('المدة الإجمالية:', totalDuration);
+            console.log('نسبة التقدم:', progress);
+            
             const amount = subscription.amount || 0;
             const dailyProfit = subscription.daily_profit || 0;
             const packageName = subscription.package_name || 'باقة غير معروفة';
@@ -1292,7 +1730,7 @@
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">الأيام المتبقية</div>
-                            <div class="detail-value">${daysLeft > 0 ? daysLeft : 0}</div>
+                            <div class="detail-value">${daysLeft}</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">تقدم الباقة</div>
@@ -1320,7 +1758,6 @@
             document.getElementById('subscriptionSection').innerHTML = subscriptionHtml;
             document.getElementById('todayProfit').textContent = dailyProfit + '$';
             
-            // إضافة زر التحديث
             addRefreshButton();
         }
 
@@ -1331,7 +1768,7 @@
                     <i class="fas fa-crown"></i>
                     <h3>لا يوجد اشتراك نشط</h3>
                     <p>اشترك في إحدى باقاتنا المميزة وابدأ جني الأرباح اليومية</p>
-                    <button class="btn btn-primary" onclick="window.location.href='index.html#packages'">
+                    <button class="btn btn-primary" onclick="goToPackages()">
                         <i class="fas fa-bolt"></i>
                         اشترك الآن
                     </button>
@@ -1342,30 +1779,32 @@
             document.getElementById('todayProfit').textContent = '0$';
         }
 
+        // الذهاب لصفحة الباقات
+        function goToPackages() {
+            window.location.href = 'index.html#packages';
+        }
+
         // إضافة زر التحديث
         function addRefreshButton() {
             const subscriptionDiv = document.getElementById('subscriptionSection');
             if (!subscriptionDiv) return;
             
-            // حذف الزر القديم إذا موجود
             const oldBtn = document.querySelector('.refresh-btn');
             if (oldBtn) oldBtn.remove();
             
-            // إنشاء زر جديد
             const refreshBtn = document.createElement('div');
             refreshBtn.className = 'refresh-btn';
             refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
-            refreshBtn.onclick = refreshSubscription;
-            refreshBtn.title = 'تحديث بيانات الباقة';
+            refreshBtn.onclick = refreshAllData;
+            refreshBtn.title = 'تحديث جميع البيانات';
             
             subscriptionDiv.appendChild(refreshBtn);
         }
 
-        // دالة تحديث البيانات
-        async function refreshSubscription() {
-            showNotification('جاري تحديث بيانات الباقة...', 'info');
+        // تحديث جميع البيانات
+        async function refreshAllData() {
+            showToast('جاري تحديث البيانات...', 'info');
             
-            // تحديث المستخدم أولاً
             if (window.supabaseHelpers) {
                 const userResult = await window.supabaseHelpers.getUserById(currentUser.id);
                 if (userResult.success && userResult.data) {
@@ -1374,11 +1813,29 @@
                 }
             }
             
-            // تحديث الاشتراك
-            await loadSubscription();
             await loadUserData();
+            await loadSubscription();
+            await loadTransactions();
+            await loadWithdrawals();
+            await loadReferralStats();
+            await loadRecentActivities();
+            await checkForActiveAlerts();
+            await checkUnreadMessages();
+            updateUI();
             
-            showNotification('✅ تم تحديث البيانات بنجاح');
+            showToast('✅ تم تحديث البيانات بنجاح');
+        }
+
+        // تحميل المعاملات
+        async function loadTransactions() {
+            if (!currentUser) return;
+            
+            const result = await window.supabaseHelpers.getUserTransactions(currentUser.id, 20);
+            
+            if (result.success && result.data) {
+                transactions = result.data;
+                document.getElementById('statsTransactionsCount').textContent = transactions.length;
+            }
         }
 
         // تحميل إحصائيات الإحالة
@@ -1402,60 +1859,6 @@
             document.getElementById('activeReferrals').textContent = referralStats.activeReferrals || 0;
             document.getElementById('referralEarnings').textContent = (referralStats.totalEarned || 0) + '$';
             document.getElementById('totalReferrals').textContent = referralStats.totalReferrals || 0;
-        }
-
-        // تحميل المعاملات
-        async function loadTransactions() {
-            if (!currentUser) return;
-            
-            const result = await window.supabaseHelpers.getUserTransactions(currentUser.id, 20);
-            
-            if (result.success && result.data) {
-                transactions = result.data;
-                displayTransactions();
-                document.getElementById('statsTransactionsCount').textContent = transactions.length;
-            }
-        }
-
-        // عرض المعاملات
-        function displayTransactions() {
-            const container = document.getElementById('transactionsList');
-            
-            if (!transactions || transactions.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">لا توجد معاملات</p>';
-                return;
-            }
-            
-            let html = '';
-            transactions.slice(0, 10).forEach(t => {
-                let itemClass = 'transaction-item';
-                let sign = '+';
-                let amountClass = 'positive';
-                
-                if (t.type === 'سحب') {
-                    itemClass += ' withdrawal';
-                    sign = '-';
-                    amountClass = 'negative';
-                } else if (t.type === 'مكافأة إحالة') {
-                    itemClass += ' referral';
-                }
-                
-                const date = t.created_at ? new Date(t.created_at).toLocaleDateString('ar-SA') : '';
-                
-                html += `
-                    <div class="${itemClass}">
-                        <div class="transaction-info">
-                            <h4>${t.type || 'معاملة'}</h4>
-                            <p>${t.description || ''}<br><small>${date}</small></p>
-                        </div>
-                        <div class="transaction-amount ${amountClass}">
-                            ${sign}${t.amount || 0}$
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
         }
 
         // تحميل طلبات السحب
@@ -1519,6 +1922,224 @@
             container.innerHTML = html;
         }
 
+        // تحميل آخر النشاطات
+        async function loadRecentActivities() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('activity_log')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                displayRecentActivities(data || []);
+                
+            } catch (error) {
+                console.error('خطأ في تحميل النشاطات:', error);
+            }
+        }
+
+        // عرض آخر النشاطات
+        function displayRecentActivities(activities) {
+            const container = document.getElementById('recentActivities');
+            
+            if (!activities || activities.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">لا توجد نشاطات</p>';
+                return;
+            }
+            
+            let html = '';
+            activities.slice(0, 7).forEach(activity => {
+                const icon = getActivityIcon(activity.type);
+                const date = new Date(activity.created_at).toLocaleDateString('ar-SA');
+                
+                let statusBadge = '';
+                if (activity.status) {
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    if (activity.status === 'pending') {
+                        statusClass = 'status-pending';
+                        statusText = 'قيد المراجعة';
+                    } else if (activity.status === 'approved') {
+                        statusClass = 'status-approved';
+                        statusText = 'تمت الموافقة';
+                    } else if (activity.status === 'completed') {
+                        statusClass = 'status-completed';
+                        statusText = 'مكتمل';
+                    } else if (activity.status === 'rejected') {
+                        statusClass = 'status-rejected';
+                        statusText = 'مرفوض';
+                    }
+                    
+                    statusBadge = `<span class="activity-status ${statusClass}">${statusText}</span>`;
+                }
+                
+                html += `
+                    <div class="activity-item">
+                        <div class="activity-icon ${icon.class}">
+                            <i class="fas ${icon.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${activity.title}</div>
+                            <div class="activity-desc">${activity.description}</div>
+                            <div class="activity-meta">
+                                <span><i class="far fa-clock"></i> ${date}</span>
+                                ${activity.amount ? `<span class="activity-amount">${activity.amount}$</span>` : ''}
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // الحصول على أيقونة النشاط
+        function getActivityIcon(type) {
+            switch(type) {
+                case 'profit':
+                    return { icon: 'fa-coins', class: 'icon-profit' };
+                case 'withdrawal':
+                    return { icon: 'fa-money-bill-wave', class: 'icon-withdrawal' };
+                case 'subscription':
+                    return { icon: 'fa-crown', class: 'icon-subscription' };
+                case 'login':
+                    return { icon: 'fa-right-to-bracket', class: 'icon-login' };
+                default:
+                    return { icon: 'fa-circle', class: '' };
+            }
+        }
+
+        // تحميل جميع النشاطات
+        async function loadAllActivities() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('activity_log')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                allActivities = data || [];
+                displayAllActivities();
+                
+            } catch (error) {
+                console.error('خطأ في تحميل جميع النشاطات:', error);
+            }
+        }
+
+        // عرض جميع النشاطات
+        function displayAllActivities() {
+            const container = document.getElementById('allActivitiesList');
+            const filter = document.getElementById('activitiesFilter').value;
+            
+            let filteredActivities = allActivities;
+            
+            if (filter !== 'all') {
+                filteredActivities = allActivities.filter(a => a.type === filter);
+            }
+            
+            if (filteredActivities.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">لا توجد نشاطات</p>';
+                return;
+            }
+            
+            let html = '';
+            filteredActivities.forEach(activity => {
+                const icon = getActivityIcon(activity.type);
+                const date = new Date(activity.created_at).toLocaleDateString('ar-SA', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                let statusBadge = '';
+                if (activity.status) {
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    if (activity.status === 'pending') {
+                        statusClass = 'status-pending';
+                        statusText = 'قيد المراجعة';
+                    } else if (activity.status === 'approved') {
+                        statusClass = 'status-approved';
+                        statusText = 'تمت الموافقة';
+                    } else if (activity.status === 'completed') {
+                        statusClass = 'status-completed';
+                        statusText = 'مكتمل';
+                    } else if (activity.status === 'rejected') {
+                        statusClass = 'status-rejected';
+                        statusText = 'مرفوض';
+                    }
+                    
+                    statusBadge = `<span class="activity-status ${statusClass}">${statusText}</span>`;
+                }
+                
+                html += `
+                    <div class="activity-item">
+                        <div class="activity-icon ${icon.class}">
+                            <i class="fas ${icon.icon}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">${activity.title}</div>
+                            <div class="activity-desc">${activity.description}</div>
+                            <div class="activity-meta">
+                                <span><i class="far fa-clock"></i> ${date}</span>
+                                ${activity.amount ? `<span class="activity-amount">${activity.amount}$</span>` : ''}
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // فلترة جميع النشاطات
+        function filterAllActivities() {
+            displayAllActivities();
+        }
+
+        // التحقق من وجود رسائل غير مقروءة في الدردشة
+        async function checkUnreadMessages() {
+            if (!currentUser) return;
+            
+            try {
+                const chatResult = await window.supabaseHelpers.getUserActiveChat(currentUser.id);
+                
+                if (chatResult.success && chatResult.data) {
+                    const { data: messages, error } = await supabaseClient
+                        .from('chat_messages')
+                        .select('id')
+                        .eq('chat_id', chatResult.data.id)
+                        .eq('is_read', false)
+                        .neq('user_id', currentUser.id);
+                    
+                    if (!error && messages && messages.length > 0) {
+                        document.getElementById('chatBadge').style.display = 'inline';
+                        document.getElementById('chatFloatBadge').style.display = 'block';
+                        document.getElementById('chatFloatBadge').textContent = messages.length;
+                    } else {
+                        document.getElementById('chatBadge').style.display = 'none';
+                        document.getElementById('chatFloatBadge').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('chatBadge').style.display = 'none';
+                    document.getElementById('chatFloatBadge').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('خطأ في التحقق من الرسائل:', error);
+            }
+        }
+
         // تحديث الواجهة
         function updateUI() {
             document.getElementById('balance').textContent = (currentUser.balance || 0) + '$';
@@ -1529,14 +2150,24 @@
         // دوال التنقل بين الصفحات
         function showPage(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            
             document.getElementById(page + '-page').classList.add('active');
             
-            const navItems = document.querySelectorAll('.nav-item');
-            if (page === 'home') navItems[0].classList.add('active');
-            else if (page === 'withdrawals') navItems[1].classList.add('active');
-            else if (page === 'stats') navItems[2].classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if (page === 'home') document.querySelectorAll('.nav-item')[0].classList.add('active');
+            else if (page === 'withdrawals') document.querySelectorAll('.nav-item')[1].classList.add('active');
+            else if (page === 'stats') document.querySelectorAll('.nav-item')[2].classList.add('active');
+        }
+
+        // عرض صفحة جميع النشاطات
+        function showAllActivitiesPage() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('all-activities-page').classList.add('active');
+            loadAllActivities();
+        }
+
+        // العودة للصفحة الرئيسية
+        function goBackToHome() {
+            showPage('home');
         }
 
         // دوال السحب
@@ -1544,7 +2175,7 @@
             if (!currentUser) return;
             
             if (currentUser.status === 'suspended' || currentUser.status === 'banned') {
-                showNotification('لا يمكنك طلب سحب حالياً', 'warning');
+                showToast('لا يمكنك طلب سحب حالياً', 'warning');
                 return;
             }
             
@@ -1585,17 +2216,17 @@
             const wallet = document.getElementById('withdrawWallet').value.trim();
             
             if (!amount || amount < 50) {
-                showNotification('الحد الأدنى للسحب 50$', 'error');
+                showToast('الحد الأدنى للسحب 50$', 'error');
                 return;
             }
             
             if (amount > (currentUser.balance || 0)) {
-                showNotification('الرصيد غير كافي', 'error');
+                showToast('الرصيد غير كافي', 'error');
                 return;
             }
             
             if (!wallet) {
-                showNotification('يرجى إدخال عنوان المحفظة', 'error');
+                showToast('يرجى إدخال عنوان المحفظة', 'error');
                 return;
             }
             
@@ -1609,41 +2240,43 @@
             
             if (result.success) {
                 closeWithdrawalModal();
-                await loadUserData();
-                await loadWithdrawals();
-                await loadTransactions();
-                updateUI();
-                showNotification('✅ تم تقديم طلب السحب بنجاح');
+                await refreshAllData();
+                showToast('✅ تم تقديم طلب السحب بنجاح');
             } else {
-                showNotification('❌ ' + result.error, 'error');
+                showToast('❌ ' + result.error, 'error');
             }
         }
 
-        // دوال مساعدة
+        // نسخ كود الإحالة
         function copyReferralCode() {
             if (referralStats?.referralCode) {
                 navigator.clipboard.writeText(referralStats.referralCode);
-                showNotification('✅ تم نسخ كود الإحالة');
+                showToast('✅ تم نسخ كود الإحالة');
             }
         }
 
+        // تبديل قائمة المستخدم
         function toggleUserMenu() {
             document.getElementById('userDropdown').classList.toggle('active');
         }
 
+        // تسجيل الخروج
         async function logout() {
             if (confirm('هل تريد تسجيل الخروج؟')) {
+                if (chatCheckInterval) clearInterval(chatCheckInterval);
+                if (activitiesInterval) clearInterval(activitiesInterval);
                 localStorage.removeItem('current_user');
                 window.location.href = 'index.html';
             }
         }
 
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.innerHTML = message;
-            notification.className = 'notification ' + type;
-            notification.style.display = 'block';
-            setTimeout(() => notification.style.display = 'none', 3000);
+        // إظهار الإشعار
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
         }
 
         // إغلاق القائمة عند النقر خارجها
@@ -1668,8 +2301,21 @@
                 console.log('تحديث تلقائي للبيانات...');
                 await loadUserData();
                 await loadTransactions();
+                await loadRecentActivities();
             }
         }, 30000);
+
+        // تنظيف عند مغادرة الصفحة
+        window.addEventListener('beforeunload', function() {
+            if (chatCheckInterval) {
+                clearInterval(chatCheckInterval);
+            }
+            if (activitiesInterval) {
+                clearInterval(activitiesInterval);
+            }
+        });
     </script>
+
+    <script src="/pwa-init.js"></script>
 </body>
 </html>
