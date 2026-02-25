@@ -328,6 +328,42 @@
             color: var(--gold);
         }
 
+        /* إحصائيات الدفع */
+        .payment-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .payment-stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--gold);
+        }
+
+        .payment-stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .payment-stat-label {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .payment-stat-card.with-proof {
+            border-color: var(--success);
+        }
+
+        .payment-stat-card.without-proof {
+            border-color: var(--warning);
+        }
+
         /* شبكة المحتوى */
         .content-grid {
             display: grid;
@@ -432,6 +468,18 @@
             color: var(--danger);
         }
 
+        .status-with-proof {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-without-proof {
+            background: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
         .status-online {
             background: rgba(39, 174, 96, 0.2);
             color: var(--success);
@@ -529,6 +577,7 @@
             cursor: pointer;
             transition: all 0.3s;
             border-right: 4px solid var(--success);
+            position: relative;
         }
 
         .chat-item:hover {
@@ -589,6 +638,34 @@
             min-width: 22px;
             text-align: center;
             animation: pulse 2s infinite;
+        }
+
+        .chat-delete-btn {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 30px;
+            height: 30px;
+            background: var(--danger);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s;
+            border: 2px solid white;
+        }
+
+        .chat-item:hover .chat-delete-btn {
+            opacity: 1;
+        }
+
+        .chat-delete-btn:hover {
+            transform: scale(1.1);
+            background: #c0392b;
         }
 
         /* ===== نظام التنبيهات العامة ===== */
@@ -838,17 +915,11 @@
         }
 
         .message-image {
-            max-width: 100%;
+            max-width: 250px;
             max-height: 200px;
             border-radius: 10px;
-            margin-bottom: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .message-image:hover {
-            transform: scale(1.05);
-            box-shadow: var(--shadow-gold);
+            border: 2px solid var(--gold);
         }
 
         .message-info {
@@ -863,10 +934,31 @@
             justify-content: flex-end;
         }
 
+        .delete-message-btn {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 24px;
+            height: 24px;
+            background: var(--danger);
+            border: 2px solid white;
+            border-radius: 50%;
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .message-bubble:hover .delete-message-btn {
+            display: flex;
+        }
+
         .chat-input-area {
             display: flex;
             gap: 10px;
-            align-items: center;
         }
 
         .chat-input-area input {
@@ -882,31 +974,6 @@
         .chat-input-area input:focus {
             outline: none;
             border-color: var(--gold);
-        }
-
-        .chat-image-label {
-            width: 50px;
-            height: 50px;
-            background: rgba(200, 169, 126, 0.1);
-            border: 2px solid var(--gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--gold);
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .chat-image-label:hover {
-            background: var(--gold);
-            color: var(--dark);
-            transform: scale(1.1);
-        }
-
-        .chat-image-label i {
-            pointer-events: none;
         }
 
         .chat-send-btn {
@@ -926,36 +993,46 @@
             box-shadow: var(--shadow-gold);
         }
 
-        .image-preview {
-            position: relative;
-            margin-bottom: 10px;
+        /* نافذة عرض الصورة */
+        .image-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 3000;
             display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        .image-preview.active {
-            display: block;
+        .image-viewer.active {
+            display: flex;
         }
 
-        .preview-img {
-            max-width: 100px;
-            max-height: 100px;
-            border-radius: 10px;
-            border: 2px solid var(--gold);
+        .image-viewer img {
+            max-width: 90%;
+            max-height: 90vh;
+            border: 3px solid var(--gold);
+            border-radius: 20px;
         }
 
-        .remove-image {
+        .image-viewer-close {
             position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 20px;
-            height: 20px;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
             background: var(--danger);
+            border: 2px solid white;
             border-radius: 50%;
+            color: white;
+            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 12px;
             cursor: pointer;
         }
 
@@ -1057,6 +1134,10 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
+            .payment-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
             .content-grid {
                 grid-template-columns: 1fr;
             }
@@ -1091,6 +1172,10 @@
 
         @media (max-width: 768px) {
             .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .payment-stats {
                 grid-template-columns: 1fr;
             }
             
@@ -1150,6 +1235,11 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span>لوحة التحكم</span>
                 </a></li>
+                <li><a onclick="showSection('payment_stats')">
+                    <i class="fas fa-credit-card"></i>
+                    <span>إحصائيات الدفع</span>
+                    <span class="badge" id="paymentBadge">0</span>
+                </a></li>
                 <li><a onclick="showSection('users')">
                     <i class="fas fa-users"></i>
                     <span>المستخدمين</span>
@@ -1169,10 +1259,6 @@
                     <span>طلبات السحب</span>
                     <span class="badge" id="withdrawalsBadge">0</span>
                 </a></li>
-                <li><a onclick="showSection('gifts')">
-                    <i class="fas fa-gift"></i>
-                    <span>الهدايا</span>
-                </a></li>
                 <li><a onclick="showSection('livechat')">
                     <i class="fas fa-comments"></i>
                     <span>الدردشة المباشرة</span>
@@ -1190,6 +1276,10 @@
                 <li><a onclick="showSection('activity_log')">
                     <i class="fas fa-history"></i>
                     <span>سجل النشاطات</span>
+                </a></li>
+                <li><a onclick="showSection('chat_management')">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>إدارة المحادثات</span>
                 </a></li>
                 <li><a onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
@@ -1254,6 +1344,30 @@
                         <div class="stat-value" id="activeSubscriptions">0</div>
                     </div>
                 </div>
+
+                <!-- إحصائيات الدفع -->
+                <div class="payment-stats">
+                    <div class="payment-stat-card with-proof" onclick="filterPendingPackages('withProof')">
+                        <div class="payment-stat-value" id="withProofCount">0</div>
+                        <div class="payment-stat-label">مع إثبات دفع</div>
+                    </div>
+                    <div class="payment-stat-card without-proof" onclick="filterPendingPackages('withoutProof')">
+                        <div class="payment-stat-value" id="withoutProofCount">0</div>
+                        <div class="payment-stat-label">بدون إثبات</div>
+                    </div>
+                    <div class="payment-stat-card">
+                        <div class="payment-stat-value" id="pendingCount">0</div>
+                        <div class="payment-stat-label">قيد المراجعة</div>
+                    </div>
+                    <div class="payment-stat-card">
+                        <div class="payment-stat-value" id="approvedCount">0</div>
+                        <div class="payment-stat-label">مقبولة</div>
+                    </div>
+                    <div class="payment-stat-card">
+                        <div class="payment-stat-value" id="rejectedCount">0</div>
+                        <div class="payment-stat-label">مرفوضة</div>
+                    </div>
+                </div>
                 
                 <!-- شبكة المحتوى -->
                 <div class="content-grid">
@@ -1275,12 +1389,13 @@
                                         <th>المستخدم</th>
                                         <th>الباقة</th>
                                         <th>المبلغ</th>
+                                        <th>إثبات</th>
                                         <th>الإجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody id="pendingTable">
                                     <tr>
-                                        <td colspan="4" style="text-align: center; color: var(--text-muted);">
+                                        <td colspan="5" style="text-align: center; color: var(--text-muted);">
                                             لا توجد طلبات معلقة
                                         </td>
                                     </tr>
@@ -1353,8 +1468,61 @@
                     </div>
                 </div>
             </div>
+
+            <!-- قسم إحصائيات الدفع -->
+            <div id="payment_stats-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-credit-card"></i>
+                            إحصائيات الدفع التفصيلية
+                        </h3>
+                        <button class="btn btn-sm btn-primary" onclick="loadPaymentStats()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="payment-stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 30px;">
+                        <div class="payment-stat-card with-proof">
+                            <div class="payment-stat-value" id="statsWithProof">0</div>
+                            <div class="payment-stat-label">مع إثبات دفع</div>
+                        </div>
+                        <div class="payment-stat-card without-proof">
+                            <div class="payment-stat-value" id="statsWithoutProof">0</div>
+                            <div class="payment-stat-label">بدون إثبات</div>
+                        </div>
+                        <div class="payment-stat-card">
+                            <div class="payment-stat-value" id="statsTotal">0</div>
+                            <div class="payment-stat-label">إجمالي الطلبات</div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>المستخدم</th>
+                                    <th>الباقة</th>
+                                    <th>المبلغ</th>
+                                    <th>إثبات الدفع</th>
+                                    <th>الحالة</th>
+                                    <th>التاريخ</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentStatsTable">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                                        جاري التحميل...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             
-            <!-- قسم المستخدمين (محدث مع زر إرسال هدية) -->
+            <!-- قسم المستخدمين -->
             <div id="users-section" class="section">
                 <div class="card">
                     <div class="card-header">
@@ -1376,12 +1544,12 @@
                                     <th>الرصيد</th>
                                     <th>اشتراك</th>
                                     <th>الحالة</th>
-                                    <th colspan="2">الإجراءات</th>
+                                    <th>الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTable">
                                 <tr>
-                                    <td colspan="8" style="text-align: center; color: var(--text-muted);">
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
                                         جاري التحميل...
                                     </td>
                                 </tr>
@@ -1438,6 +1606,19 @@
                             <i class="fas fa-clock"></i>
                             جميع طلبات الاشتراك
                         </h3>
+                        <div class="d-flex gap-2">
+                            <select id="pendingFilter" class="form-control" style="width: 150px;" onchange="filterAllPendingPackages()">
+                                <option value="all">الكل</option>
+                                <option value="withProof">مع إثبات</option>
+                                <option value="withoutProof">بدون إثبات</option>
+                                <option value="pending">معلق</option>
+                                <option value="approved">مقبول</option>
+                                <option value="rejected">مرفوض</option>
+                            </select>
+                            <button class="btn btn-sm btn-primary" onclick="loadAllPendingPackages()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="admin-table">
@@ -1446,6 +1627,7 @@
                                     <th>المستخدم</th>
                                     <th>الباقة</th>
                                     <th>المبلغ</th>
+                                    <th>إثبات الدفع</th>
                                     <th>التاريخ</th>
                                     <th>كود الإحالة</th>
                                     <th>الحالة</th>
@@ -1454,7 +1636,7 @@
                             </thead>
                             <tbody id="allPendingTable">
                                 <tr>
-                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                                    <td colspan="8" style="text-align: center; color: var(--text-muted);">
                                         جاري التحميل...
                                     </td>
                                 </tr>
@@ -1499,80 +1681,7 @@
                 </div>
             </div>
             
-            <!-- قسم الهدايا (جديد) -->
-            <div id="gifts-section" class="section">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-gift"></i>
-                            إرسال هدية لمستخدم
-                        </h3>
-                    </div>
-                    
-                    <div style="background: rgba(200,169,126,0.1); border-radius: 20px; padding: 25px; margin-bottom: 25px;">
-                        <div class="form-group">
-                            <label>اختر المستخدم</label>
-                            <select id="giftUserSelect" class="form-control" onchange="loadUserForGift()">
-                                <option value="">-- اختر مستخدم --</option>
-                            </select>
-                        </div>
-                        
-                        <div id="selectedUserInfo" style="display: none; background: rgba(39,174,96,0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px;">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="width: 50px; height: 50px; background: var(--gradient-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: var(--dark);" id="giftUserAvatar"></div>
-                                <div>
-                                    <div style="font-weight: 700; color: var(--gold);" id="giftUserName"></div>
-                                    <div style="color: var(--text-muted); font-size: 13px;" id="giftUserEmail"></div>
-                                    <div style="color: var(--success); font-weight: 600; margin-top: 5px;" id="giftUserBalance"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>مبلغ الهدية ($)</label>
-                            <input type="number" id="giftAmount" class="form-control" min="1" step="0.01" placeholder="أدخل المبلغ">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>سبب الهدية (اختياري)</label>
-                            <input type="text" id="giftReason" class="form-control" placeholder="مثال: مكافأة تميز">
-                        </div>
-                        
-                        <button class="btn btn-success btn-block" onclick="sendGift()">
-                            <i class="fas fa-gift"></i>
-                            إرسال الهدية
-                        </button>
-                    </div>
-                    
-                    <h3 class="card-title" style="margin-top: 30px;">
-                        <i class="fas fa-history"></i>
-                        آخر الهدايا المرسلة
-                    </h3>
-                    
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>المستخدم</th>
-                                    <th>المبلغ</th>
-                                    <th>السبب</th>
-                                    <th>التاريخ</th>
-                                    <th>بواسطة</th>
-                                </tr>
-                            </thead>
-                            <tbody id="giftsHistoryTable">
-                                <tr>
-                                    <td colspan="5" style="text-align: center; color: var(--text-muted);">
-                                        لا توجد هدايا مرسلة بعد
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- قسم الدردشة المباشرة (محدث) -->
+            <!-- قسم الدردشة المباشرة -->
             <div id="livechat-section" class="section">
                 <div class="card">
                     <div class="card-header">
@@ -1695,7 +1804,6 @@
                                 <option value="profit">أرباح</option>
                                 <option value="withdrawal">سحوبات</option>
                                 <option value="subscription">اشتراكات</option>
-                                <option value="gift">هدايا</option>
                                 <option value="login">دخول</option>
                             </select>
                             <button class="btn btn-sm btn-primary" onclick="loadAllActivities()">
@@ -1728,10 +1836,93 @@
                     </div>
                 </div>
             </div>
+
+            <!-- قسم إدارة المحادثات -->
+            <div id="chat_management-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-trash-alt"></i>
+                            إدارة المحادثات
+                        </h3>
+                    </div>
+                    
+                    <div class="stats-grid" style="margin-bottom: 25px;">
+                        <div class="stat-card" onclick="loadAllChats()">
+                            <div class="stat-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="stat-label">إجمالي المحادثات</div>
+                            <div class="stat-value" id="totalChats">0</div>
+                        </div>
+                        <div class="stat-card" onclick="loadActiveChatsOnly()">
+                            <div class="stat-icon">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div class="stat-label">محادثات نشطة</div>
+                            <div class="stat-value" id="activeChatsCount">0</div>
+                        </div>
+                        <div class="stat-card" onclick="loadClosedChats()">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-label">محادثات مغلقة</div>
+                            <div class="stat-value" id="closedChatsCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <div class="stat-label">صور مرسلة</div>
+                            <div class="stat-value" id="totalImages">0</div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top: 20px;">
+                        <h4 style="color: var(--gold); margin-bottom: 15px;">حذف المحادثات القديمة</h4>
+                        <div class="form-group">
+                            <label>حذف المحادثات الأقدم من (أيام)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="number" id="deleteDays" class="form-control" value="30" min="1" max="365" style="flex: 1;">
+                                <button class="btn btn-danger" onclick="deleteOldChats()">
+                                    <i class="fas fa-trash"></i>
+                                    حذف
+                                </button>
+                            </div>
+                            <small style="color: var(--text-muted);">سيتم حذف جميع المحادثات المغلقة الأقدم من العدد المحدد من الأيام</small>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top: 20px;">
+                        <h4 style="color: var(--gold); margin-bottom: 15px;">جميع المحادثات</h4>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>المستخدم</th>
+                                        <th>الحالة</th>
+                                        <th>عدد الرسائل</th>
+                                        <th>عدد الصور</th>
+                                        <th>تاريخ البدء</th>
+                                        <th>آخر نشاط</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allChatsTable">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; color: var(--text-muted);">
+                                            جاري التحميل...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
-    <!-- باقي النوافذ المنبثقة (نفس الكود السابق) -->
     <!-- نافذة إضافة باقة -->
     <div class="modal" id="addPackageModal">
         <div class="modal-content">
@@ -1778,7 +1969,7 @@
             
             <div class="form-group">
                 <label>الوصف</label>
-                <textarea id="packageDescription" class="form-control" rows="3"></textarea>
+                <textarea id="packageDescription" class="form-control" rows="3" placeholder="وصف الباقة..."></textarea>
             </div>
             
             <div class="modal-footer">
@@ -1797,6 +1988,18 @@
             </div>
             
             <div id="pendingDetails" style="margin-bottom: 20px;"></div>
+            
+            <div class="form-group">
+                <label>حالة إثبات الدفع</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button class="btn btn-sm" style="flex: 1; background: var(--success);" onclick="updatePaymentProof(true)">
+                        <i class="fas fa-check"></i> مع إثبات
+                    </button>
+                    <button class="btn btn-sm" style="flex: 1; background: var(--warning);" onclick="updatePaymentProof(false)">
+                        <i class="fas fa-times"></i> بدون إثبات
+                    </button>
+                </div>
+            </div>
             
             <div class="form-group">
                 <label>ملاحظات (اختياري)</label>
@@ -1868,7 +2071,7 @@
         </div>
     </div>
     
-    <!-- نافذة الدردشة (محدثة) -->
+    <!-- نافذة الدردشة -->
     <div class="modal" id="chatModal">
         <div class="modal-content large">
             <div class="modal-header">
@@ -1881,18 +2084,7 @@
                     <!-- الرسائل تظهر هنا -->
                 </div>
                 
-                <div class="image-preview" id="imagePreview">
-                    <img src="" alt="Preview" class="preview-img" id="previewImg">
-                    <div class="remove-image" onclick="removeSelectedImage()">
-                        <i class="fas fa-times"></i>
-                    </div>
-                </div>
-                
                 <div class="chat-input-area">
-                    <input type="file" id="chatImageInput" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
-                    <label for="chatImageInput" class="chat-image-label">
-                        <i class="fas fa-camera"></i>
-                    </label>
                     <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." onkeypress="handleChatKeyPress(event)">
                     <button class="chat-send-btn" onclick="sendChatMessage()">
                         <i class="fas fa-paper-plane"></i>
@@ -1941,13 +2133,13 @@
             </div>
         </div>
     </div>
-    
-    <!-- نافذة عرض الصورة مكبرة -->
-    <div class="modal" id="imageViewModal" onclick="this.classList.remove('active')">
-        <div class="modal-content" style="background: transparent; border: none; max-width: 90%; text-align: center;" onclick="event.stopPropagation()">
-            <img src="" id="fullscreenImage" style="max-width: 100%; max-height: 80vh; border-radius: 10px; border: 3px solid var(--gold);">
-            <button class="btn btn-primary" style="margin-top: 20px;" onclick="document.getElementById('imageViewModal').classList.remove('active')">إغلاق</button>
+
+    <!-- نافذة عرض الصورة -->
+    <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
+        <div class="image-viewer-close" onclick="closeImageViewer(event)">
+            <i class="fas fa-times"></i>
         </div>
+        <img id="viewerImage" src="" alt="صورة">
     </div>
     
     <!-- الإشعارات -->
@@ -1961,8 +2153,8 @@
         let currentWithdrawalId = null;
         let currentChatId = null;
         let chatInterval = null;
-        let selectedImageFile = null;
-        let selectedUserId = null;
+        let allPendingPackages = [];
+        let paymentStats = null;
         
         // ========== التحقق من صلاحية المسؤول ==========
         async function checkAdminAccess() {
@@ -2002,16 +2194,16 @@
         async function loadAllData() {
             console.log('جاري تحميل جميع البيانات...');
             await loadDashboardStats();
+            await loadPaymentStats();
+            await loadAllPendingPackages();
             await loadUsers();
             await loadPackages();
-            await loadPendingPackages();
             await loadWithdrawals();
             await loadReferralStats();
             await loadActiveChats();
             await loadAlerts();
             await loadAllActivities();
-            await loadGiftsHistory();
-            await loadUsersForGiftSelect();
+            await loadChatStats();
         }
         
         // ========== تحميل إحصائيات لوحة التحكم ==========
@@ -2037,6 +2229,90 @@
                 console.error('خطأ في تحميل الإحصائيات:', error);
             }
         }
+
+        // ========== تحميل إحصائيات الدفع ==========
+        async function loadPaymentStats() {
+            try {
+                const result = await window.supabaseHelpers.getPaymentStats();
+                if (result.success && result.data) {
+                    paymentStats = result.data;
+                    
+                    document.getElementById('withProofCount').textContent = paymentStats.withProof || 0;
+                    document.getElementById('withoutProofCount').textContent = paymentStats.withoutProof || 0;
+                    document.getElementById('pendingCount').textContent = paymentStats.pending || 0;
+                    document.getElementById('approvedCount').textContent = paymentStats.approved || 0;
+                    document.getElementById('rejectedCount').textContent = paymentStats.rejected || 0;
+                    
+                    document.getElementById('statsWithProof').textContent = paymentStats.withProof || 0;
+                    document.getElementById('statsWithoutProof').textContent = paymentStats.withoutProof || 0;
+                    document.getElementById('statsTotal').textContent = paymentStats.total || 0;
+                    
+                    document.getElementById('paymentBadge').textContent = paymentStats.pending || 0;
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل إحصائيات الدفع:', error);
+            }
+        }
+
+        // ========== تحميل جميع طلبات الاشتراك مع التصنيف ==========
+        async function loadAllPendingPackages() {
+            try {
+                const result = await window.supabaseHelpers.getAllPendingPackagesWithProof();
+                if (result.success && result.data) {
+                    allPendingPackages = result.data.all || [];
+                    displayPaymentStatsTable(result.data.all || []);
+                    displayAllPendingPackages(result.data.all || []);
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الطلبات:', error);
+            }
+        }
+
+        // ========== عرض جدول إحصائيات الدفع ==========
+        function displayPaymentStatsTable(packages) {
+            const tbody = document.getElementById('paymentStatsTable');
+            
+            if (!packages || packages.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد طلبات</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            packages.slice(0, 10).forEach(p => {
+                const proofStatus = p.payment_proof ? 
+                    '<span class="status-badge status-with-proof"><i class="fas fa-check-circle"></i> مع إثبات</span>' : 
+                    '<span class="status-badge status-without-proof"><i class="fas fa-clock"></i> بدون إثبات</span>';
+                
+                let statusClass = 'status-pending';
+                let statusText = 'معلق';
+                
+                if (p.status === 'approved') {
+                    statusClass = 'status-approved';
+                    statusText = 'مقبول';
+                } else if (p.status === 'rejected') {
+                    statusClass = 'status-rejected';
+                    statusText = 'مرفوض';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${p.user_name || p.users?.name || '-'}</td>
+                        <td>${p.package_name}</td>
+                        <td>${p.amount}$</td>
+                        <td>${proofStatus}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${new Date(p.created_at).toLocaleDateString('ar-SA')}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="openProcessModal(${p.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
         
         // ========== تحميل المستخدمين ==========
         async function loadUsers() {
@@ -2053,7 +2329,7 @@
         function displayUsers(users) {
             const tbody = document.getElementById('usersTable');
             if (!users || users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا يوجد مستخدمين</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا يوجد مستخدمين</td></tr>';
                 return;
             }
             
@@ -2079,13 +2355,8 @@
                         <td>${user.has_active_subscription ? '✅' : '❌'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>
-                            <button class="btn btn-sm btn-warning" onclick="openUserStatusModal(${user.id}, '${user.name}', '${user.status}')" title="تغيير الحالة">
+                            <button class="btn btn-sm btn-warning" onclick="openUserStatusModal(${user.id}, '${user.name}', '${user.status}')">
                                 <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-success" onclick="openGiftModal(${user.id}, '${user.name}', '${user.email}', ${user.balance})" title="إرسال هدية">
-                                <i class="fas fa-gift"></i>
                             </button>
                         </td>
                     </tr>
@@ -2158,7 +2429,6 @@
                 const result = await window.supabaseHelpers.getPendingPackages();
                 if (result.success && result.data) {
                     displayPendingPackages(result.data);
-                    displayAllPendingPackages(result.data);
                 }
             } catch (error) {
                 console.error('خطأ في تحميل الطلبات:', error);
@@ -2170,17 +2440,22 @@
             const pendingOnly = pending.filter(p => p.status === 'pending');
             
             if (pendingOnly.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">لا توجد طلبات معلقة</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا توجد طلبات معلقة</td></tr>';
                 return;
             }
             
             let html = '';
             pendingOnly.slice(0, 5).forEach(p => {
+                const proofStatus = p.payment_proof ? 
+                    '<span class="status-badge status-with-proof">✅ مع إثبات</span>' : 
+                    '<span class="status-badge status-without-proof">⏳ بدون إثبات</span>';
+                
                 html += `
                     <tr>
                         <td>${p.user_name}</td>
                         <td>${p.package_name}</td>
                         <td>${p.amount}$</td>
+                        <td>${proofStatus}</td>
                         <td>
                             <button class="btn btn-sm btn-success" onclick="openProcessModal(${p.id})">
                                 <i class="fas fa-check"></i>
@@ -2197,12 +2472,16 @@
             const tbody = document.getElementById('allPendingTable');
             
             if (pending.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد طلبات</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا توجد طلبات</td></tr>';
                 return;
             }
             
             let html = '';
             pending.forEach(p => {
+                const proofStatus = p.payment_proof ? 
+                    '<span class="status-badge status-with-proof">✅ مع إثبات</span>' : 
+                    '<span class="status-badge status-without-proof">⏳ بدون إثبات</span>';
+                
                 let statusClass = 'status-pending';
                 let statusText = 'معلق';
                 
@@ -2219,6 +2498,7 @@
                         <td>${p.user_name}</td>
                         <td>${p.package_name}</td>
                         <td>${p.amount}$</td>
+                        <td>${proofStatus}</td>
                         <td>${new Date(p.created_at).toLocaleDateString('ar-SA')}</td>
                         <td>${p.referred_by || '-'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -2234,6 +2514,35 @@
             });
             
             tbody.innerHTML = html;
+        }
+
+        // ========== فلترة طلبات الاشتراك ==========
+        function filterAllPendingPackages() {
+            const filter = document.getElementById('pendingFilter').value;
+            
+            if (!allPendingPackages || allPendingPackages.length === 0) return;
+            
+            let filtered = allPendingPackages;
+            
+            if (filter === 'withProof') {
+                filtered = allPendingPackages.filter(p => p.payment_proof);
+            } else if (filter === 'withoutProof') {
+                filtered = allPendingPackages.filter(p => !p.payment_proof);
+            } else if (filter === 'pending') {
+                filtered = allPendingPackages.filter(p => p.status === 'pending');
+            } else if (filter === 'approved') {
+                filtered = allPendingPackages.filter(p => p.status === 'approved');
+            } else if (filter === 'rejected') {
+                filtered = allPendingPackages.filter(p => p.status === 'rejected');
+            }
+            
+            displayAllPendingPackages(filtered);
+        }
+
+        function filterPendingPackages(type) {
+            showSection('pending');
+            document.getElementById('pendingFilter').value = type === 'withProof' ? 'withProof' : 'withoutProof';
+            filterAllPendingPackages();
         }
         
         // ========== تحميل طلبات السحب ==========
@@ -2320,153 +2629,141 @@
             tbody.innerHTML = html;
         }
         
-        // ========== نظام الهدايا ==========
-        async function loadUsersForGiftSelect() {
+        // ========== تحميل إحصائيات الإحالة ==========
+        async function loadReferralStats() {
             try {
-                const result = await window.supabaseHelpers.getAllUsers();
-                if (result.success && result.data) {
-                    const select = document.getElementById('giftUserSelect');
-                    let options = '<option value="">-- اختر مستخدم --</option>';
-                    
-                    result.data.forEach(user => {
-                        options += `<option value="${user.id}">${user.name} (${user.email}) - رصيد: ${user.balance}$</option>`;
-                    });
-                    
-                    select.innerHTML = options;
-                }
+                const users = await window.supabaseHelpers.getAllUsers();
+                if (!users.success) return;
+                
+                let totalReferrals = 0;
+                let totalEarnings = 0;
+                let marketers = [];
+                
+                users.data.forEach(user => {
+                    if (user.referral_count > 0) {
+                        totalReferrals += user.referral_count;
+                        totalEarnings += user.referral_earnings || 0;
+                        
+                        marketers.push({
+                            name: user.name,
+                            code: user.referral_code,
+                            count: user.referral_count,
+                            active: 0,
+                            earnings: user.referral_earnings || 0
+                        });
+                    }
+                });
+                
+                document.getElementById('totalReferrals').textContent = totalReferrals;
+                document.getElementById('totalReferralEarnings').textContent = totalEarnings + '$';
+                document.getElementById('pendingReferralRewards').textContent = '0$';
+                document.getElementById('referralRate').textContent = '0%';
+                
+                displayMarketers(marketers.sort((a, b) => b.count - a.count));
             } catch (error) {
-                console.error('خطأ في تحميل المستخدمين:', error);
+                console.error('خطأ في تحميل إحصائيات الإحالة:', error);
             }
         }
         
-        async function loadUserForGift() {
-            const userId = document.getElementById('giftUserSelect').value;
-            if (!userId) {
-                document.getElementById('selectedUserInfo').style.display = 'none';
-                selectedUserId = null;
+        function displayMarketers(marketers) {
+            const tbody = document.getElementById('marketersTable');
+            
+            if (marketers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">لا يوجد مسوقين</td></tr>';
                 return;
             }
             
-            try {
-                const result = await window.supabaseHelpers.getUserById(userId);
-                if (result.success && result.data) {
-                    const user = result.data;
-                    selectedUserId = user.id;
-                    
-                    document.getElementById('giftUserAvatar').textContent = user.name?.charAt(0).toUpperCase() || 'م';
-                    document.getElementById('giftUserName').textContent = user.name || 'غير محدد';
-                    document.getElementById('giftUserEmail').textContent = user.email || '';
-                    document.getElementById('giftUserBalance').textContent = `الرصيد الحالي: ${user.balance || 0}$`;
-                    
-                    document.getElementById('selectedUserInfo').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل بيانات المستخدم:', error);
-            }
-        }
-        
-        function openGiftModal(userId, userName, userEmail, userBalance) {
-            selectedUserId = userId;
-            
-            document.getElementById('giftUserSelect').value = userId;
-            document.getElementById('giftUserAvatar').textContent = userName?.charAt(0).toUpperCase() || 'م';
-            document.getElementById('giftUserName').textContent = userName;
-            document.getElementById('giftUserEmail').textContent = userEmail;
-            document.getElementById('giftUserBalance').textContent = `الرصيد الحالي: ${userBalance || 0}$`;
-            
-            document.getElementById('selectedUserInfo').style.display = 'block';
-            
-            showSection('gifts');
-            
-            document.getElementById('giftAmount').focus();
-        }
-        
-        async function sendGift() {
-            if (!selectedUserId) {
-                showNotification('❌ الرجاء اختيار مستخدم أولاً', 'error');
-                return;
-            }
-            
-            const amount = parseFloat(document.getElementById('giftAmount').value);
-            const reason = document.getElementById('giftReason').value.trim();
-            
-            if (!amount || amount <= 0) {
-                showNotification('❌ الرجاء إدخال مبلغ صحيح', 'error');
-                return;
-            }
-            
-            const result = await window.supabaseHelpers.sendGift({
-                userId: selectedUserId,
-                amount: amount,
-                reason: reason || '🎁 هدية من الإدارة',
-                adminId: currentAdmin.id
+            let html = '';
+            marketers.slice(0, 10).forEach(m => {
+                html += `
+                    <tr>
+                        <td>${m.name}</td>
+                        <td><span style="color: var(--gold);">${m.code}</span></td>
+                        <td>${m.count}</td>
+                        <td>0</td>
+                        <td>${m.earnings}$</td>
+                    </tr>
+                `;
             });
             
-            if (result.success) {
-                showNotification(`✅ تم إرسال ${amount}$ كهدية للمستخدم بنجاح`);
-                
-                document.getElementById('giftAmount').value = '';
-                document.getElementById('giftReason').value = '';
-                
-                await loadUsers();
-                await loadGiftsHistory();
-                await loadDashboardStats();
-                
-                const userSelect = document.getElementById('giftUserSelect');
-                if (userSelect.value) {
-                    await loadUserForGift();
-                }
-            } else {
-                showNotification('❌ ' + result.error, 'error');
-            }
+            tbody.innerHTML = html;
         }
-        
-        async function loadGiftsHistory() {
+
+        // ========== تحميل إحصائيات المحادثات ==========
+        async function loadChatStats() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('transactions')
+                const { data: chats, error } = await supabaseClient
+                    .from('live_chats')
                     .select(`
                         *,
-                        users:user_id (
-                            name,
-                            email
-                        )
-                    `)
-                    .eq('type', 'هدية')
-                    .order('created_at', { ascending: false })
-                    .limit(20);
+                        chat_messages(*)
+                    `);
                 
                 if (error) throw error;
                 
-                const tbody = document.getElementById('giftsHistoryTable');
+                const activeChats = chats?.filter(c => c.status === 'active') || [];
+                const closedChats = chats?.filter(c => c.status === 'closed') || [];
                 
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">لا توجد هدايا مرسلة بعد</td></tr>';
-                    return;
-                }
-                
-                let html = '';
-                data.forEach(gift => {
-                    const date = new Date(gift.created_at).toLocaleDateString('ar-SA');
-                    
-                    html += `
-                        <tr>
-                            <td>${gift.users?.name || 'غير معروف'}</td>
-                            <td style="color: var(--success); font-weight: 700;">+${gift.amount}$</td>
-                            <td>${gift.description || '-'}</td>
-                            <td>${date}</td>
-                            <td>الإدارة</td>
-                        </tr>
-                    `;
+                let totalImages = 0;
+                chats?.forEach(chat => {
+                    if (chat.chat_messages) {
+                        totalImages += chat.chat_messages.filter(m => m.message_type === 'image').length;
+                    }
                 });
                 
-                tbody.innerHTML = html;
+                document.getElementById('totalChats').textContent = chats?.length || 0;
+                document.getElementById('activeChatsCount').textContent = activeChats.length;
+                document.getElementById('closedChatsCount').textContent = closedChats.length;
+                document.getElementById('totalImages').textContent = totalImages;
+                
+                displayAllChats(chats || []);
             } catch (error) {
-                console.error('خطأ في تحميل تاريخ الهدايا:', error);
+                console.error('خطأ في تحميل إحصائيات المحادثات:', error);
             }
         }
+
+        function displayAllChats(chats) {
+            const tbody = document.getElementById('allChatsTable');
+            
+            if (!chats || chats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد محادثات</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            chats.slice(0, 20).forEach(chat => {
+                const messageCount = chat.chat_messages?.length || 0;
+                const imageCount = chat.chat_messages?.filter(m => m.message_type === 'image').length || 0;
+                
+                let statusClass = 'status-active';
+                let statusText = 'نشطة';
+                
+                if (chat.status === 'closed') {
+                    statusClass = 'status-pending';
+                    statusText = 'مغلقة';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${chat.users?.name || 'مستخدم'}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${messageCount}</td>
+                        <td>${imageCount}</td>
+                        <td>${new Date(chat.created_at).toLocaleDateString('ar-SA')}</td>
+                        <td>${new Date(chat.last_message_at).toLocaleDateString('ar-SA')}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSingleChat(${chat.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
         
-        // ========== إدارة الدردشة المباشرة (محدثة) ==========
+        // ========== إدارة الدردشة المباشرة ==========
         async function loadActiveChats() {
             try {
                 const result = await window.supabaseHelpers.getActiveChats();
@@ -2511,18 +2808,20 @@
             let html = '';
             filteredChats.forEach(chat => {
                 const lastMessage = chat.last_message?.message || 'لا توجد رسائل بعد';
-                const hasImage = chat.last_message?.image_url ? '📷 ' : '';
                 const timeAgo = getTimeAgo(new Date(chat.last_message_at));
                 const isUnread = chat.unread_count > 0;
                 
                 html += `
                     <div class="chat-item ${isUnread ? 'unread' : ''}" onclick="openChat(${chat.id}, '${chat.users?.name || 'مستخدم'}')">
+                        <div class="chat-delete-btn" onclick="deleteSingleChat(event, ${chat.id})">
+                            <i class="fas fa-trash"></i>
+                        </div>
                         <div class="chat-avatar">
                             ${(chat.users?.name || 'م').charAt(0).toUpperCase()}
                         </div>
                         <div class="chat-info">
                             <h4>${chat.users?.name || 'مستخدم'} <small style="color: var(--text-muted);">(${chat.users?.email || ''})</small></h4>
-                            <p>${hasImage}${lastMessage}</p>
+                            <p>${lastMessage}</p>
                         </div>
                         <div class="chat-time">
                             <div>${timeAgo}</div>
@@ -2583,6 +2882,7 @@
                 const isAdmin = msg.users?.is_admin;
                 const msgDate = new Date(msg.created_at);
                 const dateStr = msgDate.toLocaleDateString('ar-SA');
+                const timeStr = msgDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                 
                 if (lastDate !== dateStr) {
                     html += `
@@ -2595,86 +2895,157 @@
                     lastDate = dateStr;
                 }
                 
-                const timeStr = msgDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                 const senderName = isAdmin ? 'أنت' : msg.users?.name || 'مستخدم';
                 
-                let messageContent = msg.message;
-                if (msg.image_url) {
-                    messageContent = `
-                        <img src="${msg.image_url}" class="message-image" onclick="openFullscreenImage('${msg.image_url}')">
-                        ${msg.message ? `<br>${msg.message}` : ''}
+                if (msg.message_type === 'image') {
+                    html += `
+                        <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
+                            <div class="message-bubble" style="padding: 5px; background: transparent; border: none;">
+                                <img src="${msg.image_url}" class="message-image" onclick="openImageViewer('${msg.image_url}')">
+                                <div class="delete-message-btn" onclick="deleteChatMessage(${msg.id}, event)">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                            <div class="message-info">
+                                <span>${senderName}</span>
+                                <span>•</span>
+                                <span>${timeStr}</span>
+                                ${msg.is_read ? '<span>✓✓</span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
+                            <div class="message-bubble">
+                                ${msg.message}
+                                <div class="delete-message-btn" onclick="deleteChatMessage(${msg.id}, event)">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                            <div class="message-info">
+                                <span>${senderName}</span>
+                                <span>•</span>
+                                <span>${timeStr}</span>
+                                ${msg.is_read ? '<span>✓✓</span>' : ''}
+                            </div>
+                        </div>
                     `;
                 }
-                
-                html += `
-                    <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
-                        <div class="message-bubble">
-                            ${messageContent}
-                        </div>
-                        <div class="message-info">
-                            <span>${senderName}</span>
-                            <span>•</span>
-                            <span>${timeStr}</span>
-                            ${msg.is_read ? '<span>✓✓</span>' : ''}
-                        </div>
-                    </div>
-                `;
             });
             
             container.innerHTML = html;
             container.scrollTop = container.scrollHeight;
         }
         
-        function handleImageSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            selectedImageFile = file;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('previewImg').src = e.target.result;
-                document.getElementById('imagePreview').classList.add('active');
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        function removeSelectedImage() {
-            selectedImageFile = null;
-            document.getElementById('chatImageInput').value = '';
-            document.getElementById('imagePreview').classList.remove('active');
-        }
-        
         async function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             
-            if ((!message || message === '') && !selectedImageFile) return;
+            if (!message || !currentChatId) return;
             
             input.value = '';
             
-            let result;
-            if (selectedImageFile) {
-                result = await window.supabaseHelpers.sendChatMessageWithImage(
-                    currentChatId,
-                    currentAdmin.id,
-                    message,
-                    selectedImageFile
-                );
-                removeSelectedImage();
-            } else {
-                result = await window.supabaseHelpers.sendChatMessage(
-                    currentChatId,
-                    currentAdmin.id,
-                    message
-                );
-            }
+            const result = await window.supabaseHelpers.sendChatMessage(
+                currentChatId,
+                currentAdmin.id,
+                message
+            );
             
             if (result.success) {
                 await loadChatMessages();
             } else {
                 showNotification('❌ ' + result.error, 'error');
             }
+        }
+
+        async function deleteChatMessage(messageId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+            
+            const result = await window.supabaseHelpers.deleteChatMessage(
+                messageId,
+                currentAdmin.id,
+                true
+            );
+            
+            if (result.success) {
+                showNotification('✅ تم حذف الرسالة');
+                await loadChatMessages();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+
+        async function deleteSingleChat(event, chatId) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (!confirm('هل أنت متأكد من حذف هذه المحادثة؟\nسيتم حذف جميع الرسائل والصور المرتبطة بها')) return;
+            
+            const result = await window.supabaseHelpers.deleteChat(
+                chatId,
+                currentAdmin.id,
+                true
+            );
+            
+            if (result.success) {
+                showNotification('✅ تم حذف المحادثة');
+                await loadActiveChats();
+                await loadChatStats();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+
+        async function deleteOldChats() {
+            const days = document.getElementById('deleteDays').value;
+            
+            if (!confirm(`هل أنت متأكد من حذف جميع المحادثات المغلقة الأقدم من ${days} يوم؟`)) return;
+            
+            const result = await window.supabaseHelpers.deleteOldChats(
+                parseInt(days),
+                currentAdmin.id,
+                true
+            );
+            
+            if (result.success) {
+                showNotification(`✅ ${result.data.message}`);
+                await loadChatStats();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+
+        function loadAllChats() {
+            showSection('chat_management');
+            loadChatStats();
+        }
+
+        function loadActiveChatsOnly() {
+            showSection('chat_management');
+            // يمكن إضافة فلترة هنا
+        }
+
+        function loadClosedChats() {
+            showSection('chat_management');
+            // يمكن إضافة فلترة هنا
+        }
+
+        function openImageViewer(imageUrl) {
+            document.getElementById('viewerImage').src = imageUrl;
+            document.getElementById('imageViewer').classList.add('active');
+        }
+
+        function closeImageViewer(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            document.getElementById('imageViewer').classList.remove('active');
         }
         
         function handleChatKeyPress(event) {
@@ -2690,12 +3061,6 @@
                 clearInterval(chatInterval);
             }
             currentChatId = null;
-            removeSelectedImage();
-        }
-        
-        function openFullscreenImage(url) {
-            document.getElementById('fullscreenImage').src = url;
-            document.getElementById('imageViewModal').classList.add('active');
         }
         
         // ========== إدارة الباقات ==========
@@ -2770,13 +3135,42 @@
         // ========== معالجة طلبات الاشتراك ==========
         function openProcessModal(id) {
             currentPendingId = id;
-            document.getElementById('pendingDetails').innerHTML = `<p>جارٍ تحميل التفاصيل...</p>`;
+            const pending = allPendingPackages.find(p => p.id === id);
+            
+            if (pending) {
+                const proofStatus = pending.payment_proof ? '✅ مع إثبات دفع' : '⏳ بدون إثبات دفع';
+                document.getElementById('pendingDetails').innerHTML = `
+                    <p><strong>المستخدم:</strong> ${pending.user_name}</p>
+                    <p><strong>الباقة:</strong> ${pending.package_name}</p>
+                    <p><strong>المبلغ:</strong> ${pending.amount}$</p>
+                    <p><strong>حالة الدفع:</strong> ${proofStatus}</p>
+                `;
+            }
+            
             document.getElementById('processPendingModal').classList.add('active');
         }
         
         function closeProcessModal() {
             document.getElementById('processPendingModal').classList.remove('active');
             currentPendingId = null;
+        }
+
+        async function updatePaymentProof(hasProof) {
+            if (!currentPendingId) return;
+            
+            const result = await window.supabaseHelpers.updatePaymentStatus(
+                currentPendingId,
+                hasProof,
+                currentAdmin.id
+            );
+            
+            if (result.success) {
+                showNotification('✅ تم تحديث حالة إثبات الدفع');
+                await loadAllPendingPackages();
+                await loadPaymentStats();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
         }
         
         async function approvePending() {
@@ -2888,7 +3282,6 @@
             if (!currentUserId) return;
             
             const newStatus = document.getElementById('newUserStatus').value;
-            const reason = document.getElementById('statusReason').value;
             
             const result = await window.supabaseHelpers.updateUserStatus(currentUserId, newStatus);
             
@@ -2897,90 +3290,24 @@
                 showNotification('✅ تم تحديث حالة المستخدم');
                 await loadUsers();
                 await loadDashboardStats();
-                await loadUsersForGiftSelect();
             } else {
                 showNotification('❌ ' + result.error, 'error');
             }
         }
         
-        // ========== تحميل إحصائيات الإحالة ==========
-        async function loadReferralStats() {
-            try {
-                const users = await window.supabaseHelpers.getAllUsers();
-                if (!users.success) return;
-                
-                let totalReferrals = 0;
-                let totalEarnings = 0;
-                let marketers = [];
-                
-                users.data.forEach(user => {
-                    if (user.referral_count > 0) {
-                        totalReferrals += user.referral_count;
-                        totalEarnings += user.referral_earnings || 0;
-                        
-                        marketers.push({
-                            name: user.name,
-                            code: user.referral_code,
-                            count: user.referral_count,
-                            active: 0,
-                            earnings: user.referral_earnings || 0
-                        });
-                    }
-                });
-                
-                document.getElementById('totalReferrals').textContent = totalReferrals;
-                document.getElementById('totalReferralEarnings').textContent = totalEarnings + '$';
-                document.getElementById('pendingReferralRewards').textContent = '0$';
-                document.getElementById('referralRate').textContent = '0%';
-                
-                displayMarketers(marketers.sort((a, b) => b.count - a.count));
-            } catch (error) {
-                console.error('خطأ في تحميل إحصائيات الإحالة:', error);
-            }
-        }
-        
-        function displayMarketers(marketers) {
-            const tbody = document.getElementById('marketersTable');
-            
-            if (marketers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">لا يوجد مسوقين</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            marketers.slice(0, 10).forEach(m => {
-                html += `
-                    <tr>
-                        <td>${m.name}</td>
-                        <td><span style="color: var(--gold);">${m.code}</span></td>
-                        <td>${m.count}</td>
-                        <td>0</td>
-                        <td>${m.earnings}$</td>
-                    </tr>
-                `;
-            });
-            
-            tbody.innerHTML = html;
-        }
-        
         // ========== إدارة التنبيهات ==========
         async function loadAlerts() {
             try {
-                console.log('جاري تحميل التنبيهات...');
-                
                 const { data, error } = await supabaseClient
                     .from('global_alerts')
                     .select('*')
                     .order('created_at', { ascending: false });
-                
-                console.log('نتيجة الاستعلام:', { data, error });
                 
                 const container = document.getElementById('alertsContainer');
                 const badge = document.getElementById('alertsBadge');
                 
                 if (error) {
                     console.error('خطأ في جلب التنبيهات:', error);
-                    container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--danger);">خطأ: ${error.message}</div>`;
                     return;
                 }
                 
@@ -2992,14 +3319,11 @@
                             <p>قم بإضافة تنبيه جديد ليظهر للمستخدمين</p>
                         </div>
                     `;
-                    if (badge) {
-                        badge.style.display = 'none';
-                    }
+                    if (badge) badge.style.display = 'none';
                     return;
                 }
                 
                 displayAlerts(data);
-                
                 if (badge) {
                     badge.textContent = data.length;
                     badge.style.display = data.length > 0 ? 'inline' : 'none';
@@ -3093,8 +3417,6 @@
                 return;
             }
             
-            console.log('إضافة تنبيه:', { title, message, type, expires });
-            
             const alertData = {
                 title: title,
                 message: message,
@@ -3112,19 +3434,11 @@
                     .insert([alertData])
                     .select();
                 
-                console.log('نتيجة الإضافة:', { data, error });
-                
                 if (error) throw error;
                 
                 closeAddAlertModal();
                 showNotification('✅ تم إضافة التنبيه بنجاح');
                 await loadAlerts();
-                
-                document.getElementById('alertTitle').value = '';
-                document.getElementById('alertMessage').value = '';
-                document.getElementById('alertType').value = 'info';
-                document.getElementById('alertExpires').value = '';
-                
             } catch (error) {
                 console.error('خطأ في إضافة التنبيه:', error);
                 showNotification('❌ ' + error.message, 'error');
@@ -3144,7 +3458,6 @@
                 
                 showNotification('✅ تم حذف التنبيه');
                 await loadAlerts();
-                
             } catch (error) {
                 console.error('خطأ في حذف التنبيه:', error);
                 showNotification('❌ ' + error.message, 'error');
@@ -3173,7 +3486,6 @@
                 if (error) throw error;
                 
                 displayAllActivities(data || []);
-                
             } catch (error) {
                 console.error('خطأ في تحميل النشاطات:', error);
             }
@@ -3210,10 +3522,6 @@
                     case 'subscription':
                         typeText = '📦 اشتراك';
                         typeClass = 'status-active';
-                        break;
-                    case 'gift':
-                        typeText = '🎁 هدية';
-                        typeClass = 'status-approved';
                         break;
                     case 'login':
                         typeText = '🔐 دخول';
@@ -3277,15 +3585,16 @@
             
             const titles = {
                 'dashboard': 'لوحة التحكم',
+                'payment_stats': 'إحصائيات الدفع',
                 'users': 'إدارة المستخدمين',
                 'packages': 'إدارة الباقات',
                 'pending': 'طلبات الاشتراك',
                 'withdrawals': 'طلبات السحب',
-                'gifts': 'الهدايا',
                 'livechat': 'الدردشة المباشرة',
                 'referrals': 'نظام الإحالة',
                 'alerts': 'إدارة التنبيهات',
-                'activity_log': 'سجل النشاطات'
+                'activity_log': 'سجل النشاطات',
+                'chat_management': 'إدارة المحادثات'
             };
             
             document.getElementById('pageTitle').textContent = titles[sectionId] || 'لوحة التحكم';
@@ -3301,14 +3610,16 @@
             } else if (sectionId === 'packages') {
                 loadPackages();
             } else if (sectionId === 'pending') {
-                loadPendingPackages();
+                loadAllPendingPackages();
             } else if (sectionId === 'withdrawals') {
                 loadWithdrawals();
             } else if (sectionId === 'referrals') {
                 loadReferralStats();
-            } else if (sectionId === 'gifts') {
-                loadGiftsHistory();
-                loadUsersForGiftSelect();
+            } else if (sectionId === 'payment_stats') {
+                loadPaymentStats();
+                loadAllPendingPackages();
+            } else if (sectionId === 'chat_management') {
+                loadChatStats();
             }
         }
         
@@ -3342,12 +3653,14 @@
             }
         }
         
+        // تنظيف عند مغادرة الصفحة
         window.addEventListener('beforeunload', function() {
             if (chatInterval) {
                 clearInterval(chatInterval);
             }
         });
 
+        // إغلاق القائمة عند النقر خارجها
         document.addEventListener('click', function(e) {
             const dropdown = document.getElementById('userDropdown');
             const avatar = document.getElementById('userAvatar');

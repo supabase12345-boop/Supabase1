@@ -1,29 +1,22 @@
 // ===================================
-// supabase.js - Elite Capital (نسخة بدون Local Storage)
+// supabase.js - Elite Capital (نسخة كاملة مع دعم الصور وحذف الدردشة)
 // ===================================
 
-const SUPABASE_URL = 'https://aiorcrtfvhjpwjdsebzp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpb3JjcnRmdmhqcHdqZHNlYnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5ODg3MDEsImV4cCI6MjA4NjU2NDcwMX0.drqTeWdeOzA24K68hSM88JHNGft_kH571_te7KwUETA';
+const SUPABASE_URL = 'https://xrjwjzwqptshnbzjbzoj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyandqendxcHRzaG5iempiem9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMjA4MzksImV4cCI6MjA4NzU5NjgzOX0._0lYgQHfljPrBqOMLsRwgILEVs62sib1KqCNIOiSQ9I';
 
 let supabaseClient = null;
 
 // ========== حل مشكلة LockManager نهائياً ==========
 (function fixLockManager() {
-    // تعطيل navigator.locks مؤقتاً
     if (navigator && navigator.locks) {
         try {
-            // حفظ reference للـ locks الأصلي
             const originalLocks = navigator.locks;
-            
-            // تعطيل locks
             Object.defineProperty(navigator, 'locks', {
                 get: () => undefined,
                 configurable: true
             });
-            
             console.log('🔓 تم تعطيل LockManager');
-            
-            // إعادة locks بعد 5 ثواني
             setTimeout(() => {
                 Object.defineProperty(navigator, 'locks', {
                     get: () => originalLocks,
@@ -44,17 +37,16 @@ function initSupabase() {
     }
     
     try {
-        // استخدام sessionStorage بدلاً من localStorage
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: true,
-                storage: window.sessionStorage, // استخدام sessionStorage
-                storageKey: 'elite_capital_auth_' + Date.now() // مفتاح فريد
+                storage: window.sessionStorage,
+                storageKey: 'elite_capital_auth_' + Date.now()
             }
         });
-        console.log('✅ تم الاتصال بـ Supabase (بدون Local Storage)');
+        console.log('✅ تم الاتصال بـ Supabase');
         return supabaseClient;
     } catch (error) {
         console.error('❌ فشل الاتصال:', error);
@@ -69,6 +61,652 @@ function generateReferralCode(username) {
     const random = Math.random().toString(36).substring(2, 7).toUpperCase();
     const timestamp = Date.now().toString().slice(-4);
     return `${cleanUsername}${random}${timestamp}`.substring(0, 12);
+}
+
+// ========== دوال رفع الصور ==========
+async function uploadImage(file, folder = 'chat_images') {
+    try {
+        if (!file) throw new Error('الملف مطلوب');
+        
+        // التحقق من نوع الملف
+        if (!file.type.startsWith('image/')) {
+            throw new Error('الملف يجب أن يكون صورة');
+        }
+        
+        // التحقق من حجم الملف (5 ميجابايت كحد أقصى)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            throw new Error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+        }
+        
+        // إنشاء اسم فريد للملف
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        // رفع الملف إلى Supabase Storage
+        const { data, error } = await supabaseClient.storage
+            .from('uploads')
+            .upload(fileName, file);
+        
+        if (error) throw error;
+        
+        // الحصول على الرابط العام
+        const { data: urlData } = supabaseClient.storage
+            .from('uploads')
+            .getPublicUrl(fileName);
+        
+        return { 
+            success: true, 
+            data: {
+                path: fileName,
+                url: urlData.publicUrl,
+                name: file.name,
+                size: file.size,
+                type: file.type
+            }
+        };
+    } catch (error) {
+        console.error('خطأ في رفع الصورة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function deleteImage(imagePath) {
+    try {
+        if (!imagePath) throw new Error('مسار الصورة مطلوب');
+        
+        const { error } = await supabaseClient.storage
+            .from('uploads')
+            .remove([imagePath]);
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        console.error('خطأ في حذف الصورة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ========== نظام الدردشة المباشرة المتطور ==========
+
+// بدء محادثة جديدة
+async function startLiveChat(userId) {
+    try {
+        console.log('بدء محادثة جديدة للمستخدم:', userId);
+        
+        // التحقق من وجود محادثة نشطة
+        const { data: existingChat, error: checkError } = await supabaseClient
+            .from('live_chats')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .maybeSingle();
+        
+        if (checkError) throw checkError;
+        
+        if (existingChat) {
+            return { success: true, data: existingChat, isNew: false };
+        }
+        
+        // إنشاء محادثة جديدة
+        const { data: newChat, error: createError } = await supabaseClient
+            .from('live_chats')
+            .insert([{
+                user_id: userId,
+                status: 'active',
+                started_at: new Date().toISOString(),
+                last_message_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+        
+        if (createError) throw createError;
+        
+        console.log('✅ تم إنشاء محادثة جديدة:', newChat.id);
+        
+        return { success: true, data: newChat, isNew: true };
+    } catch (error) {
+        console.error('خطأ في بدء المحادثة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// إرسال رسالة نصية
+async function sendChatMessage(chatId, userId, message) {
+    try {
+        if (!message || !message.trim()) {
+            throw new Error('الرسالة لا يمكن أن تكون فارغة');
+        }
+        
+        console.log('إرسال رسالة نصية:', { chatId, userId, message });
+        
+        const { data: newMessage, error: msgError } = await supabaseClient
+            .from('chat_messages')
+            .insert([{
+                chat_id: chatId,
+                user_id: userId,
+                message: message.trim(),
+                message_type: 'text',
+                created_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+        
+        if (msgError) throw msgError;
+        
+        // تحديث وقت آخر رسالة
+        await supabaseClient
+            .from('live_chats')
+            .update({ last_message_at: new Date().toISOString() })
+            .eq('id', chatId);
+        
+        return { success: true, data: newMessage };
+    } catch (error) {
+        console.error('خطأ في إرسال الرسالة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// إرسال رسالة صورة
+async function sendChatImage(chatId, userId, imageFile) {
+    try {
+        console.log('رفع صورة وإرسالها:', { chatId, userId });
+        
+        // رفع الصورة أولاً
+        const uploadResult = await uploadImage(imageFile, 'chat_images');
+        
+        if (!uploadResult.success) {
+            throw new Error(uploadResult.error);
+        }
+        
+        const imageData = uploadResult.data;
+        
+        // إرسال الرسالة مع الصورة
+        const { data: newMessage, error: msgError } = await supabaseClient
+            .from('chat_messages')
+            .insert([{
+                chat_id: chatId,
+                user_id: userId,
+                message: '🖼️ صورة',
+                message_type: 'image',
+                image_url: imageData.url,
+                image_path: imageData.path,
+                image_name: imageData.name,
+                created_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+        
+        if (msgError) {
+            // إذا فشل إرسال الرسالة، احذف الصورة المرفوعة
+            await deleteImage(imageData.path);
+            throw msgError;
+        }
+        
+        // تحديث وقت آخر رسالة
+        await supabaseClient
+            .from('live_chats')
+            .update({ last_message_at: new Date().toISOString() })
+            .eq('id', chatId);
+        
+        return { success: true, data: newMessage, imageUrl: imageData.url };
+    } catch (error) {
+        console.error('خطأ في إرسال الصورة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// جلب رسائل المحادثة
+async function getChatMessages(chatId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('chat_messages')
+            .select(`
+                *,
+                users:user_id (
+                    id,
+                    name,
+                    is_admin
+                )
+            `)
+            .eq('chat_id', chatId)
+            .order('created_at', { ascending: true });
+        
+        if (error) throw error;
+        
+        return { success: true, data };
+    } catch (error) {
+        console.error('خطأ في جلب الرسائل:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// حذف رسالة معينة (للمسؤول فقط)
+async function deleteChatMessage(messageId, adminId, isAdmin = true) {
+    try {
+        if (!isAdmin) {
+            throw new Error('غير مصرح لك بحذف الرسائل');
+        }
+        
+        // جلب الرسالة أولاً لمعرفة إذا كانت تحتوي على صورة
+        const { data: message, error: fetchError } = await supabaseClient
+            .from('chat_messages')
+            .select('*')
+            .eq('id', messageId)
+            .single();
+        
+        if (fetchError) throw fetchError;
+        
+        // إذا كانت الرسالة تحتوي على صورة، احذفها من التخزين
+        if (message.message_type === 'image' && message.image_path) {
+            await deleteImage(message.image_path);
+        }
+        
+        // حذف الرسالة من قاعدة البيانات
+        const { error: deleteError } = await supabaseClient
+            .from('chat_messages')
+            .delete()
+            .eq('id', messageId);
+        
+        if (deleteError) throw deleteError;
+        
+        return { success: true };
+    } catch (error) {
+        console.error('خطأ في حذف الرسالة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// حذف محادثة كاملة (للمسؤول فقط)
+async function deleteChat(chatId, adminId, isAdmin = true) {
+    try {
+        if (!isAdmin) {
+            throw new Error('غير مصرح لك بحذف المحادثات');
+        }
+        
+        // جلب جميع رسائل المحادثة
+        const { data: messages, error: messagesError } = await supabaseClient
+            .from('chat_messages')
+            .select('*')
+            .eq('chat_id', chatId);
+        
+        if (messagesError) throw messagesError;
+        
+        // حذف جميع الصور المرتبطة
+        for (const message of messages || []) {
+            if (message.message_type === 'image' && message.image_path) {
+                await deleteImage(message.image_path);
+            }
+        }
+        
+        // حذف الرسائل
+        const { error: deleteMessagesError } = await supabaseClient
+            .from('chat_messages')
+            .delete()
+            .eq('chat_id', chatId);
+        
+        if (deleteMessagesError) throw deleteMessagesError;
+        
+        // حذف المحادثة
+        const { error: deleteChatError } = await supabaseClient
+            .from('live_chats')
+            .delete()
+            .eq('id', chatId);
+        
+        if (deleteChatError) throw deleteChatError;
+        
+        return { success: true };
+    } catch (error) {
+        console.error('خطأ في حذف المحادثة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// حذف جميع المحادثات القديمة (للمسؤول فقط)
+async function deleteOldChats(daysOld = 30, adminId, isAdmin = true) {
+    try {
+        if (!isAdmin) {
+            throw new Error('غير مصرح لك بحذف المحادثات');
+        }
+        
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+        
+        // جلب المحادثات القديمة
+        const { data: oldChats, error: fetchError } = await supabaseClient
+            .from('live_chats')
+            .select('id')
+            .lt('created_at', cutoffDate.toISOString())
+            .eq('status', 'closed');
+        
+        if (fetchError) throw fetchError;
+        
+        let deletedCount = 0;
+        
+        // حذف كل محادثة قديمة
+        for (const chat of oldChats || []) {
+            const result = await deleteChat(chat.id, adminId, isAdmin);
+            if (result.success) deletedCount++;
+        }
+        
+        return { 
+            success: true, 
+            data: { 
+                deletedCount,
+                message: `تم حذف ${deletedCount} محادثة قديمة`
+            }
+        };
+    } catch (error) {
+        console.error('خطأ في حذف المحادثات القديمة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// تعليم الرسائل كمقروءة
+async function markMessagesAsRead(chatId, userId) {
+    try {
+        const { error } = await supabaseClient
+            .from('chat_messages')
+            .update({ 
+                is_read: true,
+                read_at: new Date().toISOString()
+            })
+            .eq('chat_id', chatId)
+            .neq('user_id', userId)
+            .eq('is_read', false);
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        console.error('خطأ في تحديث حالة القراءة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// جلب المحادثات النشطة مع تفاصيلها
+async function getActiveChats() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('live_chats')
+            .select(`
+                *,
+                users:user_id (
+                    id,
+                    name,
+                    email,
+                    phone
+                )
+            `)
+            .eq('status', 'active')
+            .order('last_message_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        // إضافة آخر رسالة وعدد غير المقروء لكل محادثة
+        for (let chat of data || []) {
+            // آخر رسالة
+            const { data: lastMessage } = await supabaseClient
+                .from('chat_messages')
+                .select('*')
+                .eq('chat_id', chat.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            chat.last_message = lastMessage;
+            
+            // عدد الرسائل غير المقروءة
+            const { count } = await supabaseClient
+                .from('chat_messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('chat_id', chat.id)
+                .eq('is_read', false)
+                .neq('user_id', chat.admin_id);
+            
+            chat.unread_count = count || 0;
+        }
+        
+        return { success: true, data };
+    } catch (error) {
+        console.error('خطأ في جلب المحادثات النشطة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// انضمام مسؤول للمحادثة
+async function joinChat(chatId, adminId) {
+    try {
+        const { error } = await supabaseClient
+            .from('live_chats')
+            .update({ 
+                admin_id: adminId,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', chatId);
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        console.error('خطأ في انضمام المسؤول:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// إغلاق محادثة
+async function closeChat(chatId) {
+    try {
+        const { error } = await supabaseClient
+            .from('live_chats')
+            .update({ 
+                status: 'closed',
+                ended_at: new Date().toISOString()
+            })
+            .eq('id', chatId);
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        console.error('خطأ في إنهاء المحادثة:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// جلب محادثة المستخدم النشطة
+async function getUserActiveChat(userId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('live_chats')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .maybeSingle();
+        
+        if (error) throw error;
+        
+        return { success: true, data };
+    } catch (error) {
+        console.error('خطأ في جلب محادثة المستخدم:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ========== نظام التحقق من الدفع والتمييز بين المشتركين ==========
+
+// التحقق من حالة دفع المستخدم
+async function checkPaymentStatus(userId, packageId) {
+    try {
+        const { data: pendingPackage, error: pendingError } = await supabaseClient
+            .from('pending_packages')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('package_id', packageId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (pendingError) throw pendingError;
+
+        const { data: subscription, error: subError } = await supabaseClient
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('package_id', packageId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        if (subError) throw subError;
+
+        let status = 'none';
+        let paymentProof = null;
+        let createdAt = null;
+
+        if (subscription) {
+            status = 'approved';
+            paymentProof = 'مدفوع ✓';
+            createdAt = subscription.created_at;
+        } else if (pendingPackage) {
+            status = pendingPackage.status;
+            paymentProof = pendingPackage.payment_proof ? '📎 مع إثبات' : '⏳ بدون إثبات';
+            createdAt = pendingPackage.created_at;
+        }
+
+        return {
+            success: true,
+            data: {
+                status,
+                hasPaymentProof: !!pendingPackage?.payment_proof,
+                paymentProof,
+                createdAt,
+                pendingPackage,
+                subscription
+            }
+        };
+    } catch (error) {
+        console.error('خطأ في التحقق من حالة الدفع:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// جلب جميع الطلبات مع تصنيفها
+async function getAllPendingPackagesWithProof() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('pending_packages')
+            .select(`
+                *,
+                users:user_id (
+                    name,
+                    email,
+                    phone,
+                    balance
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const classified = {
+            withProof: [],
+            withoutProof: [],
+            all: data || []
+        };
+
+        (data || []).forEach(pkg => {
+            if (pkg.payment_proof) {
+                classified.withProof.push(pkg);
+            } else {
+                classified.withoutProof.push(pkg);
+            }
+        });
+
+        return { success: true, data: classified };
+    } catch (error) {
+        console.error('خطأ في جلب الطلبات:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// تحديث حالة الدفع يدوياً
+async function updatePaymentStatus(pendingId, hasProof, adminId) {
+    try {
+        const updates = {
+            payment_proof: hasProof ? 'manual_' + Date.now() : null,
+            processed_by: adminId,
+            updated_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabaseClient
+            .from('pending_packages')
+            .update(updates)
+            .eq('id', pendingId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('خطأ في تحديث حالة الدفع:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// جلب إحصائيات الدفع
+async function getPaymentStats() {
+    try {
+        const { data: allPackages, error } = await supabaseClient
+            .from('pending_packages')
+            .select('*');
+
+        if (error) throw error;
+
+        const stats = {
+            total: allPackages?.length || 0,
+            withProof: allPackages?.filter(p => p.payment_proof).length || 0,
+            withoutProof: allPackages?.filter(p => !p.payment_proof).length || 0,
+            pending: allPackages?.filter(p => p.status === 'pending').length || 0,
+            approved: allPackages?.filter(p => p.status === 'approved').length || 0,
+            rejected: allPackages?.filter(p => p.status === 'rejected').length || 0
+        };
+
+        return { success: true, data: stats };
+    } catch (error) {
+        console.error('خطأ في جلب إحصائيات الدفع:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// جلب المستخدمين الذين دفعوا
+async function getUsersWithPayment() {
+    try {
+        const { data: users, error: usersError } = await supabaseClient
+            .from('users')
+            .select(`
+                *,
+                subscriptions:subscriptions(
+                    id,
+                    package_name,
+                    amount,
+                    start_date,
+                    end_date,
+                    status
+                )
+            `)
+            .eq('subscriptions.status', 'active');
+
+        if (usersError) throw usersError;
+
+        const paidUsers = users?.filter(u => u.subscriptions && u.subscriptions.length > 0) || [];
+
+        return { success: true, data: paidUsers };
+    } catch (error) {
+        console.error('خطأ في جلب المستخدمين المدفوعين:', error);
+        return { success: false, error: error.message };
+    }
 }
 
 // ========== المستخدمين ==========
@@ -410,15 +1048,10 @@ async function createPendingPackage(pendingData) {
         
         if (pkgError || !pkg) throw new Error('الباقة غير موجودة');
         
-        console.log('الباقة المسترجعة:', pkg);
-        console.log('المبلغ المرسل:', pendingData.amount);
-        console.log('سعر الباقة:', pkg.price);
-        
         const amountNum = parseFloat(pendingData.amount);
         const priceNum = parseFloat(pkg.price);
         
         if (Math.abs(amountNum - priceNum) > 0.01) {
-            console.error('المبلغ غير مطابق:', { amountNum, priceNum });
             throw new Error('المبلغ غير مطابق لسعر الباقة');
         }
         
@@ -445,8 +1078,6 @@ async function createPendingPackage(pendingData) {
             created_at: new Date().toISOString()
         };
         
-        console.log('📤 إرسال البيانات إلى قاعدة البيانات:', insertData);
-        
         const { data, error } = await supabaseClient
             .from('pending_packages')
             .insert([insertData])
@@ -455,38 +1086,6 @@ async function createPendingPackage(pendingData) {
         
         if (error) {
             console.error('❌ خطأ من قاعدة البيانات:', error);
-            
-            if (error.message.includes('column')) {
-                console.log('محاولة إدخال بيانات مبسطة...');
-                
-                const simpleData = {
-                    user_id: user.id,
-                    user_name: user.name || 'مستخدم',
-                    package_name: pkg.name || 'باقة',
-                    amount: priceNum,
-                    wallet_address: pendingData.walletAddress || 'TYmk60K9JvCqS7Fqy6BpWpZp8hLpVHw7D',
-                    status: 'pending',
-                    created_at: new Date().toISOString()
-                };
-                
-                const { data: simpleResult, error: simpleError } = await supabaseClient
-                    .from('pending_packages')
-                    .insert([simpleData])
-                    .select()
-                    .single();
-                
-                if (simpleError) {
-                    console.error('❌ فشلت المحاولة الثانية:', simpleError);
-                    throw simpleError;
-                }
-                
-                console.log('✅ تم حفظ الطلب بنجاح (نسخة مبسطة):', simpleResult);
-                
-                await addSubscriptionActivity(user.id, priceNum, pkg.name, 'pending');
-                
-                return { success: true, data: simpleResult };
-            }
-            
             throw error;
         }
         
@@ -532,8 +1131,6 @@ async function approvePendingPackage(id, adminId) {
         if (fetchError) throw fetchError;
         if (!pending) throw new Error('الطلب غير موجود');
         
-        console.log('معالجة طلب:', pending);
-        
         const { data: pkg, error: pkgError } = await supabaseClient
             .from('packages')
             .select('duration, duration_type, daily_profit')
@@ -549,26 +1146,16 @@ async function approvePendingPackage(id, adminId) {
             const duration = pkg.duration || 30;
             const durationType = pkg.duration_type || 'day';
             
-            console.log('مدة الباقة:', duration, durationType);
-            
             if (durationType === 'day') {
                 endDate.setDate(endDate.getDate() + duration);
-                console.log(`تمت إضافة ${duration} يوم`);
-            } 
-            else if (durationType === 'month') {
+            } else if (durationType === 'month') {
                 endDate.setDate(endDate.getDate() + (duration * 30));
-                console.log(`تمت إضافة ${duration} شهر (${duration * 30} يوم)`);
-            } 
-            else if (durationType === 'year') {
+            } else if (durationType === 'year') {
                 endDate.setDate(endDate.getDate() + (duration * 365));
-                console.log(`تمت إضافة ${duration} سنة (${duration * 365} يوم)`);
             }
         } else {
             endDate.setDate(endDate.getDate() + 30);
         }
-        
-        console.log('تاريخ البدء:', startDate);
-        console.log('تاريخ الانتهاء:', endDate);
         
         await supabaseClient
             .from('pending_packages')
@@ -625,8 +1212,6 @@ async function approvePendingPackage(id, adminId) {
         
         await addSubscriptionActivity(pending.user_id, pending.amount, pending.package_name, 'approved');
         
-        console.log('✅ تم إنشاء الاشتراك بنجاح:', subscription);
-        
         return { success: true, data: subscription };
     } catch (error) {
         console.error('خطأ في قبول الطلب:', error);
@@ -665,7 +1250,7 @@ async function rejectPendingPackage(id, reason, adminId) {
     }
 }
 
-// ========== الإحالة (محدثة مع إصلاح أرباح الإحالة) ==========
+// ========== الإحالة ==========
 async function processReferralRewards(newUserId, referralCode) {
     try {
         console.log('معالجة مكافآت الإحالة:', { newUserId, referralCode });
@@ -695,7 +1280,6 @@ async function processReferralRewards(newUserId, referralCode) {
             return { success: false };
         }
         
-        // تحديث رصيد المحال
         await supabaseClient
             .from('users')
             .update({ 
@@ -705,7 +1289,6 @@ async function processReferralRewards(newUserId, referralCode) {
             })
             .eq('id', newUserId);
         
-        // تحديث رصيد المحيل مع referral_earnings
         await supabaseClient
             .from('users')
             .update({ 
@@ -716,7 +1299,6 @@ async function processReferralRewards(newUserId, referralCode) {
             })
             .eq('id', referrer.id);
         
-        // تسجيل المعاملات
         const transactions = [
             {
                 user_id: newUserId,
@@ -750,7 +1332,6 @@ async function processReferralRewards(newUserId, referralCode) {
     }
 }
 
-// ========== الإحالة - جلب الإحصائيات (محدث مع إصلاح أرباح الإحالة) ==========
 async function getReferralStats(userId) {
     try {
         const { data: user, error: userError } = await supabaseClient
@@ -768,17 +1349,9 @@ async function getReferralStats(userId) {
         
         if (referredError) throw referredError;
         
-        // ✅ استخدام referral_earnings من جدول users مباشرة
         const totalEarned = user.referral_earnings || 0;
         
         const activeReferrals = referredUsers?.filter(u => u.has_active_subscription).length || 0;
-        
-        console.log('📊 إحصائيات الإحالة:', {
-            المستخدم: user.name,
-            الكود: user.referral_code,
-            أرباح_الإحالة: totalEarned,
-            عدد_المحالين: referredUsers?.length
-        });
         
         return {
             success: true,
@@ -1125,226 +1698,6 @@ async function processDailyProfits() {
     }
 }
 
-// ========== نظام الدردشة المباشرة ==========
-async function startLiveChat(userId) {
-    try {
-        console.log('بدء محادثة جديدة للمستخدم:', userId);
-        
-        const { data: existingChat, error: checkError } = await supabaseClient
-            .from('live_chats')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .maybeSingle();
-        
-        if (checkError) throw checkError;
-        
-        if (existingChat) {
-            return { success: true, data: existingChat, isNew: false };
-        }
-        
-        const { data: newChat, error: createError } = await supabaseClient
-            .from('live_chats')
-            .insert([{
-                user_id: userId,
-                status: 'active',
-                started_at: new Date().toISOString(),
-                last_message_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-        
-        if (createError) throw createError;
-        
-        console.log('✅ تم إنشاء محادثة جديدة:', newChat.id);
-        
-        return { success: true, data: newChat, isNew: true };
-    } catch (error) {
-        console.error('خطأ في بدء المحادثة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function sendChatMessage(chatId, userId, message) {
-    try {
-        if (!message || !message.trim()) {
-            throw new Error('الرسالة لا يمكن أن تكون فارغة');
-        }
-        
-        console.log('إرسال رسالة:', { chatId, userId, message });
-        
-        const { data: newMessage, error: msgError } = await supabaseClient
-            .from('chat_messages')
-            .insert([{
-                chat_id: chatId,
-                user_id: userId,
-                message: message.trim(),
-                created_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-        
-        if (msgError) throw msgError;
-        
-        await supabaseClient
-            .from('live_chats')
-            .update({ last_message_at: new Date().toISOString() })
-            .eq('id', chatId);
-        
-        return { success: true, data: newMessage };
-    } catch (error) {
-        console.error('خطأ في إرسال الرسالة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function getChatMessages(chatId) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('chat_messages')
-            .select(`
-                *,
-                users:user_id (
-                    id,
-                    name,
-                    is_admin
-                )
-            `)
-            .eq('chat_id', chatId)
-            .order('created_at', { ascending: true });
-        
-        if (error) throw error;
-        
-        return { success: true, data };
-    } catch (error) {
-        console.error('خطأ في جلب الرسائل:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function markMessagesAsRead(chatId, userId) {
-    try {
-        const { error } = await supabaseClient
-            .from('chat_messages')
-            .update({ 
-                is_read: true,
-                read_at: new Date().toISOString()
-            })
-            .eq('chat_id', chatId)
-            .neq('user_id', userId)
-            .eq('is_read', false);
-        
-        if (error) throw error;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في تحديث حالة القراءة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function getActiveChats() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('live_chats')
-            .select(`
-                *,
-                users:user_id (
-                    id,
-                    name,
-                    email,
-                    phone
-                )
-            `)
-            .eq('status', 'active')
-            .order('last_message_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        for (let chat of data || []) {
-            const { data: lastMessage } = await supabaseClient
-                .from('chat_messages')
-                .select('*')
-                .eq('chat_id', chat.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            
-            chat.last_message = lastMessage;
-            
-            const { count } = await supabaseClient
-                .from('chat_messages')
-                .select('*', { count: 'exact', head: true })
-                .eq('chat_id', chat.id)
-                .eq('is_read', false)
-                .neq('user_id', chat.admin_id);
-            
-            chat.unread_count = count || 0;
-        }
-        
-        return { success: true, data };
-    } catch (error) {
-        console.error('خطأ في جلب المحادثات النشطة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function joinChat(chatId, adminId) {
-    try {
-        const { error } = await supabaseClient
-            .from('live_chats')
-            .update({ 
-                admin_id: adminId,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', chatId);
-        
-        if (error) throw error;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في انضمام المسؤول:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function closeChat(chatId) {
-    try {
-        const { error } = await supabaseClient
-            .from('live_chats')
-            .update({ 
-                status: 'closed',
-                ended_at: new Date().toISOString()
-            })
-            .eq('id', chatId);
-        
-        if (error) throw error;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في إنهاء المحادثة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function getUserActiveChat(userId) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('live_chats')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .maybeSingle();
-        
-        if (error) throw error;
-        
-        return { success: true, data };
-    } catch (error) {
-        console.error('خطأ في جلب محادثة المستخدم:', error);
-        return { success: false, error: error.message };
-    }
-}
-
 // ========== نظام سجل النشاطات ==========
 async function addActivity(activityData) {
     try {
@@ -1563,7 +1916,6 @@ async function deleteAlert(alertId) {
 // ========== إضافة كود تنظيف عند تحميل الصفحة ==========
 (function cleanupOnLoad() {
     try {
-        // محاولة مسح أي بيانات قديمة من sessionStorage
         const keysToRemove = [];
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
@@ -1572,9 +1924,7 @@ async function deleteAlert(alertId) {
             }
         }
         keysToRemove.forEach(key => sessionStorage.removeItem(key));
-    } catch (e) {
-        // تجاهل الأخطاء
-    }
+    } catch (e) {}
 })();
 
 // ========== التهيئة ==========
@@ -1628,15 +1978,30 @@ window.supabaseHelpers = {
     // الأرباح اليومية
     processDailyProfits,
     
-    // نظام الدردشة
+    // نظام الدردشة المتطور
     startLiveChat,
     sendChatMessage,
+    sendChatImage,
     getChatMessages,
+    deleteChatMessage,
+    deleteChat,
+    deleteOldChats,
     markMessagesAsRead,
     getActiveChats,
     joinChat,
     closeChat,
     getUserActiveChat,
+    
+    // نظام رفع الصور
+    uploadImage,
+    deleteImage,
+    
+    // نظام التحقق من الدفع
+    checkPaymentStatus,
+    getAllPendingPackagesWithProof,
+    updatePaymentStatus,
+    getPaymentStats,
+    getUsersWithPayment,
     
     // نظام سجل النشاطات
     addActivity,
@@ -1654,4 +2019,4 @@ window.supabaseHelpers = {
     deleteAlert
 };
 
-console.log('✅ تم تحميل جميع دوال Supabase مع الإصلاحات النهائية (بدون Local Storage)');
+console.log('✅ تم تحميل جميع دوال Supabase مع دعم الصور وحذف الدردشة');

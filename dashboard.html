@@ -125,34 +125,6 @@
 
         .user-menu {
             position: relative;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .notification-icon {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .notification-icon i {
-            font-size: 24px;
-            color: var(--gold);
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--danger);
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 18px;
-            text-align: center;
-            border: 2px solid var(--dark-light);
-            animation: pulse 2s infinite;
         }
 
         .user-avatar {
@@ -239,145 +211,7 @@
             100% { transform: translateY(-50%) scale(1); }
         }
 
-        /* ===== لوحة الإشعارات المنبثقة ===== */
-        .notifications-panel {
-            position: absolute;
-            top: 60px;
-            left: 0;
-            width: 320px;
-            background: var(--dark-light);
-            border-radius: 20px;
-            border: 2px solid var(--gold);
-            box-shadow: var(--shadow);
-            z-index: 1002;
-            display: none;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .notifications-panel.active {
-            display: block;
-            animation: slideDown 0.3s;
-        }
-
-        .notifications-header {
-            background: rgba(200,169,126,0.1);
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(200,169,126,0.3);
-            position: sticky;
-            top: 0;
-            background: var(--dark-light);
-        }
-
-        .notifications-header h4 {
-            color: var(--gold);
-            font-size: 16px;
-        }
-
-        .mark-all-read {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 50px;
-            transition: all 0.3s;
-        }
-
-        .mark-all-read:hover {
-            background: rgba(200,169,126,0.1);
-            color: var(--gold);
-        }
-
-        .notification-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .notification-item:hover {
-            background: rgba(200,169,126,0.05);
-        }
-
-        .notification-item.unread {
-            background: rgba(200,169,126,0.1);
-            border-right: 3px solid var(--gold);
-        }
-
-        .notif-icon {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .notif-icon.gift {
-            background: rgba(39, 174, 96, 0.2);
-            color: #27ae60;
-        }
-
-        .notif-icon.profit {
-            background: rgba(39, 174, 96, 0.2);
-            color: #27ae60;
-        }
-
-        .notif-icon.withdrawal {
-            background: rgba(243, 156, 18, 0.2);
-            color: #f39c12;
-        }
-
-        .notif-icon.subscription {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-        }
-
-        .notif-content {
-            flex: 1;
-        }
-
-        .notif-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 3px;
-        }
-
-        .notif-message {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 3px;
-        }
-
-        .notif-time {
-            font-size: 9px;
-            color: rgba(255,255,255,0.3);
-        }
-
-        .no-notifications {
-            text-align: center;
-            padding: 30px 15px;
-            color: var(--text-muted);
-        }
-
-        .no-notifications i {
-            font-size: 30px;
-            color: var(--gold);
-            margin-bottom: 10px;
-            opacity: 0.5;
-        }
-
-        /* ===== نافذة التنبيهات العامة ===== */
+        /* ===== نافذة التنبيهات المنبثقة ===== */
         .alert-modal {
             position: fixed;
             top: 0;
@@ -774,7 +608,6 @@
         .icon-profit { background: rgba(39, 174, 96, 0.2); color: #27ae60; }
         .icon-withdrawal { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
         .icon-subscription { background: rgba(52, 152, 219, 0.2); color: #3498db; }
-        .icon-gift { background: rgba(39, 174, 96, 0.2); color: #27ae60; }
         .icon-login { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
 
         .activity-content {
@@ -1288,11 +1121,6 @@
             .alert-modal-title {
                 font-size: 20px;
             }
-            
-            .notifications-panel {
-                width: 280px;
-                left: -100px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -1310,11 +1138,6 @@
             
             .nav-item {
                 min-width: 50px;
-            }
-            
-            .notifications-panel {
-                width: 260px;
-                left: -80px;
             }
         }
 
@@ -1350,7 +1173,7 @@
     </style>
 </head>
 <body>
-    <!-- نافذة التنبيهات العامة -->
+    <!-- نافذة التنبيهات المنبثقة -->
     <div class="alert-modal" id="alertModal">
         <div class="alert-modal-content">
             <button class="alert-modal-close" onclick="closeAlertModal()">&times;</button>
@@ -1379,29 +1202,6 @@
         </div>
         
         <div class="user-menu">
-            <!-- أيقونة الإشعارات -->
-            <div class="notification-icon" onclick="toggleNotifications()">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
-                
-                <!-- لوحة الإشعارات المنبثقة -->
-                <div class="notifications-panel" id="notificationsPanel" onclick="event.stopPropagation()">
-                    <div class="notifications-header">
-                        <h4>الإشعارات</h4>
-                        <button class="mark-all-read" onclick="markAllNotificationsAsRead()">
-                            <i class="fas fa-check-double"></i>
-                            تحديد الكل
-                        </button>
-                    </div>
-                    <div class="notifications-list" id="notificationsList">
-                        <div class="no-notifications">
-                            <i class="fas fa-bell-slash"></i>
-                            <p>لا توجد إشعارات</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">م</div>
             <div class="user-dropdown" id="userDropdown">
                 <div class="user-dropdown-item" onclick="window.location.href='profile.html'">
@@ -1508,7 +1308,7 @@
                     </div>
                 </div>
 
-                <!-- سجل النشاطات (محدث) -->
+                <!-- سجل النشاطات -->
                 <div class="card">
                     <div class="card-title">
                         <i class="fas fa-history"></i>
@@ -1596,7 +1396,7 @@
             </div>
         </div>
 
-        <!-- صفحة جميع النشاطات (محدثة) -->
+        <!-- صفحة جميع النشاطات -->
         <div id="all-activities-page" class="page">
             <div class="card">
                 <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1616,7 +1416,6 @@
                         <option value="profit">أرباح</option>
                         <option value="withdrawal">سحوبات</option>
                         <option value="subscription">اشتراكات</option>
-                        <option value="gift">هدايا</option>
                         <option value="login">دخول</option>
                     </select>
                 </div>
@@ -1698,26 +1497,6 @@
         </div>
     </div>
 
-    <!-- نافذة عرض تفاصيل الهدية -->
-    <div class="modal" id="giftDetailsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">🎁 هدية من الإدارة</h2>
-                <button class="modal-close" onclick="closeGiftModal()">&times;</button>
-            </div>
-            
-            <div style="text-align: center; padding: 20px;">
-                <div style="font-size: 60px; color: #27ae60; margin-bottom: 20px;">
-                    <i class="fas fa-gift"></i>
-                </div>
-                <div style="font-size: 32px; font-weight: 900; color: #27ae60; margin-bottom: 15px;" id="giftAmount">+50$</div>
-                <div style="font-size: 18px; color: var(--gold); margin-bottom: 10px;" id="giftTitle">هدية من الإدارة</div>
-                <div style="color: var(--text-muted); margin-bottom: 25px;" id="giftMessage">تم إضافة هدية إلى رصيدك</div>
-                <button class="btn btn-primary" onclick="closeGiftModal()">رائع 🎉</button>
-            </div>
-        </div>
-    </div>
-
     <!-- الإشعارات المنبثقة الصغيرة -->
     <div class="toast" id="toast"></div>
 
@@ -1739,11 +1518,8 @@
         let currentNetwork = 'TRC20';
         let chatCheckInterval = null;
         let activitiesInterval = null;
-        let notificationsInterval = null;
         let allActivities = [];
         let hasShownAlert = false;
-        let notifications = [];
-        let gifts = [];
         
         const withdrawalFees = {
             'TRC20': 5,
@@ -1761,204 +1537,72 @@
             await loadWithdrawals();
             await loadReferralStats();
             await loadRecentActivities();
-            await loadNotifications();
             await checkForActiveAlerts();
             await checkUnreadMessages();
-            await checkForNewGifts();
             updateUI();
             
+            // إضافة زر التحديث إذا وجد اشتراك
             setTimeout(addRefreshButton, 1000);
             
+            // بدء التحقق من الرسائل غير المقروءة كل 10 ثواني
             chatCheckInterval = setInterval(checkUnreadMessages, 10000);
+            
+            // تحديث النشاطات كل 30 ثانية
             activitiesInterval = setInterval(loadRecentActivities, 30000);
-            notificationsInterval = setInterval(checkNewNotifications, 15000);
+            
+            // التحقق من التنبيهات كل دقيقة
             setInterval(checkForActiveAlerts, 60000);
         });
 
-        // ===== نظام الإشعارات =====
-        async function loadNotifications() {
+        // التحقق من وجود تنبيهات نشطة
+        async function checkForActiveAlerts() {
             try {
-                const result = await window.supabaseHelpers.getUserNotifications(currentUser.id);
+                console.log('🔍 التحقق من التنبيهات النشطة...');
                 
-                if (result.success && result.data) {
-                    notifications = result.data;
-                    displayNotifications();
-                    updateNotificationBadge();
+                const { data, error } = await supabaseClient
+                    .from('global_alerts')
+                    .select('*')
+                    .eq('is_active', true);
+                
+                if (error) {
+                    console.error('خطأ في جلب التنبيهات:', error);
+                    return;
+                }
+                
+                console.log('✅ التنبيهات النشطة:', data);
+                
+                const now = new Date().toISOString();
+                const activeAlerts = data?.filter(alert => {
+                    if (!alert.expires_at) return true;
+                    return alert.expires_at > now;
+                }) || [];
+                
+                console.log('✅ التنبيهات بعد الفلترة:', activeAlerts);
+                
+                if (activeAlerts.length > 0 && !hasShownAlert) {
+                    const alert = activeAlerts[0];
+                    showAlertModal(alert.title, alert.message);
+                    hasShownAlert = true;
+                    localStorage.setItem('last_alert_time', Date.now().toString());
                 }
             } catch (error) {
-                console.error('خطأ في تحميل الإشعارات:', error);
+                console.error('❌ استثناء في التحقق من التنبيهات:', error);
             }
         }
 
-        async function checkNewNotifications() {
-            try {
-                const result = await window.supabaseHelpers.getUnreadNotificationsCount(currentUser.id);
-                
-                if (result.success) {
-                    const count = result.count || 0;
-                    const badge = document.getElementById('notificationBadge');
-                    
-                    if (count > 0) {
-                        badge.textContent = count;
-                        badge.style.display = 'inline';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-            } catch (error) {
-                console.error('خطأ في التحقق من الإشعارات:', error);
-            }
+        // عرض نافذة التنبيه
+        function showAlertModal(title, message) {
+            document.getElementById('alertModalTitle').textContent = title;
+            document.getElementById('alertModalMessage').textContent = message;
+            document.getElementById('alertModal').classList.add('active');
         }
 
-        function displayNotifications() {
-            const container = document.getElementById('notificationsList');
-            
-            if (!notifications || notifications.length === 0) {
-                container.innerHTML = `
-                    <div class="no-notifications">
-                        <i class="fas fa-bell-slash"></i>
-                        <p>لا توجد إشعارات</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            notifications.slice(0, 10).forEach(notif => {
-                let iconClass = 'notif-icon';
-                let icon = 'fa-bell';
-                
-                switch(notif.type) {
-                    case 'gift':
-                        iconClass += ' gift';
-                        icon = 'fa-gift';
-                        break;
-                    case 'profit':
-                        iconClass += ' profit';
-                        icon = 'fa-coins';
-                        break;
-                    case 'withdrawal':
-                        iconClass += ' withdrawal';
-                        icon = 'fa-money-bill-wave';
-                        break;
-                    case 'subscription':
-                        iconClass += ' subscription';
-                        icon = 'fa-crown';
-                        break;
-                }
-                
-                const date = new Date(notif.created_at).toLocaleDateString('ar-SA', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                html += `
-                    <div class="notification-item ${!notif.is_read ? 'unread' : ''}" onclick="markNotificationAsRead(${notif.id})">
-                        <div class="${iconClass}">
-                            <i class="fas ${icon}"></i>
-                        </div>
-                        <div class="notif-content">
-                            <div class="notif-title">${notif.title}</div>
-                            <div class="notif-message">${notif.message}</div>
-                            <div class="notif-time">${date}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            if (notifications.length > 10) {
-                html += `
-                    <div style="text-align: center; padding: 10px;">
-                        <small style="color: var(--text-muted);">+${notifications.length - 10} إشعارات أخرى</small>
-                    </div>
-                `;
-            }
-            
-            container.innerHTML = html;
+        // إغلاق نافذة التنبيه
+        function closeAlertModal() {
+            document.getElementById('alertModal').classList.remove('active');
         }
 
-        function updateNotificationBadge() {
-            const unreadCount = notifications.filter(n => !n.is_read).length;
-            const badge = document.getElementById('notificationBadge');
-            
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.style.display = 'inline';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function toggleNotifications() {
-            const panel = document.getElementById('notificationsPanel');
-            panel.classList.toggle('active');
-            
-            if (panel.classList.contains('active')) {
-                loadNotifications();
-            }
-        }
-
-        async function markNotificationAsRead(notificationId) {
-            const result = await window.supabaseHelpers.markNotificationAsRead(notificationId);
-            
-            if (result.success) {
-                const notification = notifications.find(n => n.id === notificationId);
-                if (notification) {
-                    notification.is_read = true;
-                }
-                displayNotifications();
-                updateNotificationBadge();
-            }
-        }
-
-        async function markAllNotificationsAsRead() {
-            const result = await window.supabaseHelpers.markAllNotificationsAsRead(currentUser.id);
-            
-            if (result.success) {
-                notifications.forEach(n => n.is_read = true);
-                displayNotifications();
-                updateNotificationBadge();
-                showToast('✅ تم تحديد الكل كمقروء');
-            }
-        }
-
-        // ===== نظام الهدايا =====
-        async function checkForNewGifts() {
-            try {
-                const result = await window.supabaseHelpers.getUserGifts(currentUser.id);
-                
-                if (result.success && result.data) {
-                    const newGifts = result.data.filter(g => {
-                        const lastCheck = localStorage.getItem('last_gift_check');
-                        if (!lastCheck) return true;
-                        return new Date(g.created_at) > new Date(parseInt(lastCheck));
-                    });
-                    
-                    if (newGifts.length > 0) {
-                        showGiftNotification(newGifts[0]);
-                    }
-                    
-                    localStorage.setItem('last_gift_check', Date.now().toString());
-                }
-            } catch (error) {
-                console.error('خطأ في التحقق من الهدايا:', error);
-            }
-        }
-
-        function showGiftNotification(gift) {
-            document.getElementById('giftAmount').textContent = `+${gift.amount}$`;
-            document.getElementById('giftTitle').textContent = gift.title || '🎁 هدية من الإدارة';
-            document.getElementById('giftMessage').textContent = gift.description || `تم إضافة ${gift.amount}$ إلى رصيدك`;
-            document.getElementById('giftDetailsModal').classList.add('active');
-            
-            showToast(`🎁 تهانينا! لديك هدية جديدة بقيمة ${gift.amount}$`, 'success');
-        }
-
-        function closeGiftModal() {
-            document.getElementById('giftDetailsModal').classList.remove('active');
-        }
-
-        // ===== باقي الدوال (كما هي من الملف الأصلي) =====
+        // التحقق من المستخدم
         async function checkUser() {
             const savedUser = localStorage.getItem('current_user');
             if (!savedUser) {
@@ -1980,6 +1624,7 @@
             document.getElementById('userAvatar').textContent = currentUser.name?.charAt(0).toUpperCase() || 'م';
         }
 
+        // تحميل بيانات المستخدم
         async function loadUserData() {
             document.getElementById('balance').textContent = (currentUser.balance || 0) + '$';
             document.getElementById('totalEarned').textContent = (currentUser.total_earned || 0) + '$';
@@ -1998,6 +1643,7 @@
             }
         }
 
+        // تحميل الاشتراك
         async function loadSubscription() {
             if (!currentUser) return;
             
@@ -2022,6 +1668,7 @@
             }
         }
 
+        // عرض الاشتراك - مع حساب الأيام المتبقية بشكل صحيح
         function displaySubscription() {
             if (!subscription) return;
             
@@ -2031,14 +1678,18 @@
             const endDate = new Date(subscription.end_date);
             const today = new Date();
             
+            // حساب الأيام المتبقية بشكل صحيح
             const diffTime = endDate - today;
             const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
             
+            // حساب الأيام المنقضية
             const diffPassed = today - startDate;
             const daysPassed = Math.max(0, Math.ceil(diffPassed / (1000 * 60 * 60 * 24)));
             
+            // حساب المدة الإجمالية بالأيام
             const totalDuration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
             
+            // حساب نسبة التقدم (تجنب القيم السالبة)
             let progress = ((daysPassed / totalDuration) * 100).toFixed(1);
             if (progress > 100) progress = 100;
             if (progress < 0) progress = 0;
@@ -2104,6 +1755,7 @@
             addRefreshButton();
         }
 
+        // عرض حالة عدم وجود اشتراك
         function displayNoSubscription() {
             const html = `
                 <div class="no-subscription">
@@ -2121,10 +1773,12 @@
             document.getElementById('todayProfit').textContent = '0$';
         }
 
+        // الذهاب لصفحة الباقات
         function goToPackages() {
             window.location.href = 'index.html#packages';
         }
 
+        // إضافة زر التحديث
         function addRefreshButton() {
             const subscriptionDiv = document.getElementById('subscriptionSection');
             if (!subscriptionDiv) return;
@@ -2141,6 +1795,7 @@
             subscriptionDiv.appendChild(refreshBtn);
         }
 
+        // تحديث جميع البيانات
         async function refreshAllData() {
             showToast('جاري تحديث البيانات...', 'info');
             
@@ -2158,7 +1813,6 @@
             await loadWithdrawals();
             await loadReferralStats();
             await loadRecentActivities();
-            await loadNotifications();
             await checkForActiveAlerts();
             await checkUnreadMessages();
             updateUI();
@@ -2166,6 +1820,7 @@
             showToast('✅ تم تحديث البيانات بنجاح');
         }
 
+        // تحميل المعاملات
         async function loadTransactions() {
             if (!currentUser) return;
             
@@ -2177,6 +1832,7 @@
             }
         }
 
+        // تحميل إحصائيات الإحالة
         async function loadReferralStats() {
             if (!currentUser) return;
             
@@ -2188,6 +1844,7 @@
             }
         }
 
+        // عرض إحصائيات الإحالة
         function displayReferralStats() {
             if (!referralStats) return;
             
@@ -2198,6 +1855,7 @@
             document.getElementById('totalReferrals').textContent = referralStats.totalReferrals || 0;
         }
 
+        // تحميل طلبات السحب
         async function loadWithdrawals() {
             if (!currentUser) return;
             
@@ -2217,6 +1875,7 @@
             }
         }
 
+        // عرض طلبات السحب
         function displayWithdrawals() {
             const container = document.getElementById('withdrawalsList');
             
@@ -2257,6 +1916,7 @@
             container.innerHTML = html;
         }
 
+        // تحميل آخر النشاطات
         async function loadRecentActivities() {
             try {
                 const { data, error } = await supabaseClient
@@ -2275,6 +1935,7 @@
             }
         }
 
+        // عرض آخر النشاطات
         function displayRecentActivities(activities) {
             const container = document.getElementById('recentActivities');
             
@@ -2331,6 +1992,7 @@
             container.innerHTML = html;
         }
 
+        // الحصول على أيقونة النشاط
         function getActivityIcon(type) {
             switch(type) {
                 case 'profit':
@@ -2339,8 +2001,6 @@
                     return { icon: 'fa-money-bill-wave', class: 'icon-withdrawal' };
                 case 'subscription':
                     return { icon: 'fa-crown', class: 'icon-subscription' };
-                case 'gift':
-                    return { icon: 'fa-gift', class: 'icon-gift' };
                 case 'login':
                     return { icon: 'fa-right-to-bracket', class: 'icon-login' };
                 default:
@@ -2348,6 +2008,7 @@
             }
         }
 
+        // تحميل جميع النشاطات
         async function loadAllActivities() {
             try {
                 const { data, error } = await supabaseClient
@@ -2366,6 +2027,7 @@
             }
         }
 
+        // عرض جميع النشاطات
         function displayAllActivities() {
             const container = document.getElementById('allActivitiesList');
             const filter = document.getElementById('activitiesFilter').value;
@@ -2435,10 +2097,12 @@
             container.innerHTML = html;
         }
 
+        // فلترة جميع النشاطات
         function filterAllActivities() {
             displayAllActivities();
         }
 
+        // التحقق من وجود رسائل غير مقروءة في الدردشة
         async function checkUnreadMessages() {
             if (!currentUser) return;
             
@@ -2470,57 +2134,14 @@
             }
         }
 
-        async function checkForActiveAlerts() {
-            try {
-                console.log('🔍 التحقق من التنبيهات النشطة...');
-                
-                const { data, error } = await supabaseClient
-                    .from('global_alerts')
-                    .select('*')
-                    .eq('is_active', true);
-                
-                if (error) {
-                    console.error('خطأ في جلب التنبيهات:', error);
-                    return;
-                }
-                
-                console.log('✅ التنبيهات النشطة:', data);
-                
-                const now = new Date().toISOString();
-                const activeAlerts = data?.filter(alert => {
-                    if (!alert.expires_at) return true;
-                    return alert.expires_at > now;
-                }) || [];
-                
-                console.log('✅ التنبيهات بعد الفلترة:', activeAlerts);
-                
-                if (activeAlerts.length > 0 && !hasShownAlert) {
-                    const alert = activeAlerts[0];
-                    showAlertModal(alert.title, alert.message);
-                    hasShownAlert = true;
-                    localStorage.setItem('last_alert_time', Date.now().toString());
-                }
-            } catch (error) {
-                console.error('❌ استثناء في التحقق من التنبيهات:', error);
-            }
-        }
-
-        function showAlertModal(title, message) {
-            document.getElementById('alertModalTitle').textContent = title;
-            document.getElementById('alertModalMessage').textContent = message;
-            document.getElementById('alertModal').classList.add('active');
-        }
-
-        function closeAlertModal() {
-            document.getElementById('alertModal').classList.remove('active');
-        }
-
+        // تحديث الواجهة
         function updateUI() {
             document.getElementById('balance').textContent = (currentUser.balance || 0) + '$';
             document.getElementById('totalEarned').textContent = (currentUser.total_earned || 0) + '$';
             document.getElementById('withdrawableBalance').textContent = (currentUser.balance || 0) + '$';
         }
 
+        // دوال التنقل بين الصفحات
         function showPage(page) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(page + '-page').classList.add('active');
@@ -2531,16 +2152,19 @@
             else if (page === 'stats') document.querySelectorAll('.nav-item')[2].classList.add('active');
         }
 
+        // عرض صفحة جميع النشاطات
         function showAllActivitiesPage() {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('all-activities-page').classList.add('active');
             loadAllActivities();
         }
 
+        // العودة للصفحة الرئيسية
         function goBackToHome() {
             showPage('home');
         }
 
+        // دوال السحب
         function showWithdrawalModal() {
             if (!currentUser) return;
             
@@ -2617,6 +2241,7 @@
             }
         }
 
+        // نسخ كود الإحالة
         function copyReferralCode() {
             if (referralStats?.referralCode) {
                 navigator.clipboard.writeText(referralStats.referralCode);
@@ -2624,20 +2249,22 @@
             }
         }
 
+        // تبديل قائمة المستخدم
         function toggleUserMenu() {
             document.getElementById('userDropdown').classList.toggle('active');
         }
 
+        // تسجيل الخروج
         async function logout() {
             if (confirm('هل تريد تسجيل الخروج؟')) {
                 if (chatCheckInterval) clearInterval(chatCheckInterval);
                 if (activitiesInterval) clearInterval(activitiesInterval);
-                if (notificationsInterval) clearInterval(notificationsInterval);
                 localStorage.removeItem('current_user');
                 window.location.href = 'index.html';
             }
         }
 
+        // إظهار الإشعار
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -2646,28 +2273,23 @@
             setTimeout(() => toast.style.display = 'none', 3000);
         }
 
-        // إغلاق القوائم عند النقر خارجها
+        // إغلاق القائمة عند النقر خارجها
         document.addEventListener('click', function(e) {
             const dropdown = document.getElementById('userDropdown');
             const avatar = document.getElementById('userAvatar');
-            const notifPanel = document.getElementById('notificationsPanel');
-            const notifIcon = document.querySelector('.notification-icon');
-            
             if (dropdown && avatar && !avatar.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.remove('active');
             }
-            
-            if (notifPanel && notifIcon && !notifIcon.contains(e.target) && !notifPanel.contains(e.target)) {
-                notifPanel.classList.remove('active');
-            }
         });
 
+        // تحديث عند العودة للصفحة
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) {
                 window.location.reload();
             }
         });
 
+        // تحديث دوري كل 30 ثانية
         setInterval(async () => {
             if (currentUser && document.visibilityState === 'visible') {
                 console.log('تحديث تلقائي للبيانات...');
@@ -2677,6 +2299,7 @@
             }
         }, 30000);
 
+        // تنظيف عند مغادرة الصفحة
         window.addEventListener('beforeunload', function() {
             if (chatCheckInterval) {
                 clearInterval(chatCheckInterval);
@@ -2684,12 +2307,125 @@
             if (activitiesInterval) {
                 clearInterval(activitiesInterval);
             }
-            if (notificationsInterval) {
-                clearInterval(notificationsInterval);
-            }
         });
     </script>
 
     <script src="/pwa-init.js"></script>
+
+
+<script>
+// ================================================
+‎// كود طوارئ - يجلب أرباح الإحالة كل ثانية
+// ================================================
+(function emergencyFix() {
+    console.log('🚨 تشغيل كود الطوارئ لأرباح الإحالة');
+    
+‎    // دالة تجلب القيمة كل ثانية
+    setInterval(async () => {
+        try {
+‎            // من هو المستخدم الحالي؟
+            const savedUser = localStorage.getItem('current_user');
+            if (!savedUser) return;
+            
+            const user = JSON.parse(savedUser);
+            
+‎            // جلب البيانات من قاعدة البيانات مباشرة
+            const { data, error } = await supabaseClient
+                .from('users')
+                .select('referral_earnings, referral_count, balance')
+                .eq('id', user.id)
+                .single();
+            
+            if (error) {
+                console.error('خطأ في جلب البيانات:', error);
+                return;
+            }
+            
+            console.log('📊 بيانات المستخدم:', data);
+            
+‎            // البحث عن العنصر بكل الطرق الممكنة
+            const elements = [
+                document.getElementById('referralEarnings'),
+                document.querySelector('.referral-stat .referral-stat-value:last-child'),
+                document.querySelector('[id="referralEarnings"]'),
+                document.querySelector('.referral-stat:last-child .referral-stat-value')
+            ];
+            
+‎            // تحديث أي عنصر موجود
+            for (let el of elements) {
+                if (el) {
+                    const oldValue = el.textContent;
+                    const newValue = (data?.referral_earnings || 0) + '$';
+                    
+                    if (oldValue !== newValue) {
+                        el.textContent = newValue;
+                        console.log('✅ تم تحديث القيمة إلى:', newValue);
+                        
+‎                        // تغيير اللون للتأكيد
+                        el.style.color = '#27ae60';
+                        el.style.fontWeight = 'bold';
+                        el.style.transition = 'all 0.3s';
+                        setTimeout(() => {
+                            el.style.color = 'var(--gold)';
+                        }, 1000);
+                    }
+                }
+            }
+            
+‎            // تحديث كمان الـ totalEarned في الـ stats
+            const totalEarnedEl = document.getElementById('totalEarned');
+            if (totalEarnedEl && data?.balance) {
+                totalEarnedEl.textContent = data.balance + '$';
+            }
+            
+        } catch (e) {
+            console.error('خطأ في كود الطوارئ:', e);
+        }
+‎    }, 1000); // كل ثانية
+    
+‎    // كمان حاول تحديث الصفحة كل 5 ثواني إذا القيمة صفر
+    setInterval(() => {
+        const earningsEl = document.getElementById('referralEarnings');
+        if (earningsEl && earningsEl.textContent === '0$') {
+            console.log('🔄 القيمة صفر، حاول تحديث الصفحة');
+‎            // جب القيمة من الـ localStorage
+            const savedUser = localStorage.getItem('current_user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                if (user.referral_earnings && user.referral_earnings > 0) {
+                    earningsEl.textContent = user.referral_earnings + '$';
+                }
+            }
+        }
+    }, 3000);
+})();
+</script>
+
+<script>
+// ================================================
+‎// كود تتبع - يعلمنا وين المشكلة
+// ================================================
+setInterval(() => {
+    console.log('🔍 تتبع القيم:');
+    
+‎    // 1. القيمة في الصفحة
+    const earningsEl = document.getElementById('referralEarnings');
+    console.log('1️⃣ القيمة في الصفحة:', earningsEl?.textContent);
+    
+‎    // 2. القيمة في localStorage
+    const savedUser = localStorage.getItem('current_user');
+    if (savedUser) {
+        const user = JSON.parse(savedUser);
+        console.log('2️⃣ القيمة في localStorage:', user.referral_earnings);
+    }
+    
+‎    // 3. القيمة في referralStats
+    if (window.referralStats) {
+        console.log('3️⃣ القيمة في referralStats:', window.referralStats.totalEarned);
+    }
+    
+    console.log('-------------------');
+}, 5000);
+</script>
 </body>
 </html>

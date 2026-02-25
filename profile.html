@@ -49,50 +49,12 @@
             font-size: 20px;
             cursor: pointer;
             text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: #c8a97e;
-            color: #0f172a;
-            transform: scale(1.1);
         }
 
         .header h1 {
             flex: 1;
             font-size: 24px;
             color: #c8a97e;
-        }
-
-        .notification-icon {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .notification-icon i {
-            font-size: 24px;
-            color: #c8a97e;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #e74c3c;
-            color: white;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 18px;
-            text-align: center;
-            border: 2px solid #1e293b;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
         }
 
         .main {
@@ -104,7 +66,6 @@
         .profile-header {
             text-align: center;
             margin-bottom: 30px;
-            position: relative;
         }
 
         .profile-avatar {
@@ -134,158 +95,6 @@
             font-size: 14px;
         }
 
-        /* ===== نظام الإشعارات ===== */
-        .notifications-panel {
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 2px solid #c8a97e;
-            margin-bottom: 25px;
-            overflow: hidden;
-            display: none;
-        }
-
-        .notifications-panel.active {
-            display: block;
-            animation: slideDown 0.3s;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .notifications-header {
-            background: rgba(200,169,126,0.1);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(200,169,126,0.3);
-        }
-
-        .notifications-header h3 {
-            color: #c8a97e;
-            font-size: 18px;
-        }
-
-        .mark-all-read {
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.6);
-            font-size: 13px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 50px;
-            transition: all 0.3s;
-        }
-
-        .mark-all-read:hover {
-            background: rgba(200,169,126,0.1);
-            color: #c8a97e;
-        }
-
-        .notifications-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .notification-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .notification-item:hover {
-            background: rgba(200,169,126,0.05);
-        }
-
-        .notification-item.unread {
-            background: rgba(200,169,126,0.1);
-            border-right: 4px solid #c8a97e;
-        }
-
-        .notification-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .icon-gift {
-            background: rgba(39, 174, 96, 0.2);
-            color: #27ae60;
-        }
-
-        .icon-profit {
-            background: rgba(39, 174, 96, 0.2);
-            color: #27ae60;
-        }
-
-        .icon-withdrawal {
-            background: rgba(243, 156, 18, 0.2);
-            color: #f39c12;
-        }
-
-        .icon-subscription {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-        }
-
-        .icon-info {
-            background: rgba(200, 169, 126, 0.2);
-            color: #c8a97e;
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 4px;
-        }
-
-        .notification-message {
-            font-size: 12px;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 4px;
-        }
-
-        .notification-time {
-            font-size: 10px;
-            color: rgba(255,255,255,0.4);
-        }
-
-        .no-notifications {
-            text-align: center;
-            padding: 40px 20px;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .no-notifications i {
-            font-size: 40px;
-            color: #c8a97e;
-            margin-bottom: 10px;
-            opacity: 0.5;
-        }
-
-        /* ===== بطاقات ===== */
         .card {
             background: rgba(30, 41, 59, 0.5);
             backdrop-filter: blur(10px);
@@ -341,38 +150,6 @@
             padding: 20px;
         }
 
-        /* ===== الهدايا ===== */
-        .gifts-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .gift-item {
-            background: rgba(39, 174, 96, 0.05);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border: 1px solid rgba(39, 174, 96, 0.2);
-        }
-
-        .gift-amount {
-            color: #27ae60;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .gift-reason {
-            color: white;
-            font-size: 14px;
-            margin: 5px 0;
-        }
-
-        .gift-date {
-            color: rgba(255,255,255,0.4);
-            font-size: 11px;
-        }
-
-        /* ===== النماذج ===== */
         .form-group {
             margin-bottom: 20px;
         }
@@ -448,47 +225,6 @@
             display: none;
         }
 
-        /* ===== علامات تبويب ===== */
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: rgba(30, 41, 59, 0.5);
-            padding: 10px;
-            border-radius: 50px;
-        }
-
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .tab.active {
-            background: #c8a97e;
-            color: #0f172a;
-            font-weight: 700;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* ===== استجابة ===== */
         @media (max-width: 768px) {
             .main {
                 padding: 15px;
@@ -503,10 +239,6 @@
             .profile-name {
                 font-size: 20px;
             }
-            
-            .tabs {
-                flex-wrap: wrap;
-            }
         }
     </style>
 </head>
@@ -516,31 +248,11 @@
             <i class="fas fa-arrow-left"></i>
         </a>
         <h1>الملف الشخصي</h1>
-        <div class="notification-icon" onclick="toggleNotifications()">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
-        </div>
     </div>
 
     <div class="main">
         <div class="success-message" id="successMessage"></div>
         <div class="error-message" id="errorMessage"></div>
-
-        <!-- لوحة الإشعارات -->
-        <div class="notifications-panel" id="notificationsPanel">
-            <div class="notifications-header">
-                <h3>الإشعارات</h3>
-                <button class="mark-all-read" onclick="markAllNotificationsAsRead()">
-                    <i class="fas fa-check-double"></i>
-                    تحديد الكل كمقروء
-                </button>
-            </div>
-            <div class="notifications-list" id="notificationsList">
-                <div class="loading-spinner" style="text-align: center; padding: 30px;">
-                    <i class="fas fa-spinner fa-spin" style="color: #c8a97e;"></i>
-                </div>
-            </div>
-        </div>
 
         <div class="profile-header">
             <div class="profile-avatar" id="userAvatar">م</div>
@@ -548,168 +260,106 @@
             <div class="profile-email" id="userEmail"></div>
         </div>
 
-        <!-- علامات التبويب -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('info')">المعلومات</div>
-            <div class="tab" onclick="switchTab('subscription')">الاشتراك</div>
-            <div class="tab" onclick="switchTab('gifts')">الهدايا</div>
-            <div class="tab" onclick="switchTab('edit')">تعديل</div>
-        </div>
-
-        <!-- تبويب المعلومات -->
-        <div class="tab-content active" id="info-tab">
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-info-circle"></i>
-                    معلومات الحساب
-                </div>
-                <div class="info-item">
-                    <span class="info-label">اسم المستخدم</span>
-                    <span class="info-value" id="displayUsername"></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">رقم الهاتف</span>
-                    <span class="info-value" id="displayPhone"></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">كود الإحالة</span>
-                    <span class="info-value" id="displayReferralCode"></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">تاريخ الانضمام</span>
-                    <span class="info-value" id="displayJoinDate"></span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">آخر تسجيل دخول</span>
-                    <span class="info-value" id="displayLastLogin"></span>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-crown"></i>
+                الاشتراك الحالي
             </div>
-
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-chart-line"></i>
-                    الإحصائيات
-                </div>
-                <div class="info-item">
-                    <span class="info-label">الرصيد الحالي</span>
-                    <span class="info-value" id="displayBalance">0$</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">إجمالي الأرباح</span>
-                    <span class="info-value" id="displayTotalEarned">0$</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">إجمالي المسحوبات</span>
-                    <span class="info-value" id="displayTotalWithdrawn">0$</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">عدد الإحالات</span>
-                    <span class="info-value" id="displayReferralCount">0</span>
-                </div>
+            <div id="subscriptionInfo">
+                <div class="no-subscription">جاري التحميل...</div>
             </div>
         </div>
 
-        <!-- تبويب الاشتراك -->
-        <div class="tab-content" id="subscription-tab">
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-crown"></i>
-                    الاشتراك الحالي
-                </div>
-                <div id="subscriptionInfo">
-                    <div class="no-subscription">جاري التحميل...</div>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-info-circle"></i>
+                معلومات الحساب
+            </div>
+            <div class="info-item">
+                <span class="info-label">اسم المستخدم</span>
+                <span class="info-value" id="displayUsername"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">رقم الهاتف</span>
+                <span class="info-value" id="displayPhone"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">كود الإحالة</span>
+                <span class="info-value" id="displayReferralCode"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">تاريخ الانضمام</span>
+                <span class="info-value" id="displayJoinDate"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">آخر تسجيل دخول</span>
+                <span class="info-value" id="displayLastLogin"></span>
             </div>
         </div>
 
-        <!-- تبويب الهدايا (جديد) -->
-        <div class="tab-content" id="gifts-tab">
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-gift"></i>
-                    الهدايا المستلمة
-                </div>
-                <div class="gifts-list" id="giftsList">
-                    <div class="no-subscription">جاري التحميل...</div>
-                </div>
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-edit"></i>
+                تعديل البيانات
             </div>
+            
+            <div class="form-group">
+                <label>الاسم الكامل</label>
+                <input type="text" class="form-control" id="editName">
+            </div>
+            
+            <div class="form-group">
+                <label>رقم الهاتف</label>
+                <input type="tel" class="form-control" id="editPhone">
+            </div>
+            
+            <div class="form-group">
+                <label>عنوان المحفظة (USDT)</label>
+                <input type="text" class="form-control" id="editWallet" placeholder="أدخل عنوان محفظتك">
+            </div>
+            
+            <button class="btn btn-primary btn-block" onclick="updateProfile()">
+                <i class="fas fa-save"></i>
+                حفظ التغييرات
+            </button>
         </div>
 
-        <!-- تبويب تعديل البيانات -->
-        <div class="tab-content" id="edit-tab">
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-edit"></i>
-                    تعديل البيانات
-                </div>
-                
-                <div class="form-group">
-                    <label>الاسم الكامل</label>
-                    <input type="text" class="form-control" id="editName">
-                </div>
-                
-                <div class="form-group">
-                    <label>رقم الهاتف</label>
-                    <input type="tel" class="form-control" id="editPhone">
-                </div>
-                
-                <div class="form-group">
-                    <label>عنوان المحفظة (USDT)</label>
-                    <input type="text" class="form-control" id="editWallet" placeholder="أدخل عنوان محفظتك">
-                </div>
-                
-                <button class="btn btn-primary btn-block" onclick="updateProfile()">
-                    <i class="fas fa-save"></i>
-                    حفظ التغييرات
-                </button>
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-lock"></i>
+                تغيير كلمة المرور
             </div>
-
-            <div class="card">
-                <div class="card-title">
-                    <i class="fas fa-lock"></i>
-                    تغيير كلمة المرور
-                </div>
-                
-                <div class="form-group">
-                    <label>كلمة المرور الحالية</label>
-                    <input type="password" class="form-control" id="currentPassword">
-                </div>
-                
-                <div class="form-group">
-                    <label>كلمة المرور الجديدة</label>
-                    <input type="password" class="form-control" id="newPassword">
-                </div>
-                
-                <div class="form-group">
-                    <label>تأكيد كلمة المرور الجديدة</label>
-                    <input type="password" class="form-control" id="confirmPassword">
-                </div>
-                
-                <button class="btn btn-primary btn-block" onclick="changePassword()">
-                    <i class="fas fa-key"></i>
-                    تغيير كلمة المرور
-                </button>
+            
+            <div class="form-group">
+                <label>كلمة المرور الحالية</label>
+                <input type="password" class="form-control" id="currentPassword">
             </div>
+            
+            <div class="form-group">
+                <label>كلمة المرور الجديدة</label>
+                <input type="password" class="form-control" id="newPassword">
+            </div>
+            
+            <div class="form-group">
+                <label>تأكيد كلمة المرور الجديدة</label>
+                <input type="password" class="form-control" id="confirmPassword">
+            </div>
+            
+            <button class="btn btn-primary btn-block" onclick="changePassword()">
+                <i class="fas fa-key"></i>
+                تغيير كلمة المرور
+            </button>
         </div>
     </div>
 
     <script>
         let currentUser = null;
         let userSubscription = null;
-        let notifications = [];
-        let gifts = [];
-        let checkNotificationsInterval = null;
 
         document.addEventListener('DOMContentLoaded', async function() {
             await checkUser();
             await loadUserData();
             await loadSubscription();
-            await loadNotifications();
-            await loadGifts();
-            updateUI();
-            
-            // التحقق من الإشعارات الجديدة كل 30 ثانية
-            checkNotificationsInterval = setInterval(checkNewNotifications, 30000);
         });
 
         async function checkUser() {
@@ -733,9 +383,6 @@
                     document.getElementById('displayUsername').textContent = currentUser.username || 'غير محدد';
                     document.getElementById('displayPhone').textContent = currentUser.phone || 'غير محدد';
                     document.getElementById('displayReferralCode').textContent = currentUser.referral_code || 'غير محدد';
-                    document.getElementById('displayBalance').textContent = (currentUser.balance || 0) + '$';
-                    document.getElementById('displayTotalEarned').textContent = (currentUser.total_earned || 0) + '$';
-                    document.getElementById('displayTotalWithdrawn').textContent = (currentUser.total_withdrawn || 0) + '$';
                     
                     if (currentUser.joined_date) {
                         document.getElementById('displayJoinDate').textContent = new Date(currentUser.joined_date).toLocaleDateString('ar-SA');
@@ -766,10 +413,6 @@
                     const startDate = new Date(userSubscription.start_date).toLocaleDateString('ar-SA');
                     const endDate = new Date(userSubscription.end_date).toLocaleDateString('ar-SA');
                     
-                    const today = new Date();
-                    const end = new Date(userSubscription.end_date);
-                    const daysLeft = Math.max(0, Math.ceil((end - today) / (1000 * 60 * 60 * 24)));
-                    
                     container.innerHTML = `
                         <div style="text-align: center; margin-bottom: 15px;">
                             <span class="subscription-badge">${userSubscription.package_name}</span>
@@ -781,10 +424,6 @@
                         <div class="info-item">
                             <span class="info-label">الربح اليومي</span>
                             <span class="info-value" style="color: #27ae60;">+${userSubscription.daily_profit}$</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">الأيام المتبقية</span>
-                            <span class="info-value">${daysLeft} يوم</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">تاريخ البدء</span>
@@ -803,220 +442,6 @@
             }
         }
 
-        // ===== نظام الهدايا =====
-        async function loadGifts() {
-            try {
-                const result = await window.supabaseHelpers.getUserGifts(currentUser.id);
-                
-                const container = document.getElementById('giftsList');
-                
-                if (result.success && result.data && result.data.length > 0) {
-                    gifts = result.data;
-                    displayGifts();
-                } else {
-                    container.innerHTML = `
-                        <div class="no-subscription">
-                            <i class="fas fa-gift" style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p>لا توجد هدايا مستلمة بعد</p>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل الهدايا:', error);
-            }
-        }
-
-        function displayGifts() {
-            const container = document.getElementById('giftsList');
-            
-            let html = '';
-            gifts.forEach(gift => {
-                const date = new Date(gift.created_at).toLocaleDateString('ar-SA', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                
-                html += `
-                    <div class="gift-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <span class="gift-amount">+${gift.amount}$</span>
-                            <i class="fas fa-gift" style="color: #27ae60;"></i>
-                        </div>
-                        <div class="gift-reason">${gift.description}</div>
-                        <div class="gift-date">${date}</div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        // ===== نظام الإشعارات =====
-        async function loadNotifications() {
-            try {
-                const result = await window.supabaseHelpers.getUserNotifications(currentUser.id);
-                
-                if (result.success && result.data) {
-                    notifications = result.data;
-                    displayNotifications();
-                    updateNotificationBadge();
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل الإشعارات:', error);
-            }
-        }
-
-        async function checkNewNotifications() {
-            try {
-                const result = await window.supabaseHelpers.getUnreadNotificationsCount(currentUser.id);
-                
-                if (result.success) {
-                    const count = result.count || 0;
-                    const badge = document.getElementById('notificationBadge');
-                    
-                    if (count > 0) {
-                        badge.textContent = count;
-                        badge.style.display = 'inline';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-            } catch (error) {
-                console.error('خطأ في التحقق من الإشعارات:', error);
-            }
-        }
-
-        function displayNotifications() {
-            const container = document.getElementById('notificationsList');
-            
-            if (!notifications || notifications.length === 0) {
-                container.innerHTML = `
-                    <div class="no-notifications">
-                        <i class="fas fa-bell-slash"></i>
-                        <p>لا توجد إشعارات</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            notifications.forEach(notif => {
-                let iconClass = 'icon-info';
-                let icon = 'fa-bell';
-                
-                switch(notif.type) {
-                    case 'gift':
-                        iconClass = 'icon-gift';
-                        icon = 'fa-gift';
-                        break;
-                    case 'profit':
-                        iconClass = 'icon-profit';
-                        icon = 'fa-coins';
-                        break;
-                    case 'withdrawal':
-                        iconClass = 'icon-withdrawal';
-                        icon = 'fa-money-bill-wave';
-                        break;
-                    case 'subscription':
-                        iconClass = 'icon-subscription';
-                        icon = 'fa-crown';
-                        break;
-                }
-                
-                const date = new Date(notif.created_at).toLocaleDateString('ar-SA', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                html += `
-                    <div class="notification-item ${!notif.is_read ? 'unread' : ''}" onclick="markNotificationAsRead(${notif.id})">
-                        <div class="notification-icon ${iconClass}">
-                            <i class="fas ${icon}"></i>
-                        </div>
-                        <div class="notification-content">
-                            <div class="notification-title">${notif.title}</div>
-                            <div class="notification-message">${notif.message}</div>
-                            <div class="notification-time">${date}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        function updateNotificationBadge() {
-            const unreadCount = notifications.filter(n => !n.is_read).length;
-            const badge = document.getElementById('notificationBadge');
-            
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.style.display = 'inline';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function toggleNotifications() {
-            const panel = document.getElementById('notificationsPanel');
-            panel.classList.toggle('active');
-            
-            if (panel.classList.contains('active')) {
-                loadNotifications();
-            }
-        }
-
-        async function markNotificationAsRead(notificationId) {
-            const result = await window.supabaseHelpers.markNotificationAsRead(notificationId);
-            
-            if (result.success) {
-                const notification = notifications.find(n => n.id === notificationId);
-                if (notification) {
-                    notification.is_read = true;
-                }
-                displayNotifications();
-                updateNotificationBadge();
-            }
-        }
-
-        async function markAllNotificationsAsRead() {
-            const result = await window.supabaseHelpers.markAllNotificationsAsRead(currentUser.id);
-            
-            if (result.success) {
-                notifications.forEach(n => n.is_read = true);
-                displayNotifications();
-                updateNotificationBadge();
-                showSuccess('✅ تم تحديد الكل كمقروء');
-            }
-        }
-
-        // ===== تحديث الواجهة =====
-        async function updateUI() {
-            await loadReferralCount();
-        }
-
-        async function loadReferralCount() {
-            try {
-                const result = await window.supabaseHelpers.getReferralStats(currentUser.id);
-                if (result.success && result.data) {
-                    document.getElementById('displayReferralCount').textContent = result.data.totalReferrals || 0;
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل عدد الإحالات:', error);
-            }
-        }
-
-        // ===== علامات التبويب =====
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
-            document.getElementById(`${tabId}-tab`).classList.add('active');
-        }
-
-        // ===== تحديث الملف الشخصي =====
         async function updateProfile() {
             const updates = {
                 name: document.getElementById('editName').value.trim(),
@@ -1039,7 +464,6 @@
             }
         }
 
-        // ===== تغيير كلمة المرور =====
         async function changePassword() {
             const currentPassword = document.getElementById('currentPassword').value;
             const newPassword = document.getElementById('newPassword').value;
@@ -1079,7 +503,6 @@
             }
         }
 
-        // ===== دوال مساعدة =====
         function showSuccess(message) {
             const msgDiv = document.getElementById('successMessage');
             msgDiv.textContent = message;
@@ -1097,13 +520,6 @@
                 msgDiv.style.display = 'none';
             }, 3000);
         }
-
-        // تنظيف عند مغادرة الصفحة
-        window.addEventListener('beforeunload', function() {
-            if (checkNotificationsInterval) {
-                clearInterval(checkNotificationsInterval);
-            }
-        });
     </script>
 </body>
 </html>
