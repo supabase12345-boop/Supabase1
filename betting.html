@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مراهنات كرة القدم - Elite Capital</title>
+    
+    <!-- منع التخزين المؤقت -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #c8a97e;
+            --primary-dark: #b38b5b;
+            --primary-light: #dac09a;
+            --secondary: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --gold: #c8a97e;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --shadow-gold: 0 10px 30px rgba(200, 169, 126, 0.3);
+            --gradient-gold: linear-gradient(135deg, #c8a97e, #b38b5b);
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(200, 169, 126, 0.2);
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="%23c8a97e" stroke-width="0.5" opacity="0.05"/></svg>') repeat;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        /* الشريط العلوي */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            width: 45px;
+            height: 45px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--gold);
+            color: var(--dark);
+            transform: rotate(90deg);
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-title i {
+            font-size: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .date-badge {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: pointer;
+            border: 2px solid var(--gold);
+            position: relative;
+        }
+
+        .user-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            border: 2px solid var(--dark);
+        }
+
+        /* قائمة المستخدم */
+        .user-dropdown {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 250px;
+            background: var(--dark-light);
+            border-radius: 20px;
+            padding: 15px;
+            border: 2px solid var(--gold);
+            display: none;
+            box-shadow: var(--shadow);
+            z-index: 1001;
+        }
+
+        .user-dropdown.active {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text);
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .user-dropdown-item:hover {
+            background: rgba(200, 169, 126, 0.1);
+            color: var(--gold);
+        }
+
+        /* المحتوى الرئيسي */
+        .main-content {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 120px;
+        }
+
+        /* بطاقة المباراة - تصميم بسيط مثل الصورة */
+        .match-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .match-card:hover {
+            border-color: var(--gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        /* رأس المباراة - الدوري والوقت */
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .match-league {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .match-time i {
+            margin-left: 5px;
+        }
+
+        /* الفرق - تصميم أفقي بسيط */
+        .match-teams {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .team {
+            text-align: center;
+            flex: 1;
+        }
+
+        .team-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .team-score-input {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .team-score-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .team-score-input.home:focus {
+            border-color: var(--success);
+        }
+
+        .team-score-input.away:focus {
+            border-color: var(--danger);
+        }
+
+        .vs {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 0 15px;
+        }
+
+        /* إجمالي الأهداف */
+        .total-goals {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(200, 169, 126, 0.05);
+            border-radius: 15px;
+            border: 1px dashed var(--gold);
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .total-goals span {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        /* نموذج الرهان */
+        .bet-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .potential-win {
+            background: rgba(39, 174, 96, 0.1);
+            border: 2px solid var(--success);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .potential-win-label {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .potential-win-value {
+            color: var(--success);
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .place-bet-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 15px;
+            color: var(--dark);
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .place-bet-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .place-bet-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* رصيد المستخدم - بطاقة صغيرة */
+        .balance-card {
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(46, 204, 113, 0.1));
+            border: 1px solid var(--success);
+            border-radius: 15px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .balance-label {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .balance-value {
+            color: var(--success);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* الشريط السفلي لسجل الرهانات */
+        .history-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark-light);
+            border-top: 2px solid var(--gold);
+            padding: 15px 20px;
+            z-index: 99;
+            backdrop-filter: blur(20px);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .history-header h3 {
+            color: var(--gold);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-toggle {
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .history-toggle:hover {
+            color: var(--gold);
+        }
+
+        .history-content {
+            max-height: 200px;
+            overflow-y: auto;
+            transition: all 0.3s;
+        }
+
+        .history-content.collapsed {
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .history-item.won {
+            border-right: 3px solid var(--success);
+        }
+
+        .history-item.lost {
+            border-right: 3px solid var(--danger);
+        }
+
+        .history-item.pending {
+            border-right: 3px solid var(--warning);
+        }
+
+        .history-match {
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 3px;
+        }
+
+        .history-score {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .history-amount.won {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .history-amount.lost {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .history-status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .status-pending {
+            background: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+
+        .status-won {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+        }
+
+        .status-lost {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        /* الإشعارات */
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 50px;
+            display: none;
+            z-index: 3000;
+            box-shadow: var(--shadow);
+            border-right: 4px solid white;
+            min-width: 300px;
+            backdrop-filter: blur(10px);
+            animation: slideInLeft 0.3s;
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.warning {
+            background: var(--warning);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* استجابة */
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px;
+                padding-bottom: 120px;
+            }
+
+            .team-name {
+                font-size: 16px;
+            }
+
+            .team-score-input {
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+            }
+
+            .vs {
+                margin: 0 8px;
+            }
+
+            .toast {
+                right: 10px;
+                left: 10px;
+                min-width: auto;
+            }
+
+            .date-badge {
+                display: none;
+            }
+
+            .page-title span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- الشريط العلوي -->
+    <div class="top-bar">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            <div class="page-title">
+                <i class="fas fa-futbol"></i>
+                <span>مراهنات كرة القدم</span>
+            </div>
+        </div>
+
+        <div class="user-info">
+            <div class="date-badge" id="currentDateTime"></div>
+            <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">م</div>
+        </div>
+    </div>
+
+    <!-- قائمة المستخدم -->
+    <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-item" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-tachometer-alt"></i>
+            لوحة التحكم
+        </div>
+        <div class="user-dropdown-item" onclick="window.location.href='profile.html'">
+            <i class="fas fa-user"></i>
+            الملف الشخصي
+        </div>
+        <div class="user-dropdown-item" onclick="window.location.href='chat.html'">
+            <i class="fas fa-comments"></i>
+            الدردشة المباشرة
+        </div>
+        <div class="user-dropdown-item" onclick="window.location.href='games.html'">
+            <i class="fas fa-dice"></i>
+            ألعاب الحظ
+        </div>
+        <div class="user-dropdown-item" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            تسجيل الخروج
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="main-content">
+        <!-- رصيد المستخدم -->
+        <div class="balance-card">
+            <span class="balance-label">رصيدك الحالي</span>
+            <span class="balance-value" id="userBalance">0$</span>
+        </div>
+
+        <!-- مباراة 1: الدوري الإسباني - ريال مدريد vs برشلونة -->
+        <div class="match-card" data-aos="fade-up" id="match1">
+            <div class="match-header">
+                <span class="match-league">🇪🇸 الدوري الإسباني</span>
+                <span class="match-time"><i class="far fa-clock"></i> 22:00</span>
+            </div>
+            
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-name">ريال مدريد</div>
+                    <input type="number" class="team-score-input home" id="homeScore1" min="0" max="10" value="0" oninput="calculateTotal(1)">
+                </div>
+                <span class="vs">-</span>
+                <div class="team">
+                    <div class="team-name">برشلونة</div>
+                    <input type="number" class="team-score-input away" id="awayScore1" min="0" max="10" value="0" oninput="calculateTotal(1)">
+                </div>
+            </div>
+
+            <div class="total-goals">
+                إجمالي الأهداف المتوقعة: <span id="totalGoals1">0</span>
+            </div>
+
+            <div class="bet-form">
+                <div class="form-group">
+                    <label>💰 مبلغ الرهان (5$ فأكثر)</label>
+                    <input type="number" class="form-control" id="betAmount1" min="5" step="1" placeholder="أدخل المبلغ" oninput="calculateWin(1)">
+                </div>
+
+                <div class="potential-win">
+                    <span class="potential-win-label">الربح المحتمل</span>
+                    <span class="potential-win-value" id="potentialWin1">0$</span>
+                </div>
+
+                <button class="place-bet-btn" onclick="placeBet(1, 'ريال مدريد', 'برشلونة')" id="placeBetBtn1">
+                    <i class="fas fa-check-circle"></i>
+                    تأكيد الرهان
+                </button>
+            </div>
+        </div>
+
+        <!-- مباراة 2: الدوري الإنجليزي - مانشستر سيتي vs ليفربول -->
+        <div class="match-card" data-aos="fade-up" data-aos-delay="100" id="match2">
+            <div class="match-header">
+                <span class="match-league">🏴󠁧󠁢󠁥󠁮󠁧󠁿 الدوري الإنجليزي</span>
+                <span class="match-time"><i class="far fa-clock"></i> 21:45</span>
+            </div>
+            
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-name">مانشستر سيتي</div>
+                    <input type="number" class="team-score-input home" id="homeScore2" min="0" max="10" value="0" oninput="calculateTotal(2)">
+                </div>
+                <span class="vs">-</span>
+                <div class="team">
+                    <div class="team-name">ليفربول</div>
+                    <input type="number" class="team-score-input away" id="awayScore2" min="0" max="10" value="0" oninput="calculateTotal(2)">
+                </div>
+            </div>
+
+            <div class="total-goals">
+                إجمالي الأهداف المتوقعة: <span id="totalGoals2">0</span>
+            </div>
+
+            <div class="bet-form">
+                <div class="form-group">
+                    <label>💰 مبلغ الرهان (5$ فأكثر)</label>
+                    <input type="number" class="form-control" id="betAmount2" min="5" step="1" placeholder="أدخل المبلغ" oninput="calculateWin(2)">
+                </div>
+
+                <div class="potential-win">
+                    <span class="potential-win-label">الربح المحتمل</span>
+                    <span class="potential-win-value" id="potentialWin2">0$</span>
+                </div>
+
+                <button class="place-bet-btn" onclick="placeBet(2, 'مانشستر سيتي', 'ليفربول')" id="placeBetBtn2">
+                    <i class="fas fa-check-circle"></i>
+                    تأكيد الرهان
+                </button>
+            </div>
+        </div>
+
+        <!-- مباراة 3: دوري أبطال أوروبا - بايرن ميونخ vs باريس سان جيرمان -->
+        <div class="match-card" data-aos="fade-up" data-aos-delay="200" id="match3">
+            <div class="match-header">
+                <span class="match-league">🇪🇺 دوري أبطال أوروبا</span>
+                <span class="match-time"><i class="far fa-clock"></i> 22:00</span>
+            </div>
+            
+            <div class="match-teams">
+                <div class="team">
+                    <div class="team-name">بايرن ميونخ</div>
+                    <input type="number" class="team-score-input home" id="homeScore3" min="0" max="10" value="0" oninput="calculateTotal(3)">
+                </div>
+                <span class="vs">-</span>
+                <div class="team">
+                    <div class="team-name">باريس سان جيرمان</div>
+                    <input type="number" class="team-score-input away" id="awayScore3" min="0" max="10" value="0" oninput="calculateTotal(3)">
+                </div>
+            </div>
+
+            <div class="total-goals">
+                إجمالي الأهداف المتوقعة: <span id="totalGoals3">0</span>
+            </div>
+
+            <div class="bet-form">
+                <div class="form-group">
+                    <label>💰 مبلغ الرهان (5$ فأكثر)</label>
+                    <input type="number" class="form-control" id="betAmount3" min="5" step="1" placeholder="أدخل المبلغ" oninput="calculateWin(3)">
+                </div>
+
+                <div class="potential-win">
+                    <span class="potential-win-label">الربح المحتمل</span>
+                    <span class="potential-win-value" id="potentialWin3">0$</span>
+                </div>
+
+                <button class="place-bet-btn" onclick="placeBet(3, 'بايرن ميونخ', 'باريس سان جيرمان')" id="placeBetBtn3">
+                    <i class="fas fa-check-circle"></i>
+                    تأكيد الرهان
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- الشريط السفلي لسجل الرهانات -->
+    <div class="history-bar">
+        <div class="history-header" onclick="toggleHistory()">
+            <h3>
+                <i class="fas fa-history"></i>
+                سجل الرهانات
+            </h3>
+            <span class="history-toggle" id="historyToggle">
+                <i class="fas fa-chevron-down"></i>
+            </span>
+        </div>
+        <div class="history-content" id="historyContent">
+            <div id="betsHistory">
+                <p style="color: var(--text-muted); text-align: center; padding: 10px;">لا توجد رهانات سابقة</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- الإشعارات -->
+    <div class="toast" id="toast"></div>
+
+    <!-- AOS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // متغيرات عامة
+        let currentUser = null;
+        let userBets = [];
+        let historyCollapsed = false;
+
+        // بيانات المباريات
+        const matches = {
+            1: { home: 'ريال مدريد', away: 'برشلونة', league: 'الدوري الإسباني', time: '22:00' },
+            2: { home: 'مانشستر سيتي', away: 'ليفربول', league: 'الدوري الإنجليزي', time: '21:45' },
+            3: { home: 'بايرن ميونخ', away: 'باريس سان جيرمان', league: 'دوري أبطال أوروبا', time: '22:00' }
+        };
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkUser();
+            await loadUserData();
+            await loadUserBets();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            
+            // حساب إجمالي الأهداف لكل مباراة
+            for (let i = 1; i <= 3; i++) {
+                calculateTotal(i);
+                calculateWin(i);
+            }
+        });
+
+        // تحديث الوقت
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentDateTime').textContent = now.toLocaleString('ar-SA', {
+                hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short'
+            });
+        }
+
+        // التحقق من المستخدم
+        async function checkUser() {
+            const savedUser = localStorage.getItem('current_user');
+            if (!savedUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = JSON.parse(savedUser);
+            
+            if (window.supabaseHelpers) {
+                const result = await window.supabaseHelpers.getUserById(currentUser.id);
+                if (result.success && result.data) {
+                    currentUser = result.data;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                }
+            }
+            
+            // تحديث الصورة الرمزية
+            const initial = currentUser.name?.charAt(0).toUpperCase() || 'م';
+            document.getElementById('userAvatar').textContent = initial;
+        }
+
+        // تحميل بيانات المستخدم
+        async function loadUserData() {
+            document.getElementById('userBalance').textContent = (currentUser.balance || 0) + '$';
+        }
+
+        // تحميل رهانات المستخدم
+        async function loadUserBets() {
+            if (!window.supabaseHelpers) return;
+            
+            try {
+                // محاكاة بعض الرهانات للتجربة
+                const mockBets = [
+                    { match_id: 1, amount: 20, status: 'pending', predicted_result: '2-1', created_at: new Date().toISOString() },
+                    { match_id: 2, amount: 15, status: 'won', predicted_result: '1-0', created_at: new Date(Date.now() - 86400000).toISOString() },
+                    { match_id: 3, amount: 30, status: 'lost', predicted_result: '1-2', created_at: new Date(Date.now() - 172800000).toISOString() }
+                ];
+                userBets = mockBets;
+                displayBetsHistory();
+            } catch (error) {
+                console.error('خطأ في تحميل الرهانات:', error);
+            }
+        }
+
+        // عرض سجل الرهانات
+        function displayBetsHistory() {
+            const container = document.getElementById('betsHistory');
+            
+            if (!userBets || userBets.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 10px;">لا توجد رهانات سابقة</p>';
+                return;
+            }
+
+            let html = '';
+            userBets.slice(0, 5).forEach(bet => {
+                const match = matches[bet.match_id] || { home: 'مباراة', away: '' };
+                const statusClass = bet.status === 'pending' ? 'pending' : (bet.status === 'won' ? 'won' : 'lost');
+                const statusText = bet.status === 'pending' ? 'قيد المراجعة' : (bet.status === 'won' ? 'فائز' : 'خاسر');
+                const date = new Date(bet.created_at).toLocaleDateString('ar-SA');
+
+                html += `
+                    <div class="history-item ${statusClass}">
+                        <div>
+                            <div class="history-match">${match.home} vs ${match.away}</div>
+                            <div class="history-score">توقع: ${bet.predicted_result || '0-0'}</div>
+                            <div style="color: var(--text-muted); font-size: 11px;">${date}</div>
+                        </div>
+                        <div style="text-align: left;">
+                            <div class="history-amount ${statusClass}">${bet.amount}$</div>
+                            <span class="history-status status-${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // حساب إجمالي الأهداف
+        function calculateTotal(matchId) {
+            const homeScore = parseInt(document.getElementById(`homeScore${matchId}`).value) || 0;
+            const awayScore = parseInt(document.getElementById(`awayScore${matchId}`).value) || 0;
+            const total = homeScore + awayScore;
+            document.getElementById(`totalGoals${matchId}`).textContent = total;
+        }
+
+        // حساب الربح المحتمل
+        function calculateWin(matchId) {
+            const amount = parseFloat(document.getElementById(`betAmount${matchId}`).value) || 0;
+            const potentialWin = amount * 2;
+            document.getElementById(`potentialWin${matchId}`).textContent = potentialWin + '$';
+        }
+
+        // تأكيد الرهان
+        async function placeBet(matchId, homeTeam, awayTeam) {
+            const homeScore = parseInt(document.getElementById(`homeScore${matchId}`).value) || 0;
+            const awayScore = parseInt(document.getElementById(`awayScore${matchId}`).value) || 0;
+            const amount = parseFloat(document.getElementById(`betAmount${matchId}`).value);
+            
+            // التحقق من صحة المدخلات
+            if (homeScore === 0 && awayScore === 0) {
+                showToast('❌ يرجى توقع نتيجة المباراة', 'error');
+                return;
+            }
+
+            if (!amount || amount < 5) {
+                showToast('❌ الحد الأدنى للرهان هو 5$', 'error');
+                return;
+            }
+
+            if (amount > (currentUser.balance || 0)) {
+                showToast('❌ الرصيد غير كافي', 'error');
+                return;
+            }
+
+            try {
+                // تعطيل الزر مؤقتاً
+                const btn = document.getElementById(`placeBetBtn${matchId}`);
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+
+                // محاكاة نجاح الرهان (في المشروع الحقيقي، استخدم Supabase)
+                setTimeout(() => {
+                    // تحديث رصيد المستخدم
+                    currentUser.balance -= amount;
+                    localStorage.setItem('current_user', JSON.stringify(currentUser));
+                    document.getElementById('userBalance').textContent = currentUser.balance + '$';
+                    
+                    // إعادة تعيين الحقول
+                    document.getElementById(`homeScore${matchId}`).value = 0;
+                    document.getElementById(`awayScore${matchId}`).value = 0;
+                    document.getElementById(`betAmount${matchId}`).value = '';
+                    document.getElementById(`potentialWin${matchId}`).textContent = '0$';
+                    calculateTotal(matchId);
+                    
+                    // إضافة الرهان إلى السجل
+                    const newBet = {
+                        match_id: matchId,
+                        amount: amount,
+                        status: 'pending',
+                        predicted_result: `${homeScore}-${awayScore}`,
+                        created_at: new Date().toISOString()
+                    };
+                    userBets.unshift(newBet);
+                    displayBetsHistory();
+                    
+                    showToast(`✅ تم تقديم الرهان: ${homeTeam} ${homeScore} - ${awayScore} ${awayTeam}`);
+                    
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> تأكيد الرهان';
+                }, 1000);
+
+            } catch (error) {
+                console.error('خطأ في تقديم الرهان:', error);
+                showToast('❌ حدث خطأ في تقديم الرهان', 'error');
+                
+                const btn = document.getElementById(`placeBetBtn${matchId}`);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> تأكيد الرهان';
+            }
+        }
+
+        // تبديل عرض سجل الرهانات
+        function toggleHistory() {
+            const content = document.getElementById('historyContent');
+            const toggle = document.getElementById('historyToggle');
+            
+            historyCollapsed = !historyCollapsed;
+            
+            if (historyCollapsed) {
+                content.classList.add('collapsed');
+                toggle.innerHTML = '<i class="fas fa-chevron-up"></i>';
+            } else {
+                content.classList.remove('collapsed');
+                toggle.innerHTML = '<i class="fas fa-chevron-down"></i>';
+            }
+        }
+
+        // تبديل قائمة المستخدم
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('active');
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                localStorage.removeItem('current_user');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // إظهار الإشعار
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + (type === 'error' ? 'error' : type === 'warning' ? 'warning' : '');
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        // إغلاق القائمة عند النقر خارجها
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.getElementById('userAvatar');
+            if (dropdown && avatar && !avatar.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // تحديث عند العودة للصفحة
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>
